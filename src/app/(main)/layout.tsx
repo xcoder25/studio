@@ -29,14 +29,7 @@ import {
   ChevronDown,
   Video,
   Plus,
-  Text,
-  ImageIcon,
-  Shapes,
-  Music,
-  Maximize,
-  Mic,
   Book,
-  Scissors,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -55,16 +48,6 @@ const navItems = [
   { href: '/calendar', icon: Calendar, label: 'Calendar' },
   { href: '/library', icon: Library, label: 'Library' },
 ];
-
-const videoNavItems = [
-    { href: '/video-generator/editor', icon: Scissors, label: 'Video Editor' },
-    { href: '/video-generator', icon: Text, label: 'Text to Video' },
-    { href: '/video-generator/image-to-video', icon: ImageIcon, label: 'Image to Video' },
-    { href: '/video-generator/add-audio', icon: Music, label: 'Add Audio to Video' },
-    { href: '/video-generator/video-upscale', icon: Maximize, label: 'Video Upscale' },
-    { href: '/video-generator/lip-sync', icon: Mic, label: 'Lip-Sync Video' },
-];
-
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -125,11 +108,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   }
 
   const getPageTitle = () => {
-    const allNavItems = [...navItems, ...videoNavItems, { href: '/settings', label: 'Settings'}, { href: '/library', label: 'Library' }];
-    const currentNavItem = allNavItems.find(item => pathname === item.href);
+    if (pathname.startsWith('/video-generator/editor')) return 'Video Editor';
+
+    const currentNavItem = navItems.find(item => pathname === item.href);
     if (currentNavItem) return currentNavItem.label;
 
-    if (pathname.startsWith('/video-generator')) return 'Video Generator';
+    if (pathname.startsWith('/settings')) return 'Settings';
+    if (pathname.startsWith('/library')) return 'Library';
 
     return 'Dashboard';
   }
@@ -157,7 +142,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname === item.href || (item.href === '/library' && pathname === '/templates')}
+                    isActive={pathname === item.href}
                     tooltip={{
                       children: item.label,
                     }}
@@ -169,33 +154,20 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-               <Collapsible open={isVideoOpen} onOpenChange={setIsVideoOpen} className="w-full">
-                  <SidebarMenuItem>
-                      <CollapsibleTrigger asChild>
-                          <SidebarMenuButton isActive={pathname.startsWith('/video-generator')} className='w-full justify-between'>
-                              <div className="flex items-center gap-2">
-                                  <Video />
-                                  <span>Video</span>
-                              </div>
-                              <ChevronDown className={`size-4 transition-transform ${isVideoOpen ? 'rotate-180' : ''}`} />
-                          </SidebarMenuButton>
-                      </CollapsibleTrigger>
-                  </SidebarMenuItem>
-                  <CollapsibleContent>
-                      <SidebarMenu className="ml-4 mt-2 border-l pl-4 space-y-1">
-                          {videoNavItems.map((item) => (
-                              <SidebarMenuItem key={item.label}>
-                                  <SidebarMenuButton asChild isActive={pathname === item.href} href={item.href} variant="ghost" size="sm" onClick={(e) => handleNavClick(e as any, item.href)}>
-                                      <Link href={item.href}>
-                                          <item.icon className="size-3.5" />
-                                          <span>{item.label}</span>
-                                      </Link>
-                                  </SidebarMenuButton>
-                              </SidebarMenuItem>
-                          ))}
-                      </SidebarMenu>
-                  </CollapsibleContent>
-                </Collapsible>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith('/video-generator/editor')}
+                    tooltip={{
+                      children: "Video Editor",
+                    }}
+                  >
+                    <Link href="/video-generator/editor" onClick={(e) => handleNavClick(e, '/video-generator/editor')}>
+                      <Video />
+                      <span>Video Editor</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
