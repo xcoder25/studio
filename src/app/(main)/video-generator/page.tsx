@@ -1,59 +1,34 @@
+
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Video, Image as ImageIcon, Upload, Text, Settings, ChevronDown } from 'lucide-react';
+import { Loader2, Video, Image as ImageIcon, Upload, Text, Settings, ChevronDown, Music, Sparkles, History, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { generateVideo } from '@/ai/flows/generate-video';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import VideoGeneratorSidebar from '@/components/video-generator/video-generator-sidebar';
+import ControlPanel from '@/components/video-generator/control-panel';
+import OutputPanel from '@/components/video-generator/output-panel';
 
-type GenerationMode = 'text-to-video' | 'image-to-video';
+export type GenerationMode = 'text-to-video' | 'image-to-video' | 'elements-to-video' | 'audio-to-video';
 
 export default function VideoGeneratorPage() {
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [videoUrl, setVideoUrl] = useState('');
-  const [mode, setMode] = useState<GenerationMode>('image-to-video');
+  const [mode, setMode] = useState<GenerationMode>('text-to-video');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageDataUri, setImageDataUri] = useState<string | null>(null);
   const [aspectRatio, setAspectRatio] = useState('16:9');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
+  
   const { toast } = useToast();
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUri = reader.result as string;
-        setImagePreview(dataUri);
-        setImageDataUri(dataUri);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleImageDrop = (event: React.DragEvent<HTMLLabelElement>) => {
-    event.preventDefault();
-    const file = event.dataTransfer.files?.[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const dataUri = reader.result as string;
-            setImagePreview(dataUri);
-            setImageDataUri(dataUri);
-        };
-        reader.readAsDataURL(file);
-    }
-  };
 
   const handleGenerateVideo = async () => {
     if (!prompt) {
@@ -105,165 +80,31 @@ export default function VideoGeneratorPage() {
     }
   };
 
-  const ImageUploadArea = useCallback(() => {
-    return (
-      <div className="space-y-2">
-        <label
-          htmlFor="image-upload"
-          onDrop={handleImageDrop}
-          onDragOver={(e) => e.preventDefault()}
-          className="relative flex flex-col items-center justify-center w-full h-80 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-        >
-          {imagePreview ? (
-            <Image src={imagePreview} alt="Image preview" layout="fill" objectFit="contain" className="rounded-lg p-2" />
-          ) : (
-            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              <ImageIcon className="w-10 h-10 mb-4 text-muted-foreground" />
-              <p className="mb-2 text-sm text-center text-muted-foreground">
-                <span className="font-semibold">Drag & drop an image</span>
-                <br />
-                or click to upload
-              </p>
-              <p className="text-xs text-muted-foreground">PNG, JPG, or GIF</p>
-            </div>
-          )}
-        </label>
-        <Input 
-          id="image-upload"
-          ref={fileInputRef} 
-          type="file" 
-          className="hidden" 
-          accept="image/png, image/jpeg, image/gif"
-          onChange={handleFileChange} 
-        />
-      </div>
-    )
-  }, [imagePreview]);
-  
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full">
-      {/* Left Panel: Tools */}
-      <div className="lg:col-span-3">
-        <Card className="h-full bg-card/50">
-            <CardHeader>
-                <CardTitle>Video Tools</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <Tabs defaultValue={mode} onValueChange={(v) => setMode(v as GenerationMode)} orientation="vertical" className="w-full">
-                    <TabsList className="w-full h-auto flex-col items-start bg-transparent p-0">
-                        <TabsTrigger value="text-to-video" className="w-full justify-start gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
-                            <Text /> Text to Video
-                        </TabsTrigger>
-                        <TabsTrigger value="image-to-video" className="w-full justify-start gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
-                            <ImageIcon /> Image to Video
-                        </TabsTrigger>
-                    </TabsList>
-                </Tabs>
-            </CardContent>
-        </Card>
-      </div>
-
-      {/* Center Panel: Controls */}
-      <div className="lg:col-span-5">
-        <div className="space-y-4">
-            <Card className="bg-card/50">
-                <CardContent className="p-4">
-                    <div className="flex justify-between items-center">
-                        <Label>Select Model</Label>
-                         <Button variant="outline" className="h-8">
-                            Veo3 <ChevronDown className="ml-2 size-4" />
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Tabs value={mode}>
-                <TabsContent value="text-to-video">
-                  {/* Can add specific text-to-video controls here in future */}
-                </TabsContent>
-                <TabsContent value="image-to-video">
-                    <ImageUploadArea />
-                </TabsContent>
-            </Tabs>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2"><Settings className="size-5" /> Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div>
-                        <Label htmlFor="prompt">Prompt</Label>
-                        <Textarea
-                            id="prompt"
-                            placeholder="e.g., A majestic dragon soaring over a mystical forest at dawn."
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            disabled={isLoading}
-                            className="min-h-[120px] mt-2"
-                        />
-                    </div>
-                    <div>
-                        <Label>Aspect Ratio</Label>
-                        <Select value={aspectRatio} onValueChange={setAspectRatio} disabled={isLoading}>
-                            <SelectTrigger className="mt-2">
-                                <SelectValue placeholder="Aspect Ratio" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="16:9">16:9 (Widescreen)</SelectItem>
-                                <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
-                                <SelectItem value="1:1">1:1 (Square)</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <Label>Audio</Label>
-                        <Switch disabled={isLoading} />
-                    </div>
-                </CardContent>
-                <CardFooter>
-                    <Button onClick={handleGenerateVideo} disabled={isLoading} className="w-full">
-                        {isLoading ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Generating...
-                        </>
-                        ) : (
-                        'Create'
-                        )}
-                    </Button>
-                </CardFooter>
-            </Card>
+    <div className="flex h-[calc(100vh-theme(spacing.14))] bg-background">
+      <VideoGeneratorSidebar />
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-10 gap-4 p-4">
+        <div className="lg:col-span-7 xl:col-span-6">
+            <ControlPanel 
+                mode={mode}
+                setMode={setMode}
+                prompt={prompt}
+                setPrompt={setPrompt}
+                aspectRatio={aspectRatio}
+                setAspectRatio={setAspectRatio}
+                isLoading={isLoading}
+                handleGenerateVideo={handleGenerateVideo}
+                imagePreview={imagePreview}
+                setImagePreview={setImagePreview}
+                setImageDataUri={setImageDataUri}
+            />
         </div>
-      </div>
-
-      {/* Right Panel: Output */}
-      <div className="lg:col-span-4">
-        <Card className="lg:sticky top-6 h-[calc(100vh-100px)]">
-          <CardHeader>
-            <CardTitle>Generation</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center justify-center h-[85%]">
-            {isLoading ? (
-              <div className="flex flex-col items-center gap-4 text-muted-foreground text-center">
-                <Loader2 className="h-12 w-12 animate-spin" />
-                <p>Generating video... <br/>This may take a minute or two.</p>
-              </div>
-            ) : videoUrl ? (
-              <video
-                src={videoUrl}
-                controls
-                className="w-full aspect-video rounded-md bg-muted"
-              >
-                Your browser does not support the video tag.
-              </video>
-            ) : (
-                 <div className="text-center text-muted-foreground">
-                    <Video className="mx-auto h-16 w-16" />
-                    <p className="mt-4">Your generated video will appear here.</p>
-                </div>
-            )}
-          </CardContent>
-        </Card>
+        <div className="lg:col-span-5 xl:col-span-4">
+            <OutputPanel
+                isLoading={isLoading}
+                videoUrl={videoUrl}
+            />
+        </div>
       </div>
     </div>
   );
