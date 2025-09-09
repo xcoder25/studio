@@ -12,32 +12,37 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { generateReply } from '@/ai/flows/generate-reply';
-import { Loader2, Send, Twitter, MessageSquare, Instagram, Bot, Sparkles, Wand2, Search } from 'lucide-react';
+import { Loader2, Send, Twitter, MessageSquare, Instagram, Bot, Sparkles, Wand2, Search, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 
-const conversations = [
-  { id: 1, name: 'Alice Johnson', handle: '@alicej', platform: 'Twitter', message: 'Just wanted to say I love your new feature! It\'s a game-changer. 🚀', avatar: 'https://picsum.photos/100/100?random=5', type: 'Mention', unread: 2 },
-  { id: 2, name: 'Bob Williams', handle: 'bobw', platform: 'Instagram', message: 'Can you tell me more about your pricing plans?', avatar: 'https://picsum.photos/100/100?random=6', type: 'DM' },
-  { id: 3, name: 'Charlie Brown', handle: '@charlieb', platform: 'Twitter', message: 'I\'m having some trouble with the setup process. Can you help?', avatar: 'https://picsum.photos/100/100?random=7', type: 'Comment' },
-  { id: 4, name: 'Diana Miller', handle: 'dianam', platform: 'Facebook', message: 'Your last post was so insightful! Looking forward to more content like that.', avatar: 'https://picsum.photos/100/100?random=8', type: 'Comment' },
-];
-
-const messageThread = {
-    1: [
-        { from: 'user', text: 'Just wanted to say I love your new feature! It\'s a game-changer. 🚀' },
-        { from: 'agent', text: 'That\'s amazing to hear, Alice! We\'re so glad you\'re enjoying it. Anything specific you like the most?' },
-        { from: 'user', text: 'The AI-powered suggestions are incredibly accurate. Saves me so much time!' },
-    ],
-    2: [
-        { from: 'user', text: 'Can you tell me more about your pricing plans?' }
-    ],
-    3: [
-         { from: 'user', text: 'I\'m having some trouble with the setup process. Can you help?' }
-    ],
-    4: [
-        { from: 'user', text: 'Your last post was so insightful! Looking forward to more content like that.' }
-    ]
+const accounts = {
+    trendix: {
+        name: 'Trendix',
+        conversations: [
+            { id: 1, name: 'Alice Johnson', handle: '@alicej', platform: 'Twitter', message: 'Just wanted to say I love your new feature! It\'s a game-changer. 🚀', avatar: 'https://picsum.photos/100/100?random=5', type: 'Mention', unread: 2 },
+            { id: 2, name: 'Bob Williams', handle: 'bobw', platform: 'Instagram', message: 'Can you tell me more about your pricing plans?', avatar: 'https://picsum.photos/100/100?random=6', type: 'DM' },
+        ],
+        messageThread: {
+            1: [
+                { from: 'user', text: 'Just wanted to say I love your new feature! It\'s a game-changer. 🚀' },
+                { from: 'agent', text: 'That\'s amazing to hear, Alice! We\'re so glad you\'re enjoying it. Anything specific you like the most?' },
+                { from: 'user', text: 'The AI-powered suggestions are incredibly accurate. Saves me so much time!' },
+            ],
+            2: [ { from: 'user', text: 'Can you tell me more about your pricing plans?' } ],
+        }
+    },
+    client_a: {
+        name: 'Client A',
+        conversations: [
+            { id: 3, name: 'Charlie Brown', handle: '@charlieb', platform: 'Twitter', message: 'I\'m having some trouble with the setup process. Can you help?', avatar: 'https://picsum.photos/100/100?random=7', type: 'Comment' },
+            { id: 4, name: 'Diana Miller', handle: 'dianam', platform: 'Facebook', message: 'Your last post was so insightful! Looking forward to more content like that.', avatar: 'https://picsum.photos/100/100?random=8', type: 'Comment' },
+        ],
+        messageThread: {
+            3: [ { from: 'user', text: 'I\'m having some trouble with the setup process. Can you help?' } ],
+            4: [ { from: 'user', text: 'Your last post was so insightful! Looking forward to more content like that.' } ]
+        }
+    }
 }
 
 const platformIcons = {
@@ -48,15 +53,23 @@ const platformIcons = {
 
 export default function UnifiedInboxPage() {
     const { toast } = useToast();
-    const [selectedConversation, setSelectedConversation] = useState(conversations[0]);
+    const [selectedAccount, setSelectedAccount] = useState('trendix');
+    const currentAccountData = accounts[selectedAccount as keyof typeof accounts];
+    const [selectedConversation, setSelectedConversation] = useState(currentAccountData.conversations[0]);
     const [isLoading, setIsLoading] = useState(false);
     const [replyText, setReplyText] = useState('');
     const [tone, setTone] = useState('Friendly');
+
+    const handleAccountChange = (accountId: string) => {
+        setSelectedAccount(accountId);
+        const newAccountData = accounts[accountId as keyof typeof accounts];
+        setSelectedConversation(newAccountData.conversations[0]);
+    }
     
     const handleGenerateReply = async () => {
         setIsLoading(true);
         try {
-            const lastMessage = messageThread[selectedConversation.id as keyof typeof messageThread].slice(-1)[0].text;
+            const lastMessage = currentAccountData.messageThread[selectedConversation.id as keyof typeof currentAccountData.messageThread].slice(-1)[0].text;
             const result = await generateReply({
                 conversationContext: lastMessage,
                 tone: tone,
@@ -75,7 +88,34 @@ export default function UnifiedInboxPage() {
     <div className="grid grid-cols-10 gap-4 h-[calc(100vh-8rem)]">
         {/* Conversations List */}
         <Card className="col-span-2 flex flex-col">
-            <CardHeader className='p-4'>
+            <CardHeader className='p-3 space-y-3'>
+                <Select value={selectedAccount} onValueChange={handleAccountChange}>
+                    <SelectTrigger className="h-10">
+                        <div className="flex items-center gap-2">
+                             <Avatar className="size-6">
+                                <AvatarImage src={`https://picsum.photos/100/100?random=${selectedAccount === 'trendix' ? 1 : 99}`} data-ai-hint="logo company"/>
+                                <AvatarFallback>{currentAccountData.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <SelectValue />
+                        </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {Object.keys(accounts).map(key => {
+                            const account = accounts[key as keyof typeof accounts];
+                            return (
+                                <SelectItem key={key} value={key}>
+                                    <div className="flex items-center gap-2">
+                                        <Avatar className="size-6">
+                                            <AvatarImage src={`https://picsum.photos/100/100?random=${key === 'trendix' ? 1 : 99}`} data-ai-hint="logo company"/>
+                                            <AvatarFallback>{account.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <span>{account.name}</span>
+                                    </div>
+                                </SelectItem>
+                            )
+                        })}
+                    </SelectContent>
+                </Select>
                  <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input placeholder="Search inbox..." className="pl-8 h-9" />
@@ -83,7 +123,7 @@ export default function UnifiedInboxPage() {
             </CardHeader>
             <ScrollArea>
                  <div className="space-y-1 p-2">
-                    {conversations.map(convo => (
+                    {currentAccountData.conversations.map(convo => (
                         <button key={convo.id} onClick={() => setSelectedConversation(convo)} className={cn(
                             "w-full text-left p-2 rounded-lg hover:bg-muted transition-colors",
                             selectedConversation.id === convo.id && 'bg-muted'
@@ -116,7 +156,7 @@ export default function UnifiedInboxPage() {
                     <p className="text-sm text-muted-foreground">on {selectedConversation.platform}</p>
                 </CardHeader>
                 <CardContent className="flex-grow p-4 space-y-4">
-                     {messageThread[selectedConversation.id as keyof typeof messageThread].map((msg, index) => (
+                     {currentAccountData.messageThread[selectedConversation.id as keyof typeof currentAccountData.messageThread].map((msg, index) => (
                         <div key={index} className={cn(
                             "flex items-end gap-2",
                             msg.from === 'agent' ? 'justify-end' : 'justify-start'
