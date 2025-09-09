@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bot, Zap, Puzzle, Sparkles, Pencil, Clapperboard, MessageSquareHeart } from "lucide-react";
+import { Bot, Zap, Puzzle, Sparkles, Pencil, Clapperboard, MessageSquareHeart, LayoutTemplate, Image, Music, FileText } from "lucide-react";
 import React from 'react';
 
 const addons = [
@@ -149,9 +149,37 @@ const addons = [
     icon: <Puzzle className="size-8 text-primary" />,
     status: "Activate"
   },
+  {
+    title: "Template Packs",
+    description: "Ready-made post templates for holidays, promotions, and memes.",
+    category: "Premium Content",
+    icon: <LayoutTemplate className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "AI Stock Assets",
+    description: "AI-generated stock photos and videos curated for your niche.",
+    category: "Premium Content",
+    icon: <Image className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Music & Sound Packs",
+    description: "Licensed music snippets and sound effects for Reels & TikToks.",
+    category: "Premium Content",
+    icon: <Music className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Caption Packs",
+    description: "Pre-written captions for various industries and occasions.",
+    category: "Premium Content",
+    icon: <FileText className="size-8 text-primary" />,
+    status: "Activate"
+  }
 ];
 
-const categories = ["All", "AI Assistants", "Automations", "Integrations"];
+const categories = ["All", "AI Assistants", "Automations", "Integrations", "Premium Content"];
 
 export default function StorePage() {
     const [filter, setFilter] = React.useState('All');
@@ -171,9 +199,10 @@ export default function StorePage() {
 
         <Tabs value={filter} onValueChange={setFilter} className="w-full">
             <div className="flex justify-center">
-                <TabsList>
+                <TabsList className="flex-wrap h-auto">
                     {categories.map(category => (
                         <TabsTrigger key={category} value={category}>{category}</TabsTrigger>
+
                     ))}
                 </TabsList>
             </div>
