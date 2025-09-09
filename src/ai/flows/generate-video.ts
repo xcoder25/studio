@@ -1,24 +1,32 @@
 'use server';
 
 /**
- * @fileOverview A flow for generating video from a text prompt.
+ * @fileOverview A flow for generating video from a text prompt or an image.
  *
- * - generateVideo - A function that generates a video based on a text prompt.
+ * - generateVideo - A function that generates a video based on a text prompt and an optional image.
+ * - GenerateVideoInput - The input type for the generateVideo function.
  * - GenerateVideoOutput - The return type for the generateVideo function.
  */
 
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
-import { MediaPart } from 'genkit';
+import { MediaPart, Part } from 'genkit';
+
+const GenerateVideoInputSchema = z.object({
+    prompt: z.string().describe('The text prompt for the video.'),
+    imageDataUri: z.string().optional().describe('An optional image to use as a reference for the video, as a data URI.'),
+    aspectRatio: z.string().optional().describe('The aspect ratio of the video.'),
+});
+export type GenerateVideoInput = z.infer<typeof GenerateVideoInputSchema>;
 
 const GenerateVideoOutputSchema = z.object({
   videoUrl: z.string().describe('The data URI of the generated video.'),
 });
 export type GenerateVideoOutput = z.infer<typeof GenerateVideoOutputSchema>;
 
-export async function generateVideo(prompt: string): Promise<GenerateVideoOutput> {
-  return generateVideoFlow(prompt);
+export async function generateVideo(input: GenerateVideoInput): Promise<GenerateVideoOutput> {
+  return generateVideoFlow(input);
 }
 
 async function fetchVideoAsDataURI(url: string): Promise<string> {
@@ -37,16 +45,21 @@ async function fetchVideoAsDataURI(url: string): Promise<string> {
 const generateVideoFlow = ai.defineFlow(
   {
     name: 'generateVideoFlow',
-    inputSchema: z.string(),
+    inputSchema: GenerateVideoInputSchema,
     outputSchema: GenerateVideoOutputSchema,
   },
-  async (prompt) => {
+  async ({ prompt, imageDataUri, aspectRatio }) => {
+    
+    const promptParts: Part[] = [{ text: prompt }];
+    if (imageDataUri) {
+        promptParts.push({ media: { url: imageDataUri }});
+    }
+
     let { operation } = await ai.generate({
       model: googleAI.model('veo-3.0-generate-preview'),
-      prompt: prompt,
+      prompt: promptParts,
       config: {
-        // Veo 3 default duration is 8 seconds. durationSeconds is not supported.
-        aspectRatio: '16:9',
+        aspectRatio: aspectRatio || '16:9',
       },
     });
 
