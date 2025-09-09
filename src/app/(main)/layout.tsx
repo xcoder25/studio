@@ -41,6 +41,7 @@ import {
 import SplashScreen from '@/components/splash-screen';
 import { useLoading } from '@/context/loading-context';
 import VideoGeneratorSidebar from '@/components/video-generator/video-generator-sidebar';
+import TopBar from '@/components/video-generator/top-bar';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -102,39 +103,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 <div className="absolute inset-0 z-0 bg-grid-white/[0.05] [mask-image:linear-gradient(to_bottom,white_5%,transparent_50%)]" />
                 <VideoGeneratorSidebar />
                 <div className="flex flex-1 flex-col z-10">
-                    <header className="flex h-16 items-center justify-end gap-4 border-b bg-card/80 backdrop-blur-sm px-6">
-                        <div className="flex items-center gap-2 text-sm">
-                            <span className="text-muted-foreground">Credits:</span>
-                            <span className="font-semibold">40/40</span>
-                        </div>
-                        <Button variant="outline" size="sm">Upgrade</Button>
-                        <Button size="sm"><Plus className="mr-2 size-4" /> Create</Button>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="flex items-center gap-2">
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarImage src="https://picsum.photos/100/100" data-ai-hint="avatar" alt="User Avatar" />
-                                        <AvatarFallback>JD</AvatarFallback>
-                                    </Avatar>
-                                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56">
-                                <DropdownMenuItem>
-                                    <div className="flex flex-col">
-                                        <span className="font-semibold">Jane Doe</span>
-                                        <span className="text-xs text-muted-foreground">Workspace: Jane's Studio</span>
-                                    </div>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem>Profile</DropdownMenuItem>
-                                <DropdownMenuItem>Billing</DropdownMenuItem>
-                                <DropdownMenuItem>Settings</DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem>Log out</DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </header>
+                   <TopBar />
                     {children}
                 </div>
             </div>

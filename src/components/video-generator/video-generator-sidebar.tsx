@@ -26,8 +26,8 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/component
 import { useState } from 'react';
 
 const videoNavItems = [
-    { href: '/video-generator', icon: Text, label: 'Text to Video' },
-    { href: '/video-generator', icon: ImageIcon, label: 'Image to Video' },
+    { href: '/video-generator/text-to-video', icon: Text, label: 'Text to Video' },
+    { href: '/video-generator/image-to-video', icon: ImageIcon, label: 'Image to Video' },
     { href: '/video-generator/elements-to-video', icon: Shapes, label: 'Elements to Video' },
     { href: '/video-generator/add-audio', icon: Music, label: 'Add Audio to Video' },
     { href: '/video-generator/video-upscale', icon: Maximize, label: 'Video Upscale' },
@@ -37,6 +37,13 @@ const videoNavItems = [
 export default function VideoGeneratorSidebar() {
   const pathname = usePathname();
   const [isVideoOpen, setIsVideoOpen] = useState(true);
+
+  const isVideoGeneratorPage = pathname.startsWith('/video-generator');
+
+  // A bit of a hack to handle the two modes on the same page
+  const textToVideoActive = pathname === '/video-generator' || pathname === '/video-generator/text-to-video';
+  const imageToVideoActive = pathname === '/video-generator/image-to-video';
+
 
   return (
     <div className="w-64 border-r bg-card/50 p-2 flex flex-col z-10">
@@ -65,7 +72,7 @@ export default function VideoGeneratorSidebar() {
           <Collapsible open={isVideoOpen} onOpenChange={setIsVideoOpen} className="w-full">
             <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                    <SidebarMenuButton isActive={pathname.startsWith('/video-generator')} className='w-full justify-between'>
+                    <SidebarMenuButton isActive={isVideoGeneratorPage} className='w-full justify-between'>
                         <div className="flex items-center gap-2">
                             <Video />
                             <span>Video</span>
@@ -76,15 +83,31 @@ export default function VideoGeneratorSidebar() {
             </SidebarMenuItem>
             <CollapsibleContent>
                 <SidebarMenu className="ml-4 mt-2 border-l pl-4 space-y-1">
-                    {videoNavItems.map((item) => (
-                    <SidebarMenuItem key={item.label}>
-                        <SidebarMenuButton asChild isActive={pathname === item.href && item.label !== 'Image to Video' && item.label !== 'Text to Video'} variant="ghost" size="sm">
-                            <Link href={item.href}>
-                                <item.icon className="size-3.5" />
-                                <span>{item.label}</span>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={textToVideoActive} href="/video-generator" variant="ghost" size="sm">
+                            <Link href="/video-generator">
+                                <Text className="size-3.5" />
+                                <span>Text to Video</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
+                     <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={imageToVideoActive} href="/video-generator" variant="ghost" size="sm">
+                            <Link href="/video-generator">
+                                <ImageIcon className="size-3.5" />
+                                <span>Image to Video</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    {videoNavItems.slice(2).map((item) => (
+                        <SidebarMenuItem key={item.label}>
+                            <SidebarMenuButton asChild isActive={pathname === item.href} variant="ghost" size="sm">
+                                <Link href={item.href}>
+                                    <item.icon className="size-3.5" />
+                                    <span>{item.label}</span>
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
                     ))}
                 </SidebarMenu>
             </CollapsibleContent>

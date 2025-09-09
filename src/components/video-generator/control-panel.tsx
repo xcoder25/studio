@@ -43,9 +43,13 @@ export default function ControlPanel({
   
   const router = useRouter();
 
-  const navigateTo = (path: string, newMode: GenerationMode) => {
+  const handleModeChange = (newMode: GenerationMode) => {
     setMode(newMode);
-    router.push(path);
+    if (newMode === 'text-to-video' || newMode === 'image-to-video') {
+      router.push('/video-generator');
+    } else {
+      router.push(`/video-generator/${newMode}`);
+    }
   }
 
   return (
@@ -55,10 +59,8 @@ export default function ControlPanel({
                 <CardTitle>Create New Video</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
-                <Button variant={mode === 'text-to-video' ? 'secondary' : 'outline'} onClick={() => navigateTo('/video-generator', 'text-to-video')}><Text className="mr-2"/> Text to Video</Button>
-                <Button variant={mode === 'image-to-video' ? 'secondary' : 'outline'} onClick={() => navigateTo('/video-generator', 'image-to-video')}><ImageIcon className="mr-2"/> Image to Video</Button>
-                <Button variant={mode === 'elements-to-video' ? 'secondary' : 'outline'} onClick={() => navigateTo('/video-generator/elements-to-video', 'elements-to-video')}><Shapes className="mr-2"/> Elements to Video</Button>
-                <Button variant={mode === 'audio-to-video' ? 'secondary' : 'outline'} onClick={() => navigateTo('/video-generator/add-audio', 'audio-to-video')}><Music className="mr-2"/> Audio to Video</Button>
+                <Button variant={mode === 'text-to-video' ? 'secondary' : 'outline'} onClick={() => setMode('text-to-video')}><Text className="mr-2"/> Text to Video</Button>
+                <Button variant={mode === 'image-to-video' ? 'secondary' : 'outline'} onClick={() => setMode('image-to-video')}><ImageIcon className="mr-2"/> Image to Video</Button>
             </CardContent>
         </Card>
         
