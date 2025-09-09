@@ -31,6 +31,7 @@ import {
   ThumbsUp,
   MessageSquare,
   Share2,
+  BarChart2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -332,22 +333,33 @@ export default function PostComposer() {
             </CardHeader>
             <CardContent>
               <div className="rounded-lg border p-4 space-y-3 bg-background/50">
-                <div className="flex items-center gap-3">
-                  <Avatar>
-                    <AvatarImage src="https://picsum.photos/100/100" data-ai-hint="avatar" alt="User Avatar" />
-                    <AvatarFallback>JD</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold">Jane Doe</p>
-                    <p className="text-xs text-muted-foreground">Posting to Twitter</p>
+                  <div className="flex gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src="https://picsum.photos/100/100" data-ai-hint="avatar" alt="User Avatar" />
+                      <AvatarFallback>JD</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold">Jane Doe</p>
+                          <p className="text-xs text-muted-foreground">@janedoe</p>
+                        </div>
+                        <p className="text-sm whitespace-pre-wrap min-h-[60px]">{postContentValue || "Your post content will appear here..."}</p>
+                        <div className="flex items-center justify-between text-muted-foreground pt-2 -mx-2">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 scale-75">
+                                <MessageSquare className="size-5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 scale-75">
+                                <Share2 className="size-5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 scale-75">
+                                <ThumbsUp className="size-5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 scale-75">
+                                <BarChart2 className="size-5" />
+                            </Button>
+                        </div>
+                    </div>
                   </div>
-                </div>
-                <p className="text-sm whitespace-pre-wrap min-h-[60px]">{postContentValue || "Your post content will appear here..."}</p>
-                <div className="flex gap-1 pt-2 border-t -mx-4 px-2">
-                  <Button variant="ghost" size="sm" className="text-muted-foreground gap-2"><ThumbsUp className="size-4" />Like</Button>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground gap-2"><MessageSquare className="size-4" />Comment</Button>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground gap-2"><Share2 className="size-4" />Share</Button>
-                </div>
               </div>
             </CardContent>
           </Card>
