@@ -46,6 +46,7 @@ export default function LoginPage() {
   const onSubmit = (data: LoginFormValues) => {
     console.log(data);
     showLoading(2000);
+    localStorage.setItem('auth-token', 'user-is-logged-in');
     setTimeout(() => {
         router.push('/dashboard');
     }, 2000);

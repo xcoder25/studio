@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, type ReactNode, useCallback } from 'react';
 import {
   SidebarProvider,
@@ -48,9 +48,20 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [initialLoading, setInitialLoading] = useState(true);
   const { showLoading } = useLoading();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  useEffect(() => {
+    const token = localStorage.getItem('auth-token');
+    if (!token) {
+      router.replace('/login');
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, [router]);
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       setInitialLoading(false);
@@ -64,9 +75,16 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       showLoading(3000);
     }
   }, [pathname, showLoading]);
+  
+  const handleLogout = () => {
+    showLoading(1500);
+    localStorage.removeItem('auth-token');
+    setTimeout(() => {
+      router.push('/');
+    }, 1500);
+  };
 
-
-  if (initialLoading) {
+  if (!isAuthenticated || initialLoading) {
     return <SplashScreen />;
   }
 
@@ -140,7 +158,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Billing</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Log out</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarFooter>
