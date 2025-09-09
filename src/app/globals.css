@@ -127,4 +127,11 @@ body {
     background-size: 4rem 4rem;
     opacity: 0.05;
   }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
 }
