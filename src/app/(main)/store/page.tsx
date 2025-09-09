@@ -86,7 +86,7 @@ const addons = [
     icon: <Zap className="size-8 text-primary" />,
     status: "Activate"
   },
-  {
+    {
     title: "Smart Reply Pack",
     description: "AI-suggested replies for DMs and comments to speed up engagement.",
     category: "Automations",
@@ -107,7 +107,7 @@ const addons = [
     icon: <Zap className="size-8 text-primary" />,
     status: "Activate"
   },
-  {
+    {
     title: "Weekly Report Generator",
     description: "Automatically generates and sends weekly PDF reports to your clients.",
     category: "Automations",
@@ -207,7 +207,7 @@ const addons = [
   }
 ];
 
-const categories = ["All", "AI Assistants", "Automations", "Integrations", "Premium Content"];
+const categories = ["All", "AI Assistants", "Automations", "Integrations", "Premium Content", "Bundles"];
 
 export default function StorePage() {
     const [filter, setFilter] = React.useState('All');
@@ -221,7 +221,7 @@ export default function StorePage() {
         <div className="text-center max-w-2xl mx-auto">
             <h1 className="text-3xl font-bold">Trendix Store</h1>
             <p className="text-muted-foreground mt-2">
-                Welcome to the marketplace. Enhance your workflow by activating powerful tools from Trendix and our community of third-party developers.
+                Welcome to the marketplace. Enhance your workflow by activating powerful tools from Trendix and our community of third-party developers. Discover individual add-ons, subscribe to bundles, and find pricing that scales with your needs.
             </p>
         </div>
 
@@ -236,27 +236,33 @@ export default function StorePage() {
             </div>
             
             <div className="mt-6">
-                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredAddons.map((addon) => (
-                        <Card key={addon.title} className="flex flex-col">
-                            <CardHeader className="flex-row items-start gap-4">
-                                {addon.icon}
-                                <div>
-                                    <CardTitle>{addon.title}</CardTitle>
-                                    <Badge variant="outline" className="mt-1">{addon.category}</Badge>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="flex-grow">
-                                <CardDescription>{addon.description}</CardDescription>
-                            </CardContent>
-                            <CardFooter>
-                                <Button className="w-full" disabled={addon.status !== 'Activate'}>
-                                    {addon.status}
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    ))}
-                </div>
+                 {filter === 'Bundles' ? (
+                    <div className="text-center py-20">
+                        <p className="text-muted-foreground">App bundles are coming soon!</p>
+                    </div>
+                 ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredAddons.map((addon) => (
+                            <Card key={addon.title} className="flex flex-col">
+                                <CardHeader className="flex-row items-start gap-4">
+                                    {addon.icon}
+                                    <div>
+                                        <CardTitle>{addon.title}</CardTitle>
+                                        <Badge variant="outline" className="mt-1">{addon.category}</Badge>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="flex-grow">
+                                    <CardDescription>{addon.description}</CardDescription>
+                                </CardContent>
+                                <CardFooter>
+                                    <Button className="w-full" disabled={addon.status !== 'Activate'}>
+                                        {addon.status}
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        ))}
+                    </div>
+                )}
             </div>
         </Tabs>
     </div>
