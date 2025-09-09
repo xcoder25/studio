@@ -184,9 +184,9 @@ export default function DashboardPage() {
               </div>
             ) : (
             <ul className="space-y-4">
-                {trends.slice(0, 2).map((trend) => (
+                {trends.slice(0, 3).map((trend) => (
                   <li key={trend.title} className="flex items-start gap-4">
-                    <div>{trendIcons[trend.type]}</div>
+                    <div>{trendIcons[trend.type as keyof typeof trendIcons]}</div>
                     <div>
                       <h4 className="font-semibold">{trend.title}</h4>
                       <p className="text-sm text-muted-foreground">{trend.description}</p>
@@ -197,8 +197,10 @@ export default function DashboardPage() {
             )}
           </CardContent>
            <CardFooter>
-            <Button variant="outline" className="w-full">
-              Explore More Trends <ArrowRight className="ml-2" />
+            <Button variant="outline" className="w-full" asChild>
+                <Link href="/composer">
+                    Find More Trends <ArrowRight className="ml-2" />
+                </Link>
             </Button>
           </CardFooter>
         </Card>

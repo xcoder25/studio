@@ -2,7 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Twitter, Facebook } from "lucide-react"
+import { ArrowRight, Twitter, Facebook, Instagram } from "lucide-react"
+import Link from 'next/link';
 
 const posts = [
   {
@@ -38,7 +39,7 @@ const posts = [
 const platformIcons = {
   Twitter: <Twitter className="size-4 text-sky-500" />,
   Facebook: <Facebook className="size-4 text-blue-600" />,
-  Instagram: <svg className="size-4 text-fuchsia-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>,
+  Instagram: <Instagram className="size-4 text-fuchsia-600" />,
 }
 
 const statusColors = {
@@ -55,7 +56,11 @@ export default function PostsOverview() {
           <CardTitle>Posts Overview</CardTitle>
           <CardDescription>A quick look at your recent and upcoming posts.</CardDescription>
         </div>
-        <Button variant="outline" size="sm">View All <ArrowRight className="ml-2 size-4" /></Button>
+        <Button variant="outline" size="sm" asChild>
+            <Link href="/calendar">
+                View Calendar <ArrowRight className="ml-2 size-4" />
+            </Link>
+        </Button>
       </CardHeader>
       <CardContent className="h-72 overflow-auto">
         <Table>

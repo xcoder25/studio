@@ -39,7 +39,11 @@ import {
   Bell,
   Users,
   Megaphone,
-  Briefcase
+  Briefcase,
+  MicVocal,
+  Search,
+  BarChart,
+  UserPlus
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -131,18 +135,18 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (pathname.startsWith('/agency/inbox')) return 'Unified Inbox';
     if (pathname.startsWith('/agency/ad-campaigns')) return 'Ad Campaign Assistant';
     
-    const currentNavItem = navItems.find(item => pathname === item.href);
+    const currentNavItem = navItems.find(item => pathname.startsWith(item.href));
     if (currentNavItem) return currentNavItem.label;
 
     if (pathname.startsWith('/settings')) return 'Settings';
-    if (pathname.startsWith('/library')) return 'Library';
+    if (pathname.startsWith('/tutorials')) return 'Tutorials';
 
     return 'Dashboard';
   }
 
   return (
     <SidebarProvider defaultOpen={false}>
-        <Sidebar collapsible="icon">
+        <Sidebar>
           <SidebarHeader>
               <Link href="/dashboard" className="flex items-center gap-2" onClick={(e) => handleNavClick(e, '/dashboard')}>
                   <Image
@@ -161,7 +165,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname === item.href}
+                    isActive={pathname.startsWith(item.href)}
                     tooltip={{
                       children: item.label,
                     }}
@@ -176,7 +180,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname.startsWith('/video-generator/editor')}
+                    isActive={pathname.startsWith('/video-generator')}
                     tooltip={{
                       children: "Video Editor",
                     }}
@@ -250,7 +254,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                       children: "Tutorials",
                     }}
                   >
-                    <Link href="#" onClick={(e) => handleNavClick(e, '/tutorials')}>
+                    <Link href="/tutorials" onClick={(e) => handleNavClick(e, '/tutorials')}>
                       <Book />
                       <span className="group-hover:inline hidden">Tutorials</span>
                     </Link>
@@ -281,7 +285,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                         <AvatarImage src="https://picsum.photos/100/100" data-ai-hint="avatar" alt="User Avatar" />
                         <AvatarFallback>JD</AvatarFallback>
                       </Avatar>
-                      <div className="flex flex-col items-start group-hover:flex hidden">
+                      <div className="flex-col items-start group-hover:flex hidden">
                           <span className="text-sm font-medium text-foreground">Jane Doe</span>
                           <span className="text-xs text-muted-foreground">jane.doe@email.com</span>
                       </div>
@@ -357,7 +361,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-              <Button size="sm"><Plus className="mr-2 size-4" /> Create</Button>
+              <Button size="sm" asChild>
+                <Link href="/composer"><Plus className="mr-2 size-4" /> Create</Link>
+              </Button>
           </div>
         </header>
         <main className="flex-1 overflow-auto p-6 relative">

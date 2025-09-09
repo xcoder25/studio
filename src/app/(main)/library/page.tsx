@@ -3,11 +3,12 @@
 'use client';
 
 import Image from "next/image";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PlayCircle, MoreHorizontal } from "lucide-react";
+import Link from 'next/link';
 
 const templates = [
   {
@@ -34,12 +35,25 @@ const templates = [
     image: "https://picsum.photos/600/400?random=4",
     aiHint: "office people",
   },
+  {
+    title: "Product Hunt Launch",
+    category: "Announcement",
+    image: "https://picsum.photos/600/400?random=5",
+    aiHint: "space rocket",
+    },
+  {
+    title: "Weekly Newsletter",
+    category: "Informative",
+    image: "https://picsum.photos/600/400?random=6",
+    aiHint: "reading book",
+    },
 ];
 
 const savedHashtags = [
-    { title: 'Tech Startups', tags: ['#startup', '#tech', '#innovation'] },
-    { title: 'AI Marketing', tags: ['#AI', '#Marketing', '#FutureOfTech'] },
-    { title: 'Developer Life', tags: ['#devlife', '#coding', '#software'] },
+    { title: 'Tech Startups', tags: ['#startup', '#tech', '#innovation', '#saas', '#ai'] },
+    { title: 'AI Marketing', tags: ['#AI', '#Marketing', '#FutureOfTech', '#MarTech'] },
+    { title: 'Developer Life', tags: ['#devlife', '#coding', '#software', '#webdev', '#reactjs'] },
+    { title: 'Content Creation', tags: ['#content', '#socialmedia', '#digitalmarketing', '#creative'] },
 ]
 
 const recentVideos = [
@@ -63,32 +77,34 @@ export default function LibraryPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {recentVideos.map((video) => (
                         <div key={video.title} className="group relative rounded-lg overflow-hidden">
-                            <Image 
-                                src={video.image} 
-                                alt={video.title} 
-                                width={600} 
-                                height={400} 
-                                data-ai-hint={video.aiHint}
-                                className="w-full h-auto object-cover aspect-video transition-transform duration-300 group-hover:scale-110" 
-                            />
-                            <div className="absolute inset-0 bg-black/50 flex flex-col justify-between p-3">
-                                <div className="flex justify-end">
-                                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-8 w-8">
-                                        <MoreHorizontal className="size-4" />
-                                    </Button>
+                             <Link href="/video-generator/editor">
+                                <Image 
+                                    src={video.image} 
+                                    alt={video.title} 
+                                    width={600} 
+                                    height={400} 
+                                    data-ai-hint={video.aiHint}
+                                    className="w-full h-auto object-cover aspect-video transition-transform duration-300 group-hover:scale-110" 
+                                />
+                                <div className="absolute inset-0 bg-black/50 flex flex-col justify-between p-3">
+                                    <div className="flex justify-end">
+                                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-8 w-8">
+                                            <MoreHorizontal className="size-4" />
+                                        </Button>
+                                    </div>
+                                    <div className="text-white">
+                                        <PlayCircle className="size-10 text-white/80 group-hover:text-white transition-colors cursor-pointer" />
+                                        <h4 className="font-semibold mt-2">{video.title}</h4>
+                                        <p className="text-xs">{video.duration}</p>
+                                    </div>
                                 </div>
-                                <div className="text-white">
-                                    <PlayCircle className="size-10 text-white/80 group-hover:text-white transition-colors cursor-pointer" />
-                                    <h4 className="font-semibold mt-2">{video.title}</h4>
-                                    <p className="text-xs">{video.duration}</p>
-                                </div>
-                            </div>
+                            </Link>
                         </div>
                     ))}
                 </div>
             </TabsContent>
             <TabsContent value="templates" className="mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {templates.map((template) => (
                     <Card key={template.title} className="group overflow-hidden">
                     <CardContent className="p-0">
@@ -104,8 +120,10 @@ export default function LibraryPage() {
                         <Badge variant="secondary" className="absolute top-3 left-3">{template.category}</Badge>
                         </div>
                         <div className="p-4 space-y-2">
-                        <h3 className="font-semibold text-lg">{template.title}</h3>
-                        <Button className="w-full">Use Template</Button>
+                        <h3 className="font-semibold">{template.title}</h3>
+                        <Button className="w-full" asChild>
+                            <Link href="/composer">Use Template</Link>
+                        </Button>
                         </div>
                     </CardContent>
                     </Card>
@@ -113,7 +131,7 @@ export default function LibraryPage() {
                 </div>
             </TabsContent>
             <TabsContent value="hashtags" className="mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {savedHashtags.map((group) => (
                         <Card key={group.title}>
                             <CardHeader>
@@ -125,7 +143,9 @@ export default function LibraryPage() {
                                         <Badge key={tag} variant="outline">{tag}</Badge>
                                     ))}
                                 </div>
-                                <Button className="w-full mt-4">Use Group</Button>
+                                <Button className="w-full mt-4" asChild>
+                                    <Link href="/composer">Use Group</Link>
+                                </Button>
                             </CardContent>
                         </Card>
                     ))}
