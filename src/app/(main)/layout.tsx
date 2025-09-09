@@ -142,7 +142,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     <SidebarProvider>
         <Sidebar collapsible="icon">
           <SidebarHeader>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between w-full">
               <Link href="/dashboard" className="flex items-center gap-2" onClick={(e) => handleNavClick(e, '/dashboard')}>
                   <Image
                     src="/Trendix Logo.png"
@@ -153,6 +153,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   />
                 <h1 className="text-lg font-semibold text-foreground group-data-[collapsible=icon]:hidden">Trendix</h1>
               </Link>
+              <SidebarCollapseButton />
             </div>
           </SidebarHeader>
           <SidebarContent>
@@ -240,7 +241,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <SidebarCollapseButton />
             </div>
           </SidebarFooter>
         </Sidebar>
