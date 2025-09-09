@@ -28,7 +28,10 @@ import {
   Clock,
   Loader2,
   Copy,
-  Wand2
+  Wand2,
+  ThumbsUp,
+  MessageSquare,
+  Share2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -127,7 +130,7 @@ export default function PostComposer() {
     try {
       const result = await suggestHashtags({ postContent: content });
       setSuggestedHashtags(result.hashtags);
-    } catch (error)_ {
+    } catch (error) {
       console.error(error);
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to suggest hashtags.' });
     } finally {
