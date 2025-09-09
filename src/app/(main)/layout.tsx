@@ -33,6 +33,7 @@ import {
   Plus,
   Book,
   PanelLeft,
+  Scale,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -75,6 +76,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const { showLoading, hideLoading, isLoading } = useLoading();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(pathname.startsWith('/video-generator'));
+  const [isAgencyOpen, setIsAgencyOpen] = useState(pathname.startsWith('/agency'));
 
 
   useEffect(() => {
@@ -112,6 +114,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (pathname.startsWith('/video-generator')) {
       setIsVideoOpen(true);
     }
+    if (pathname.startsWith('/agency')) {
+      setIsAgencyOpen(true);
+    }
   }, [pathname]);
 
   useEffect(() => {
@@ -128,7 +133,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   const getPageTitle = () => {
     if (pathname.startsWith('/video-generator/editor')) return 'Video Editor';
-
+    if (pathname.startsWith('/agency/competitor-analysis')) return 'Competitor Analysis';
+    
     const currentNavItem = navItems.find(item => pathname === item.href);
     if (currentNavItem) return currentNavItem.label;
 
@@ -188,6 +194,33 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+
+                <Collapsible open={isAgencyOpen} onOpenChange={setIsAgencyOpen}>
+                    <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                            <SidebarMenuButton
+                                className="w-full"
+                                tooltip={{ children: 'Agency Tools' }}
+                            >
+                                <Scale/>
+                                <span>Agency Tools</span>
+                                <ChevronDown className="ml-auto size-4 transition-transform data-[state=open]:rotate-180" />
+                            </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                    </SidebarMenuItem>
+                    <CollapsibleContent asChild>
+                        <SidebarMenuSub>
+                            <SidebarMenuSubItem>
+                                <SidebarMenuSubButton asChild isActive={pathname === '/agency/competitor-analysis'}>
+                                    <Link href="/agency/competitor-analysis" onClick={(e) => handleNavClick(e, '/agency/competitor-analysis')}>
+                                        <span>Competitor Analysis</span>
+                                    </Link>
+                                </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                        </SidebarMenuSub>
+                    </CollapsibleContent>
+                </Collapsible>
+
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild

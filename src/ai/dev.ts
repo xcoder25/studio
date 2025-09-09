@@ -8,3 +8,4 @@ import '@/ai/flows/generate-audio-from-text.ts';
 import '@/ai/flows/lip-sync.ts';
 import '@/ai/flows/rewrite-caption.ts';
 import '@/ai/flows/find-trends.ts';
+import '@/ai/flows/analyze-competitor.ts';
