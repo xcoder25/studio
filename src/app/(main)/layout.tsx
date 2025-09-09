@@ -29,6 +29,7 @@ import {
   ChevronDown,
   Video,
   Link2,
+  Plus,
 } from 'lucide-react';
 import {
   DropdownMenu,
