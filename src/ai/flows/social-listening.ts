@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -11,7 +12,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-export const SocialListeningInputSchema = z.object({
+const SocialListeningInputSchema = z.object({
   brandName: z.string().describe('The name of the brand to monitor.'),
   keywords: z.array(z.string()).describe('A list of keywords to track in mentions.'),
 });
@@ -35,7 +36,7 @@ const SentimentAnalysisSchema = z.object({
 });
 
 
-export const SocialListeningOutputSchema = z.object({
+const SocialListeningOutputSchema = z.object({
     summary: z.string().describe('A high-level summary of the social listening results.'),
     sentimentAnalysis: SentimentAnalysisSchema,
     recentMentions: z.array(MentionSchema).describe('A list of the most recent and relevant mentions.'),
