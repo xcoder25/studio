@@ -43,7 +43,8 @@ import {
   MicVocal,
   Search,
   BarChart,
-  UserPlus
+  UserPlus,
+  Store,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -65,6 +66,7 @@ const navItems = [
   { href: '/composer', icon: PenSquare, label: 'Composer' },
   { href: '/calendar', icon: Calendar, label: 'Calendar' },
   { href: '/library', icon: Library, label: 'Library' },
+  { href: '/store', icon: Store, label: 'Store' },
 ];
 
 
@@ -134,6 +136,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (pathname.startsWith('/agency/team')) return 'Team Management';
     if (pathname.startsWith('/agency/inbox')) return 'Unified Inbox';
     if (pathname.startsWith('/agency/ad-campaigns')) return 'Ad Campaign Assistant';
+    if (pathname.startsWith('/store')) return 'Trendix Store';
     
     const currentNavItem = navItems.find(item => pathname.startsWith(item.href));
     if (currentNavItem) return currentNavItem.label;
