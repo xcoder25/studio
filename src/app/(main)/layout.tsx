@@ -156,7 +156,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     <SidebarProvider>
         <Sidebar collapsible="icon">
           <SidebarHeader>
-            <div className="flex items-center justify-between w-full">
+            <div className="flex items-center justify-between w-full group-data-[collapsible=icon]:group-hover:w-[calc(var(--sidebar-width)_-_theme(spacing.4))]">
               <Link href="/dashboard" className="flex items-center gap-2" onClick={(e) => handleNavClick(e, '/dashboard')}>
                   <Image
                     src="/Trendix Logo.png"
