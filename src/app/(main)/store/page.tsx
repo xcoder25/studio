@@ -204,6 +204,27 @@ const addons = [
     category: "Premium Content",
     icon: <FileText className="size-8 text-primary" />,
     status: "Activate"
+  },
+  {
+    title: "Creator Starter Kit",
+    description: "The essential AI toolkit for solo creators. Includes Social Media Manager AI and Trend Hunter AI.",
+    category: "Bundles",
+    icon: <Sparkles className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Agency Growth Engine",
+    description: "A complete AI team for agencies. Includes Strategy, Creative, Analytics, and Engagement AIs.",
+    category: "Bundles",
+    icon: <Sparkles className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Content Power-Up",
+    description: "Supercharge your content with Creative AI, Video Script AI, and a premium Caption Pack.",
+    category: "Bundles",
+    icon: <Sparkles className="size-8 text-primary" />,
+    status: "Activate"
   }
 ];
 
@@ -236,7 +257,7 @@ export default function StorePage() {
             </div>
             
             <div className="mt-6">
-                 {filter === 'Bundles' ? (
+                 {filteredAddons.length === 0 ? (
                     <div className="text-center py-20">
                         <p className="text-muted-foreground">App bundles are coming soon!</p>
                     </div>
