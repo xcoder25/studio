@@ -11,3 +11,4 @@ import '@/ai/flows/find-trends.ts';
 import '@/ai/flows/analyze-competitor.ts';
 import '@/ai/flows/social-listening.ts';
 import '@/ai/flows/generate-reply.ts';
+import '@/ai/flows/generate-ad-copy.ts';

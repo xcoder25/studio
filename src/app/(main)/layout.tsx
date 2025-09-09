@@ -17,7 +17,6 @@ import {
   SidebarFooter,
   SidebarInset,
   SidebarTrigger,
-  SidebarRail,
   useSidebar,
   SidebarMenuSub,
   SidebarMenuSubItem,
@@ -35,11 +34,12 @@ import {
   Video,
   Plus,
   Book,
-  PanelLeft,
   Scale,
-  Users,
   MessageSquare,
-  Bell
+  Bell,
+  Users,
+  Megaphone,
+  Briefcase
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -53,6 +53,8 @@ import SplashScreen from '@/components/splash-screen';
 import { useLoading } from '@/context/loading-context';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -69,6 +71,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const { showLoading, hideLoading, isLoading } = useLoading();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAgencyOpen, setIsAgencyOpen] = useState(pathname.startsWith('/agency'));
+  const [selectedClient, setSelectedClient] = useState('trendix');
 
 
   useEffect(() => {
@@ -126,6 +129,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (pathname.startsWith('/agency/social-listening')) return 'Social Listening';
     if (pathname.startsWith('/agency/team')) return 'Team Management';
     if (pathname.startsWith('/agency/inbox')) return 'Unified Inbox';
+    if (pathname.startsWith('/agency/ad-campaigns')) return 'Ad Campaign Assistant';
     
     const currentNavItem = navItems.find(item => pathname === item.href);
     if (currentNavItem) return currentNavItem.label;
@@ -220,6 +224,20 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                                     </Link>
                                 </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
+                             <SidebarMenuSubItem>
+                                <SidebarMenuSubButton asChild isActive={pathname === '/agency/ad-campaigns'}>
+                                    <Link href="/agency/ad-campaigns" onClick={(e) => handleNavClick(e, '/agency/ad-campaigns')}>
+                                        <span>Ad Assistant</span>
+                                    </Link>
+                                </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                             <SidebarMenuSubItem>
+                                <SidebarMenuSubButton asChild isActive={pathname === '/agency/team'}>
+                                    <Link href="/agency/team" onClick={(e) => handleNavClick(e, '/agency/team')}>
+                                        <span>Team Management</span>
+                                    </Link>
+                                </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
                         </SidebarMenuSub>
                     </CollapsibleContent>
                 </Collapsible>
@@ -283,17 +301,25 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <SidebarInset>
         <header className="flex h-14 items-center justify-between gap-4 border-b bg-background/95 px-4 md:px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center gap-2">
-            <div className="md:hidden">
-              <SidebarTrigger />
-            </div>
             <h2 className="text-xl font-semibold">
               {getPageTitle()}
             </h2>
           </div>
           <div className="flex items-center gap-4 text-sm">
-              <span className="text-muted-foreground">Credits:</span>
-              <span className="font-semibold">40/40</span>
-              <Button variant="outline" size="sm">Upgrade</Button>
+                <Select value={selectedClient} onValueChange={setSelectedClient}>
+                    <SelectTrigger className="w-[180px] h-9 hidden md:flex">
+                        <div className="flex items-center gap-2">
+                            <Briefcase className="size-4" />
+                            <SelectValue />
+                        </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="trendix">Trendix</SelectItem>
+                        <SelectItem value="client_a">Client A</SelectItem>
+                        <SelectItem value="client_b">Client B</SelectItem>
+                    </SelectContent>
+                </Select>
+
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="icon" className="relative h-9 w-9">
