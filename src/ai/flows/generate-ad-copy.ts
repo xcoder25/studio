@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -19,7 +20,7 @@ const GenerateAdCopyInputSchema = z.object({
 });
 export type GenerateAdCopyInput = z.infer<typeof GenerateAdCopyInputSchema>;
 
-export const AdCopySchema = z.object({
+const AdCopySchema = z.object({
     headline: z.string().describe("A compelling headline for the ad."),
     body: z.string().describe("The main body text for the ad."),
     hashtags: z.array(z.string()).optional().describe("A list of relevant hashtags, especially for social platforms."),
