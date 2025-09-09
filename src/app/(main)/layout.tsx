@@ -17,6 +17,8 @@ import {
   SidebarFooter,
   SidebarInset,
   SidebarTrigger,
+  SidebarRail,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -30,6 +32,7 @@ import {
   Video,
   Plus,
   Book,
+  PanelLeft,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -48,6 +51,22 @@ const navItems = [
   { href: '/calendar', icon: Calendar, label: 'Calendar' },
   { href: '/library', icon: Library, label: 'Library' },
 ];
+
+
+function SidebarCollapseButton() {
+    const { toggleSidebar } = useSidebar();
+    return (
+        <Button
+            variant="ghost"
+            size="icon"
+            className="group-data-[collapsible=icon]:hidden"
+            onClick={() => toggleSidebar()}
+        >
+            <PanelLeft />
+        </Button>
+    )
+}
+
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -121,7 +140,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <SidebarProvider>
-        <Sidebar>
+        <Sidebar collapsible="icon">
           <SidebarHeader>
             <div className="flex items-center gap-2">
               <Link href="/dashboard" className="flex items-center gap-2" onClick={(e) => handleNavClick(e, '/dashboard')}>
@@ -132,7 +151,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     height={28}
                     className="size-7"
                   />
-                <h1 className="text-lg font-semibold text-foreground">Trendix</h1>
+                <h1 className="text-lg font-semibold text-foreground group-data-[collapsible=icon]:hidden">Trendix</h1>
               </Link>
             </div>
           </SidebarHeader>
@@ -199,27 +218,30 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="w-full justify-start h-12 gap-2 px-2 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="https://picsum.photos/100/100" data-ai-hint="avatar" alt="User Avatar" />
-                    <AvatarFallback>JD</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden">
-                      <span className="text-sm font-medium text-foreground">Jane Doe</span>
-                      <span className="text-xs text-muted-foreground">jane.doe@email.com</span>
-                  </div>
-                  <ChevronDown className="ml-auto h-4 w-4 group-data-[collapsible=icon]:hidden" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 mb-2" align="end">
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Billing</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className='flex items-center justify-between group-data-[collapsible=icon]:justify-center'>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-start h-12 gap-2 px-2 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src="https://picsum.photos/100/100" data-ai-hint="avatar" alt="User Avatar" />
+                        <AvatarFallback>JD</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden">
+                          <span className="text-sm font-medium text-foreground">Jane Doe</span>
+                          <span className="text-xs text-muted-foreground">jane.doe@email.com</span>
+                      </div>
+                      <ChevronDown className="ml-auto h-4 w-4 group-data-[collapsible=icon]:hidden" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 mb-2" align="end">
+                    <DropdownMenuItem>Profile</DropdownMenuItem>
+                    <DropdownMenuItem>Billing</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <SidebarCollapseButton />
+            </div>
           </SidebarFooter>
         </Sidebar>
       <SidebarInset>
