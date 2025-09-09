@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -12,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { generateAudioFromText } from '@/ai/flows/generate-audio-from-text';
 import { lipSync } from '@/ai/flows/lip-sync';
 import OutputPanel from '@/components/video-generator/output-panel';
+import { useLoading } from '@/context/loading-context';
 
 const voices = [
     { id: 'Alloy', name: 'Alloy' },
@@ -31,6 +33,7 @@ export default function LipSyncPage() {
     const [voice, setVoice] = useState(voices[0].id);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [videoUrl, setVideoUrl] = useState<string>('');
+    const { showLoading, hideLoading } = useLoading();
 
     const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
     const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
@@ -42,6 +45,7 @@ export default function LipSyncPage() {
             return;
         }
         setIsGeneratingAudio(true);
+        showLoading();
         setAudioUrl(null);
         try {
             const result = await generateAudioFromText({ text, voice });
@@ -52,6 +56,7 @@ export default function LipSyncPage() {
             toast({ variant: 'destructive', title: 'Audio generation failed' });
         } finally {
             setIsGeneratingAudio(false);
+            hideLoading();
         }
     };
 
@@ -66,6 +71,7 @@ export default function LipSyncPage() {
         }
 
         setIsGeneratingVideo(true);
+        showLoading();
         setVideoUrl('');
         try {
             const result = await lipSync({ imageDataUri, audioDataUri: audioUrl });
@@ -76,6 +82,7 @@ export default function LipSyncPage() {
             toast({ variant: 'destructive', title: 'Lip-sync generation failed.' });
         } finally {
             setIsGeneratingVideo(false);
+            hideLoading();
         }
     };
 

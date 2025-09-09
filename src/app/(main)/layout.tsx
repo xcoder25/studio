@@ -27,7 +27,6 @@ import {
   Settings,
   ChevronDown,
   Video,
-  Link2,
   Plus,
   Text,
   ImageIcon,
@@ -36,7 +35,6 @@ import {
   Maximize,
   Mic,
   Book,
-  Wand2,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -70,7 +68,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [initialLoading, setInitialLoading] = useState(true);
-  const { showLoading } = useLoading();
+  const { showLoading, hideLoading, isLoading } = useLoading();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(pathname.startsWith('/video-generator'));
 
@@ -94,12 +92,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   const handleNavClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (pathname !== href) {
-      showLoading(1500);
+      showLoading();
     }
   }, [pathname, showLoading]);
   
   const handleLogout = () => {
-    showLoading(1500);
+    showLoading();
     localStorage.removeItem('auth-token');
     setTimeout(() => {
       router.push('/');
@@ -112,12 +110,20 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     }
   }, [pathname]);
 
+  useEffect(() => {
+    if(isLoading && !initialLoading) {
+        hideLoading();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
+
   if (!isAuthenticated || initialLoading) {
     return <SplashScreen />;
   }
 
   const getPageTitle = () => {
-    const allNavItems = [...navItems, ...videoNavItems, { href: '/settings', label: 'Settings'}];
+    const allNavItems = [...navItems, ...videoNavItems, { href: '/settings', label: 'Settings'}, { href: '/library', label: 'Library' }];
     const currentNavItem = allNavItems.find(item => pathname === item.href);
     if (currentNavItem) return currentNavItem.label;
 
@@ -149,7 +155,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname === item.href}
+                    isActive={pathname === item.href || (item.href === '/library' && pathname === '/templates')}
                     tooltip={{
                       children: item.label,
                     }}

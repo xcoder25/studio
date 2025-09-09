@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -57,7 +58,7 @@ export default function PostComposer() {
   const [isRewriting, setIsRewriting] = useState(false);
   const [generatedPost, setGeneratedPost] = useState<{ content: string; reasoning: string } | null>(null);
   const [suggestedHashtags, setSuggestedHashtags] = useState<string[]>([]);
-  const { showLoading } = useLoading();
+  const { showLoading, hideLoading } = useLoading();
   
   const form = useForm<ComposerFormValues>({
     resolver: zodResolver(composerSchema),
@@ -78,7 +79,7 @@ export default function PostComposer() {
       return;
     }
     setIsGenerating(true);
-    showLoading(2000);
+    showLoading();
     setGeneratedPost(null);
     try {
       const result = await generatePostContent({
@@ -93,6 +94,7 @@ export default function PostComposer() {
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to generate post content.' });
     } finally {
       setIsGenerating(false);
+      hideLoading();
     }
   };
 
@@ -103,7 +105,7 @@ export default function PostComposer() {
       return;
     }
     setIsRewriting(true);
-    showLoading(2000);
+    showLoading();
     try {
       const result = await rewriteCaption({
         caption: postContent,
@@ -116,6 +118,7 @@ export default function PostComposer() {
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to rewrite caption.' });
     } finally {
       setIsRewriting(false);
+      hideLoading();
     }
   };
   
@@ -126,7 +129,7 @@ export default function PostComposer() {
       return;
     }
     setIsSuggesting(true);
-    showLoading(2000);
+    showLoading();
     try {
       const result = await suggestHashtags({ postContent: content });
       setSuggestedHashtags(result.hashtags);
@@ -135,6 +138,7 @@ export default function PostComposer() {
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to suggest hashtags.' });
     } finally {
       setIsSuggesting(false);
+      hideLoading();
     }
   };
 
