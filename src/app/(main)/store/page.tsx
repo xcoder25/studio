@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bot, Zap, Puzzle, Sparkles, Pencil, Clapperboard, MessageSquareHeart, LayoutTemplate, Image, Music, FileText } from "lucide-react";
+import { Bot, Zap, Puzzle, Sparkles, Pencil, Clapperboard, MessageSquareHeart, LayoutTemplate, Image, Music, FileText, Calendar, Brush, BarChart, Users } from "lucide-react";
 import React from 'react';
 
 const addons = [
@@ -15,6 +15,34 @@ const addons = [
     category: "AI Assistants",
     icon: <Bot className="size-8 text-primary" />,
     status: "Active"
+  },
+  {
+    title: "Strategy AI",
+    description: "Builds monthly content calendars and plans your social strategy.",
+    category: "AI Assistants",
+    icon: <Calendar className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Creative AI",
+    description: "Writes engaging captions, and generates videos & images.",
+    category: "AI Assistants",
+    icon: <Brush className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Analytics AI",
+    description: "Interprets metrics, tracks performance, and recommends pivots.",
+    category: "AI Assistants",
+    icon: <BarChart className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Engagement AI",
+    description: "Chats with followers, responds to comments, and builds community.",
+    category: "AI Assistants",
+    icon: <Users className="size-8 text-primary" />,
+    status: "Activate"
   },
   {
     title: "Ad Copywriter AI",
