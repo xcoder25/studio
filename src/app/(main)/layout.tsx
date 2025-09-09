@@ -27,6 +27,7 @@ import {
   Settings,
   ChevronDown,
   Video,
+  Link2,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -44,6 +45,7 @@ const navItems = [
   { href: '/calendar', icon: Calendar, label: 'Calendar' },
   { href: '/templates', icon: Library, label: 'Templates' },
   { href: '/video-generator', icon: Video, label: 'Video Generation' },
+  { href: '/settings', icon: Link2, label: 'Linked Accounts' },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
