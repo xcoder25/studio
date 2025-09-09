@@ -137,6 +137,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const getPageTitle = () => {
     if (pathname.startsWith('/video-generator/editor')) return 'Video Editor';
     if (pathname.startsWith('/agency/competitor-analysis')) return 'Competitor Analysis';
+    if (pathname.startsWith('/agency/social-listening')) return 'Social Listening';
     
     const currentNavItem = navItems.find(item => pathname === item.href);
     if (currentNavItem) return currentNavItem.label;
@@ -217,6 +218,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                                 <SidebarMenuSubButton asChild isActive={pathname === '/agency/competitor-analysis'}>
                                     <Link href="/agency/competitor-analysis" onClick={(e) => handleNavClick(e, '/agency/competitor-analysis')}>
                                         <span>Competitor Analysis</span>
+                                    </Link>
+                                </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                            <SidebarMenuSubItem>
+                                <SidebarMenuSubButton asChild isActive={pathname === '/agency/social-listening'}>
+                                    <Link href="/agency/social-listening" onClick={(e) => handleNavClick(e, '/agency/social-listening')}>
+                                        <span>Social Listening</span>
                                     </Link>
                                 </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
