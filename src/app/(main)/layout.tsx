@@ -37,6 +37,7 @@ import {
   Book,
   PanelLeft,
   Scale,
+  Users,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -138,6 +139,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (pathname.startsWith('/video-generator/editor')) return 'Video Editor';
     if (pathname.startsWith('/agency/competitor-analysis')) return 'Competitor Analysis';
     if (pathname.startsWith('/agency/social-listening')) return 'Social Listening';
+    if (pathname.startsWith('/agency/team')) return 'Team Management';
     
     const currentNavItem = navItems.find(item => pathname === item.href);
     if (currentNavItem) return currentNavItem.label;
@@ -214,6 +216,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     </SidebarMenuItem>
                     <CollapsibleContent asChild>
                         <SidebarMenuSub>
+                            <SidebarMenuSubItem>
+                                <SidebarMenuSubButton asChild isActive={pathname === '/agency/team'}>
+                                    <Link href="/agency/team" onClick={(e) => handleNavClick(e, '/agency/team')}>
+                                        <span>Team Management</span>
+                                    </Link>
+                                </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
                             <SidebarMenuSubItem>
                                 <SidebarMenuSubButton asChild isActive={pathname === '/agency/competitor-analysis'}>
                                     <Link href="/agency/competitor-analysis" onClick={(e) => handleNavClick(e, '/agency/competitor-analysis')}>
