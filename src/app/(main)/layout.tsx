@@ -25,6 +25,7 @@ import {
   Library,
   Settings,
   ChevronDown,
+  Video,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -39,6 +40,7 @@ const navItems = [
   { href: '/composer', icon: PenSquare, label: 'Composer' },
   { href: '/calendar', icon: Calendar, label: 'Calendar' },
   { href: '/templates', icon: Library, label: 'Templates' },
+  { href: '/video-generator', icon: Video, label: 'Video Generation' },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {

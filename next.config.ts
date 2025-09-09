@@ -24,6 +24,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+      serverActions: {
+          // Allow long-running server actions for video generation
+          bodySizeLimit: '10mb',
+          // timeout of 2 mins for video generation
+          serverActionsTimeout: 120,
+      }
+  },
 };
 
 export default nextConfig;

@@ -3,3 +3,4 @@ config();
 
 import '@/ai/flows/suggest-hashtags.ts';
 import '@/ai/flows/generate-post-content.ts';
+import '@/ai/flows/generate-video.ts';
