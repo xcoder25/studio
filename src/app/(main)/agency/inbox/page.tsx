@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { generateReply } from '@/ai/flows/generate-reply';
-import { Loader2, Send, Twitter, MessageSquare, Instagram, Bot, Sparkles, Wand2, Search, ChevronsUpDown } from 'lucide-react';
+import { Loader2, Send, Twitter, MessageSquare, Instagram, Bot, Sparkles, Wand2, Search, ChevronsUpDown, Facebook } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 
@@ -45,17 +45,28 @@ const accounts = {
     }
 }
 
-const platformIcons = {
-    Twitter: <Twitter className="size-4 text-sky-500" />,
-    Instagram: <Instagram className="size-4 text-fuchsia-500" />,
-    Facebook: <MessageSquare className="size-4 text-blue-600" />,
+const allPlatforms = ['Twitter', 'Instagram', 'Facebook'];
+
+const platformConfig = {
+    Twitter: { icon: Twitter, color: 'text-sky-500' },
+    Instagram: { icon: Instagram, color: 'text-fuchsia-500' },
+    Facebook: { icon: Facebook, color: 'text-blue-600' },
 }
 
 export default function UnifiedInboxPage() {
     const { toast } = useToast();
     const [selectedAccount, setSelectedAccount] = useState('trendix');
+    const [platformFilters, setPlatformFilters] = useState<string[]>(allPlatforms);
+
     const currentAccountData = accounts[selectedAccount as keyof typeof accounts];
-    const [selectedConversation, setSelectedConversation] = useState(currentAccountData.conversations[0]);
+    
+    const filteredConversations = useMemo(() => {
+        return currentAccountData.conversations.filter(convo => 
+            platformFilters.includes(convo.platform)
+        );
+    }, [currentAccountData.conversations, platformFilters]);
+
+    const [selectedConversation, setSelectedConversation] = useState(filteredConversations[0]);
     const [isLoading, setIsLoading] = useState(false);
     const [replyText, setReplyText] = useState('');
     const [tone, setTone] = useState('Friendly');
@@ -63,10 +74,30 @@ export default function UnifiedInboxPage() {
     const handleAccountChange = (accountId: string) => {
         setSelectedAccount(accountId);
         const newAccountData = accounts[accountId as keyof typeof accounts];
-        setSelectedConversation(newAccountData.conversations[0]);
+        const newFilteredConvos = newAccountData.conversations.filter(convo => 
+            platformFilters.includes(convo.platform)
+        );
+        setSelectedConversation(newFilteredConvos[0] || null);
     }
     
+    const handleFilterToggle = (platform: string) => {
+        setPlatformFilters(prev => 
+            prev.includes(platform) 
+                ? prev.filter(p => p !== platform)
+                : [...prev, platform]
+        );
+    }
+
+    React.useEffect(() => {
+        if (filteredConversations.length > 0 && !filteredConversations.find(c => c.id === selectedConversation?.id)) {
+            setSelectedConversation(filteredConversations[0]);
+        } else if (filteredConversations.length === 0) {
+            setSelectedConversation(null!);
+        }
+    }, [filteredConversations, selectedConversation]);
+    
     const handleGenerateReply = async () => {
+        if (!selectedConversation) return;
         setIsLoading(true);
         try {
             const lastMessage = currentAccountData.messageThread[selectedConversation.id as keyof typeof currentAccountData.messageThread].slice(-1)[0].text;
@@ -87,7 +118,7 @@ export default function UnifiedInboxPage() {
   return (
     <div className="grid grid-cols-10 gap-4 h-[calc(100vh-8rem)]">
         {/* Conversations List */}
-        <Card className="col-span-2 flex flex-col">
+        <Card className="col-span-3 lg:col-span-2 flex flex-col">
             <CardHeader className='p-3 space-y-3'>
                 <Select value={selectedAccount} onValueChange={handleAccountChange}>
                     <SelectTrigger className="h-10">
@@ -120,23 +151,40 @@ export default function UnifiedInboxPage() {
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input placeholder="Search inbox..." className="pl-8 h-9" />
                 </div>
+                 <div className="flex gap-1">
+                    {allPlatforms.map(platform => {
+                        const config = platformConfig[platform as keyof typeof platformConfig];
+                        const Icon = config.icon;
+                        return (
+                            <Button 
+                                key={platform} 
+                                variant={platformFilters.includes(platform) ? 'secondary' : 'ghost'} 
+                                size="icon" 
+                                className="h-8 w-8 flex-1"
+                                onClick={() => handleFilterToggle(platform)}
+                            >
+                                <Icon className={cn("size-4", config.color)} />
+                            </Button>
+                        )
+                    })}
+                </div>
             </CardHeader>
             <ScrollArea>
                  <div className="space-y-1 p-2">
-                    {currentAccountData.conversations.map(convo => (
+                    {filteredConversations.map(convo => (
                         <button key={convo.id} onClick={() => setSelectedConversation(convo)} className={cn(
                             "w-full text-left p-2 rounded-lg hover:bg-muted transition-colors",
-                            selectedConversation.id === convo.id && 'bg-muted'
+                            selectedConversation?.id === convo.id && 'bg-muted'
                         )}>
                            <div className="flex items-start gap-3">
                                 <Avatar className="size-8">
                                     <AvatarImage src={convo.avatar} data-ai-hint="avatar"/>
                                     <AvatarFallback>{convo.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
-                                <div className='flex-1'>
+                                <div className='flex-1 overflow-hidden'>
                                     <div className="flex justify-between items-center">
                                         <h4 className="text-sm font-semibold">{convo.name}</h4>
-                                        {platformIcons[convo.platform as keyof typeof platformIcons]}
+                                        {React.createElement(platformConfig[convo.platform as keyof typeof platformConfig].icon, { className: "size-4 " + platformConfig[convo.platform as keyof typeof platformConfig].color })}
                                     </div>
                                     <p className="text-xs text-muted-foreground truncate">{convo.message}</p>
                                 </div>
@@ -149,39 +197,48 @@ export default function UnifiedInboxPage() {
         </Card>
 
         {/* Message Thread */}
-        <div className="col-span-5 flex flex-col gap-4">
+        <div className="col-span-7 lg:col-span-5 flex flex-col gap-4">
             <Card className="flex-grow flex flex-col">
-                <CardHeader className="border-b p-4">
-                    <h3 className="font-semibold">{selectedConversation.name}</h3>
-                    <p className="text-sm text-muted-foreground">on {selectedConversation.platform}</p>
-                </CardHeader>
-                <CardContent className="flex-grow p-4 space-y-4">
-                     {currentAccountData.messageThread[selectedConversation.id as keyof typeof currentAccountData.messageThread].map((msg, index) => (
-                        <div key={index} className={cn(
-                            "flex items-end gap-2",
-                            msg.from === 'agent' ? 'justify-end' : 'justify-start'
-                        )}>
-                           {msg.from === 'user' && <Avatar className="size-6"><AvatarImage src={selectedConversation.avatar} data-ai-hint="avatar"/></Avatar>}
-                            <p className={cn(
-                                "max-w-xs rounded-xl p-3 text-sm",
-                                msg.from === 'agent' ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                            )}>{msg.text}</p>
-                        </div>
-                    ))}
-                </CardContent>
-                <CardFooter className="p-4 border-t">
-                    <div className="relative w-full">
-                        <Textarea placeholder="Type your reply..." className="pr-20"/>
-                        <Button size="sm" className="absolute right-2 top-1/2 -translate-y-1/2">
-                            Send <Send className="ml-2"/>
-                        </Button>
+                {selectedConversation ? (
+                    <>
+                        <CardHeader className="border-b p-4">
+                            <h3 className="font-semibold">{selectedConversation.name}</h3>
+                            <p className="text-sm text-muted-foreground">on {selectedConversation.platform}</p>
+                        </CardHeader>
+                        <CardContent className="flex-grow p-4 space-y-4">
+                            {currentAccountData.messageThread[selectedConversation.id as keyof typeof currentAccountData.messageThread].map((msg, index) => (
+                                <div key={index} className={cn(
+                                    "flex items-end gap-2",
+                                    msg.from === 'agent' ? 'justify-end' : 'justify-start'
+                                )}>
+                                {msg.from === 'user' && <Avatar className="size-6"><AvatarImage src={selectedConversation.avatar} data-ai-hint="avatar"/></Avatar>}
+                                    <p className={cn(
+                                        "max-w-xs rounded-xl p-3 text-sm",
+                                        msg.from === 'agent' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                                    )}>{msg.text}</p>
+                                </div>
+                            ))}
+                        </CardContent>
+                        <CardFooter className="p-4 border-t">
+                            <div className="relative w-full">
+                                <Textarea placeholder="Type your reply..." className="pr-20"/>
+                                <Button size="sm" className="absolute right-2 top-1/2 -translate-y-1/2">
+                                    Send <Send className="ml-2"/>
+                                </Button>
+                            </div>
+                        </CardFooter>
+                    </>
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                        <MessageSquare className="size-16" />
+                        <p className="mt-4">Select a conversation to start</p>
                     </div>
-                </CardFooter>
+                )}
             </Card>
         </div>
 
         {/* AI Assistant Panel */}
-        <Card className="col-span-3 flex flex-col">
+        <Card className="col-span-4 lg:col-span-3 flex flex-col">
             <CardHeader className="text-center">
                 <Bot className="mx-auto size-8 text-primary" />
                 <CardTitle>Serai AI</CardTitle>
@@ -212,7 +269,7 @@ export default function UnifiedInboxPage() {
                 </div>
             </CardContent>
             <CardFooter className="flex-col gap-2">
-                 <Button onClick={handleGenerateReply} disabled={isLoading} className="w-full">
+                 <Button onClick={handleGenerateReply} disabled={isLoading || !selectedConversation} className="w-full">
                     {isLoading ? <Loader2 className="animate-spin" /> : <Sparkles />}
                     {replyText ? 'Regenerate' : 'Generate'}
                 </Button>

@@ -39,6 +39,7 @@ import {
   Scale,
   Users,
   MessageSquare,
+  Bell
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -46,10 +47,12 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import SplashScreen from '@/components/splash-screen';
 import { useLoading } from '@/context/loading-context';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Badge } from '@/components/ui/badge';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -148,7 +151,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 <h1 className="text-lg font-semibold text-foreground group-hover:inline hidden">Trendix</h1>
               </Link>
           </SidebarHeader>
-          <SidebarContent>
+          <SidebarContent className="hide-scrollbar">
             <SidebarMenu>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
@@ -161,7 +164,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   >
                     <Link href={item.href} onClick={(e) => handleNavClick(e, item.href)}>
                       <item.icon />
-                      <span>{item.label}</span>
+                      <span className="group-hover:inline hidden">{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -176,7 +179,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   >
                     <Link href="/video-generator/editor" onClick={(e) => handleNavClick(e, '/video-generator/editor')}>
                       <Video />
-                      <span>Video Editor</span>
+                      <span className="group-hover:inline hidden">Video Editor</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -189,8 +192,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                                 tooltip={{ children: 'Agency Tools' }}
                             >
                                 <Scale/>
-                                <span>Agency Tools</span>
-                                <ChevronDown className="ml-auto size-4 transition-transform data-[state=open]:rotate-180" />
+                                <span className="group-hover:inline hidden">Agency Tools</span>
+                                <ChevronDown className="ml-auto size-4 transition-transform data-[state=open]:rotate-180 group-hover:inline hidden" />
                             </SidebarMenuButton>
                         </CollapsibleTrigger>
                     </SidebarMenuItem>
@@ -231,7 +234,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   >
                     <Link href="#" onClick={(e) => handleNavClick(e, '/tutorials')}>
                       <Book />
-                      <span>Tutorials</span>
+                      <span className="group-hover:inline hidden">Tutorials</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -247,7 +250,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 >
                   <Link href="/settings" onClick={(e) => handleNavClick(e, '/settings')}>
                     <Settings />
-                    <span>Settings</span>
+                    <span className="group-hover:inline hidden">Settings</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -287,10 +290,47 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               {getPageTitle()}
             </h2>
           </div>
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-4 text-sm">
               <span className="text-muted-foreground">Credits:</span>
               <span className="font-semibold">40/40</span>
               <Button variant="outline" size="sm">Upgrade</Button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="icon" className="relative h-9 w-9">
+                            <Bell className="size-4" />
+                             <Badge className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0">2</Badge>
+                            <span className="sr-only">Notifications</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-80">
+                        <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>
+                            <div className="flex items-start gap-3">
+                                <Avatar className="size-8">
+                                    <AvatarImage src="https://picsum.photos/100/100?random=5" data-ai-hint="avatar"/>
+                                    <AvatarFallback>AJ</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="text-sm font-medium">New mention from @alicej</p>
+                                    <p className="text-xs text-muted-foreground">Just wanted to say I love your new feature!...</p>
+                                </div>
+                            </div>
+                        </DropdownMenuItem>
+                         <DropdownMenuItem>
+                            <div className="flex items-start gap-3">
+                                 <Avatar className="size-8">
+                                    <AvatarImage src="https://picsum.photos/100/100?random=6" data-ai-hint="avatar"/>
+                                    <AvatarFallback>BW</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="text-sm font-medium">New DM from bobw</p>
+                                    <p className="text-xs text-muted-foreground">Can you tell me more about your pricing...</p>
+                                </div>
+                            </div>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
               <Button size="sm"><Plus className="mr-2 size-4" /> Create</Button>
           </div>
         </header>
