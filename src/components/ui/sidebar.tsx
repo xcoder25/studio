@@ -170,14 +170,21 @@ const Sidebar = React.forwardRef<
     {
       side = "left",
       variant = "sidebar",
-      collapsible = "offcanvas",
+      collapsible = "icon",
       className,
       children,
       ...props
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, setOpen, openMobile, setOpenMobile } = useSidebar()
+    
+    React.useEffect(() => {
+      if(!isMobile) {
+        setOpen(false)
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isMobile]);
 
     if (collapsible === "none") {
       return (
@@ -218,8 +225,8 @@ const Sidebar = React.forwardRef<
       <div
         ref={ref}
         className="group peer hidden md:block text-sidebar-foreground"
-        data-state={state}
-        data-collapsible={state === "collapsed" ? collapsible : ""}
+        data-state='collapsed'
+        data-collapsible='icon'
         data-variant={variant}
         data-side={side}
       >
@@ -227,25 +234,27 @@ const Sidebar = React.forwardRef<
         <div
           className={cn(
             "duration-200 relative h-svh bg-transparent transition-all ease-in-out",
-            "w-[--sidebar-width]",
+            "w-[--sidebar-width-icon]",
+            "group-hover:w-[--sidebar-width]",
             "group-data-[collapsible=offcanvas]:w-0",
             "group-data-[side=right]:rotate-180",
             variant === "floating" || variant === "inset"
-              ? "group-hover:w-[calc(var(--sidebar-width)_+_theme(spacing.4))] w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]"
-              : "group-hover:w-[--sidebar-width] w-[--sidebar-width-icon]"
+              ? "group-hover:w-[calc(var(--sidebar-width)_+_theme(spacing.4))]"
+              : ""
           )}
         />
         <div
           className={cn(
             "duration-200 fixed inset-y-0 z-10 hidden h-svh transition-all ease-in-out md:flex",
-            "group-hover:w-[--sidebar-width] w-[--sidebar-width-icon]",
+            "w-[--sidebar-width-icon]",
+            "group-hover:w-[--sidebar-width]",
             side === "left"
               ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
               : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
             // Adjust the padding for floating and inset variants.
             variant === "floating" || variant === "inset"
-              ? "p-2 group-hover:w-[calc(var(--sidebar-width)_+_theme(spacing.4)_+2px)] w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
-              : "group-hover:w-[--sidebar-width] w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l",
+              ? "p-2 group-hover:w-[calc(var(--sidebar-width)_+_theme(spacing.4)_+2px)]"
+              : "group-data-[side=left]:border-r group-data-[side=right]:border-l",
             className
           )}
           {...props}
@@ -408,7 +417,7 @@ const SidebarContent = React.forwardRef<
       ref={ref}
       data-sidebar="content"
       className={cn(
-        "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-hover:overflow-auto overflow-hidden",
+        "flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden group-hover:overflow-auto",
         className
       )}
       {...props}

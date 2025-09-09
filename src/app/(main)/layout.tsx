@@ -65,7 +65,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const [initialLoading, setInitialLoading] = useState(true);
   const { showLoading, hideLoading, isLoading } = useLoading();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isVideoOpen, setIsVideoOpen] = useState(pathname.startsWith('/video-generator'));
   const [isAgencyOpen, setIsAgencyOpen] = useState(pathname.startsWith('/agency'));
 
 
@@ -101,9 +100,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   };
   
   useEffect(() => {
-    if (pathname.startsWith('/video-generator')) {
-      setIsVideoOpen(true);
-    }
     if (pathname.startsWith('/agency')) {
       setIsAgencyOpen(true);
     }
@@ -138,7 +134,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen>
         <Sidebar collapsible="icon">
           <SidebarHeader>
               <Link href="/dashboard" className="flex items-center gap-2" onClick={(e) => handleNavClick(e, '/dashboard')}>
@@ -204,13 +200,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                                 <SidebarMenuSubButton asChild isActive={pathname === '/agency/inbox'}>
                                     <Link href="/agency/inbox" onClick={(e) => handleNavClick(e, '/agency/inbox')}>
                                         <span>Unified Inbox</span>
-                                    </Link>
-                                </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                            <SidebarMenuSubItem>
-                                <SidebarMenuSubButton asChild isActive={pathname === '/agency/team'}>
-                                    <Link href="/agency/team" onClick={(e) => handleNavClick(e, '/agency/team')}>
-                                        <span>Team Management</span>
                                     </Link>
                                 </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
