@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Link from 'next/link';
@@ -35,6 +36,7 @@ import {
   Maximize,
   Mic,
   Book,
+  Scissors,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -55,9 +57,9 @@ const navItems = [
 ];
 
 const videoNavItems = [
+    { href: '/video-generator/editor', icon: Scissors, label: 'Video Editor' },
     { href: '/video-generator', icon: Text, label: 'Text to Video' },
     { href: '/video-generator/image-to-video', icon: ImageIcon, label: 'Image to Video' },
-    { href: '/video-generator/elements-to-video', icon: Shapes, label: 'Elements to Video' },
     { href: '/video-generator/add-audio', icon: Music, label: 'Add Audio to Video' },
     { href: '/video-generator/video-upscale', icon: Maximize, label: 'Video Upscale' },
     { href: '/video-generator/lip-sync', icon: Mic, label: 'Lip-Sync Video' },
@@ -111,7 +113,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
-    if(isLoading && !initialLoading) {
+    if(!initialLoading) {
         hideLoading();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
