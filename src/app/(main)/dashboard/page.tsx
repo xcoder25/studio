@@ -184,7 +184,7 @@ export default function DashboardPage() {
               </div>
             ) : (
             <ul className="space-y-4">
-                {trends.map((trend) => (
+                {trends.slice(0, 2).map((trend) => (
                   <li key={trend.title} className="flex items-start gap-4">
                     <div>{trendIcons[trend.type]}</div>
                     <div>
