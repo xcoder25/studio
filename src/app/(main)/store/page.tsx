@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bot, Zap, Puzzle, Sparkles } from "lucide-react";
+import { Bot, Zap, Puzzle, Sparkles, Pencil, Clapperboard, MessageSquareHeart } from "lucide-react";
 import React from 'react';
 
 const addons = [
@@ -24,24 +24,38 @@ const addons = [
     status: "Activate"
   },
   {
-    title: "Cross-Posting Automation",
-    description: "Auto-adapt and distribute your content for each social platform.",
-    category: "Automations",
-    icon: <Zap className="size-8 text-primary" />,
-    status: "Activate"
-  },
-  {
-    title: "Canva Integration",
-    description: "Access your Canva designs directly within Trendix.",
-    category: "Integrations",
-    icon: <Puzzle className="size-8 text-primary" />,
-    status: "Activate"
-  },
-  {
     title: "Trend Hunter AI",
     description: "Scans platforms daily and pushes trending hashtags/sounds to your dashboard.",
     category: "AI Assistants",
     icon: <Bot className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Brand Voice AI",
+    description: "Trains on your past content and mimics your unique style and tone.",
+    category: "AI Assistants",
+    icon: <Pencil className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Community Manager AI",
+    description: "Auto-responds to comments and DMs in your brand's voice to boost engagement.",
+    category: "AI Assistants",
+    icon: <MessageSquareHeart className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Video Script AI",
+    description: "Generates engaging scripts for TikToks, Reels, and YouTube Shorts.",
+    category: "AI Assistants",
+    icon: <Clapperboard className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Cross-Posting Automation",
+    description: "Auto-adapt and distribute your content for each social platform.",
+    category: "Automations",
+    icon: <Zap className="size-8 text-primary" />,
     status: "Activate"
   },
   {
@@ -50,6 +64,13 @@ const addons = [
     category: "Automations",
     icon: <Zap className="size-8 text-primary" />,
     status: "Requires Setup"
+  },
+  {
+    title: "Canva Integration",
+    description: "Access your Canva designs directly within Trendix.",
+    category: "Integrations",
+    icon: <Puzzle className="size-8 text-primary" />,
+    status: "Activate"
   },
 ];
 
