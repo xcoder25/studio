@@ -134,7 +134,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <SidebarProvider defaultOpen>
+    <SidebarProvider defaultOpen={false}>
         <Sidebar collapsible="icon">
           <SidebarHeader>
               <Link href="/dashboard" className="flex items-center gap-2" onClick={(e) => handleNavClick(e, '/dashboard')}>
@@ -145,7 +145,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     height={28}
                     className="size-7"
                   />
-                <h1 className="text-lg font-semibold text-foreground group-data-[collapsible=icon]:group-hover:inline group-data-[collapsible=icon]:hidden">Trendix</h1>
+                <h1 className="text-lg font-semibold text-foreground group-hover:inline hidden">Trendix</h1>
               </Link>
           </SidebarHeader>
           <SidebarContent>
@@ -252,19 +252,19 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
-            <div className='flex items-center justify-between group-data-[collapsible=icon]:hover:w-[calc(var(--sidebar-width)_-_theme(spacing.4))] group-data-[collapsible=icon]:justify-center'>
+            <div className='flex items-center justify-between group-hover:w-[calc(var(--sidebar-width)_-_theme(spacing.4))] justify-center'>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-start h-12 gap-2 px-2 group-data-[collapsible=icon]:hover:w-full group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
+                    <Button variant="ghost" className="w-full justify-start h-12 gap-2 px-2 group-hover:w-full h-10 w-10 px-0 justify-center">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src="https://picsum.photos/100/100" data-ai-hint="avatar" alt="User Avatar" />
                         <AvatarFallback>JD</AvatarFallback>
                       </Avatar>
-                      <div className="flex flex-col items-start group-data-[collapsible=icon]:hover:flex group-data-[collapsible=icon]:hidden">
+                      <div className="flex flex-col items-start group-hover:flex hidden">
                           <span className="text-sm font-medium text-foreground">Jane Doe</span>
                           <span className="text-xs text-muted-foreground">jane.doe@email.com</span>
                       </div>
-                      <ChevronDown className="ml-auto h-4 w-4 group-data-[collapsible=icon]:hover:inline-flex group-data-[collapsible=icon]:hidden" />
+                      <ChevronDown className="ml-auto h-4 w-4 group-hover:inline-flex hidden" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56 mb-2" align="end">
