@@ -42,7 +42,7 @@ export default function ControlPanel({
   
   return (
     <div className="space-y-4 h-full flex flex-col">
-        <Card>
+        <Card className="bg-card/50">
             <CardHeader>
                 <CardTitle>Create New Video</CardTitle>
             </CardHeader>
@@ -54,7 +54,7 @@ export default function ControlPanel({
             </CardContent>
         </Card>
         
-        <Card className="flex-grow flex flex-col">
+        <Card className="flex-grow flex flex-col bg-card/50">
             <CardContent className="p-4 space-y-4 flex-grow flex flex-col">
                 <div>
                     <Label>Model</Label>
@@ -86,7 +86,7 @@ export default function ControlPanel({
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
                         disabled={isLoading}
-                        className="min-h-[120px] mt-1 flex-grow"
+                        className="min-h-[120px] mt-1 flex-grow bg-transparent"
                     />
                 </div>
                  <div>

@@ -16,17 +16,17 @@ interface OutputPanelProps {
 export default function OutputPanel({ isLoading, videoUrl }: OutputPanelProps) {
   return (
     <div className="space-y-4 h-full flex flex-col">
-        <Card className="bg-primary/10 border-primary/20">
+        <Card className="bg-primary/20 border-primary/30">
             <CardContent className="p-4">
-                <h4 className="font-semibold text-primary">Create Your Story Video</h4>
-                <p className="text-sm text-primary/90 mt-1">Turn ideas into animated stories—add characters, music, and more.</p>
+                <h4 className="font-semibold text-primary-foreground">Create Your Story Video</h4>
+                <p className="text-sm text-primary-foreground/80 mt-1">Turn ideas into animated stories—add characters, music, and more.</p>
                 <div className="mt-3">
                     <Button size="sm" variant="secondary">Try Now</Button>
-                    <Button size="sm" variant="ghost" className="text-primary/90 hover:text-primary hover:bg-transparent">Dismiss</Button>
+                    <Button size="sm" variant="ghost" className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-transparent/20">Dismiss</Button>
                 </div>
             </CardContent>
         </Card>
-        <Card className="flex-grow flex flex-col">
+        <Card className="flex-grow flex flex-col bg-card/50">
             <CardHeader>
                 <CardTitle>Generation History</CardTitle>
                 <div className="flex gap-2 pt-2">
@@ -44,7 +44,7 @@ export default function OutputPanel({ isLoading, videoUrl }: OutputPanelProps) {
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="flex-grow flex items-center justify-center bg-muted/20 m-4 mt-0 rounded-lg">
+            <CardContent className="flex-grow flex items-center justify-center bg-background/30 m-4 mt-0 rounded-lg">
                 {isLoading ? (
                 <div className="flex flex-col items-center gap-4 text-muted-foreground text-center p-8">
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />

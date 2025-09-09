@@ -75,9 +75,10 @@ export default function VideoGeneratorPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen bg-muted/40">
+      <div className="flex h-screen bg-background relative overflow-hidden">
+          <div className="absolute inset-0 z-0 bg-grid-white/[0.05] [mask-image:linear-gradient(to_bottom,white_5%,transparent_50%)]" />
           <VideoGeneratorSidebar />
-          <div className="flex flex-1 flex-col">
+          <div className="flex flex-1 flex-col z-10">
               <TopBar />
               <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-10 gap-4 p-4 overflow-y-auto">
                   <div className="lg:col-span-7 xl:col-span-6 h-full">

@@ -5,13 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
-  Sidebar,
-  SidebarHeader,
-  SidebarContent,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
 } from '@/components/ui/sidebar';
 import {
   LayoutDashboard,
@@ -28,7 +24,6 @@ import {
 } from 'lucide-react';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { useState } from 'react';
-import { Button } from '../ui/button';
 
 const videoNavItems = [
     { href: '#', icon: Text, label: 'Text to Video' },
@@ -44,7 +39,7 @@ export default function VideoGeneratorSidebar() {
   const [isVideoOpen, setIsVideoOpen] = useState(true);
 
   return (
-    <div className="w-64 border-r bg-card p-2 flex flex-col">
+    <div className="w-64 border-r bg-card/50 p-2 flex flex-col z-10">
         <div className="flex items-center gap-2 p-2">
             <Link href="/dashboard" className="flex items-center gap-2">
                 <Image
