@@ -193,7 +193,7 @@ export default function StorePage() {
         <div className="text-center max-w-2xl mx-auto">
             <h1 className="text-3xl font-bold">Trendix Store</h1>
             <p className="text-muted-foreground mt-2">
-                Enhance your workflow by activating powerful AI assistants, automations, and integrations.
+                Welcome to the marketplace. Enhance your workflow by activating powerful tools from Trendix and our community of third-party developers.
             </p>
         </div>
 
