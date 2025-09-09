@@ -21,6 +21,19 @@ export async function generateVideo(prompt: string): Promise<GenerateVideoOutput
   return generateVideoFlow(prompt);
 }
 
+async function fetchVideoAsDataURI(url: string): Promise<string> {
+    const response = await fetch(`${url}&key=${process.env.GEMINI_API_KEY}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch video: ${response.statusText}`);
+    }
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const base64 = buffer.toString('base64');
+    const contentType = response.headers.get('content-type') || 'video/mp4';
+    return `data:${contentType};base64,${base64}`;
+}
+
+
 const generateVideoFlow = ai.defineFlow(
   {
     name: 'generateVideoFlow',
@@ -65,8 +78,10 @@ const generateVideoFlow = ai.defineFlow(
       throw new Error('Failed to find the generated video in the operation result');
     }
 
+    const videoDataUri = await fetchVideoAsDataURI(videoPart.media.url);
+
     return {
-      videoUrl: videoPart.media.url,
+      videoUrl: videoDataUri,
     };
   }
 );
