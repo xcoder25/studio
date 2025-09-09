@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import type { GenerationMode } from '@/app/(main)/video-generator/page';
 import { ImageUploadArea } from './image-upload-area';
 import { useRouter } from 'next/navigation';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface ControlPanelProps {
     mode: GenerationMode;
@@ -43,29 +44,30 @@ export default function ControlPanel({
   
   const router = useRouter();
 
-  const handleModeChange = (newMode: GenerationMode) => {
-    setMode(newMode);
-    if (newMode === 'text-to-video' || newMode === 'image-to-video') {
+  const handleModeChange = (newMode: string) => {
+    const typedMode = newMode as GenerationMode;
+    setMode(typedMode);
+    if(typedMode === 'text-to-video') {
       router.push('/video-generator');
     } else {
-      router.push(`/video-generator/${newMode}`);
+      router.push('/video-generator/image-to-video');
     }
   }
 
   return (
     <div className="space-y-4 h-full flex flex-col">
-        <Card className="bg-card/50">
-            <CardHeader>
-                <CardTitle>Create New Video</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-2">
-                <Button variant={mode === 'text-to-video' ? 'secondary' : 'outline'} onClick={() => setMode('text-to-video')}><Text className="mr-2"/> Text to Video</Button>
-                <Button variant={mode === 'image-to-video' ? 'secondary' : 'outline'} onClick={() => setMode('image-to-video')}><ImageIcon className="mr-2"/> Image to Video</Button>
-            </CardContent>
-        </Card>
         
-        <Card className="flex-grow flex flex-col bg-card/50">
-            <CardContent className="p-4 space-y-4 flex-grow flex flex-col">
+        <Card className="flex-grow flex flex-col bg-card/80">
+             <CardHeader>
+                <CardTitle>Create New Video</CardTitle>
+                 <Tabs value={mode} onValueChange={handleModeChange} className='mt-2'>
+                    <TabsList>
+                        <TabsTrigger value="text-to-video"><Text className="mr-2"/>Text to Video</TabsTrigger>
+                        <TabsTrigger value="image-to-video"><ImageIcon className="mr-2"/>Image to Video</TabsTrigger>
+                    </TabsList>
+                </Tabs>
+            </CardHeader>
+            <CardContent className="p-4 pt-0 space-y-4 flex-grow flex flex-col">
                 <div>
                     <Label>Model</Label>
                     <Select defaultValue="veo3" disabled={isLoading}>

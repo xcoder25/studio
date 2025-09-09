@@ -1,14 +1,12 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { generateVideo } from '@/ai/flows/generate-video';
-import VideoGeneratorSidebar from '@/components/video-generator/video-generator-sidebar';
 import ControlPanel from '@/components/video-generator/control-panel';
 import OutputPanel from '@/components/video-generator/output-panel';
-import TopBar from '@/components/video-generator/top-bar';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { usePathname } from 'next/navigation';
 
 export type GenerationMode = 'text-to-video' | 'image-to-video';
 
@@ -22,6 +20,15 @@ export default function VideoGeneratorPage() {
   const [aspectRatio, setAspectRatio] = useState('16:9');
   
   const { toast } = useToast();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if(pathname === '/video-generator/image-to-video') {
+      setMode('image-to-video');
+    } else {
+      setMode('text-to-video');
+    }
+  }, [pathname]);
 
   const handleGenerateVideo = async () => {
     if (!prompt) {
@@ -74,37 +81,28 @@ export default function VideoGeneratorPage() {
   };
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen bg-background relative overflow-hidden">
-          <div className="absolute inset-0 z-0 bg-grid-white/[0.05] [mask-image:linear-gradient(to_bottom,white_5%,transparent_50%)]" />
-          <VideoGeneratorSidebar />
-          <div className="flex flex-1 flex-col z-10">
-              <TopBar />
-              <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-10 gap-4 p-4 overflow-y-auto">
-                  <div className="lg:col-span-7 xl:col-span-6 h-full">
-                      <ControlPanel 
-                          mode={mode}
-                          setMode={setMode}
-                          prompt={prompt}
-                          setPrompt={setPrompt}
-                          aspectRatio={aspectRatio}
-                          setAspectRatio={setAspectRatio}
-                          isLoading={isLoading}
-                          handleGenerateVideo={handleGenerateVideo}
-                          imagePreview={imagePreview}
-                          setImagePreview={setImagePreview}
-                          setImageDataUri={setImageDataUri}
-                      />
-                  </div>
-                  <div className="lg:col-span-5 xl:col-span-4 h-full">
-                      <OutputPanel
-                          isLoading={isLoading}
-                          videoUrl={videoUrl}
-                      />
-                  </div>
-              </main>
-          </div>
-      </div>
-    </SidebarProvider>
+    <div className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-10 gap-4 h-full">
+        <div className="lg:col-span-7 xl:col-span-6 h-full">
+            <ControlPanel 
+                mode={mode}
+                setMode={setMode}
+                prompt={prompt}
+                setPrompt={setPrompt}
+                aspectRatio={aspectRatio}
+                setAspectRatio={setAspectRatio}
+                isLoading={isLoading}
+                handleGenerateVideo={handleGenerateVideo}
+                imagePreview={imagePreview}
+                setImagePreview={setImagePreview}
+                setImageDataUri={setImageDataUri}
+            />
+        </div>
+        <div className="lg:col-span-5 xl:col-span-4 h-full">
+            <OutputPanel
+                isLoading={isLoading}
+                videoUrl={videoUrl}
+            />
+        </div>
+    </div>
   );
 }

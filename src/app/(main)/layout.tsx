@@ -29,6 +29,14 @@ import {
   ChevronDown,
   Video,
   Link2,
+  Plus,
+  Text,
+  ImageIcon,
+  Shapes,
+  Music,
+  Maximize,
+  Mic,
+  Book,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -39,15 +47,24 @@ import {
 } from '@/components/ui/dropdown-menu';
 import SplashScreen from '@/components/splash-screen';
 import { useLoading } from '@/context/loading-context';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/composer', icon: PenSquare, label: 'Composer' },
   { href: '/calendar', icon: Calendar, label: 'Calendar' },
   { href: '/templates', icon: Library, label: 'Templates' },
-  { href: '/video-generator', icon: Video, label: 'Video Generation' },
-  { href: '/settings', icon: Link2, label: 'Linked Accounts' },
 ];
+
+const videoNavItems = [
+    { href: '/video-generator', icon: Text, label: 'Text to Video' },
+    { href: '/video-generator/image-to-video', icon: ImageIcon, label: 'Image to Video' },
+    { href: '/video-generator/elements-to-video', icon: Shapes, label: 'Elements to Video' },
+    { href: '/video-generator/add-audio', icon: Music, label: 'Add Audio to Video' },
+    { href: '/video-generator/video-upscale', icon: Maximize, label: 'Video Upscale' },
+    { href: '/video-generator/lip-sync', icon: Mic, label: 'Lip-Sync Video' },
+];
+
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -55,6 +72,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const [initialLoading, setInitialLoading] = useState(true);
   const { showLoading } = useLoading();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isVideoOpen, setIsVideoOpen] = useState(pathname.startsWith('/video-generator'));
+
 
   useEffect(() => {
     const token = localStorage.getItem('auth-token');
@@ -75,7 +94,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   const handleNavClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (pathname !== href) {
-      showLoading(3000);
+      showLoading(1500);
     }
   }, [pathname, showLoading]);
   
@@ -86,9 +105,25 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       router.push('/');
     }, 1500);
   };
+  
+  useEffect(() => {
+    if (pathname.startsWith('/video-generator')) {
+      setIsVideoOpen(true);
+    }
+  }, [pathname]);
 
   if (!isAuthenticated || initialLoading) {
     return <SplashScreen />;
+  }
+
+  const getPageTitle = () => {
+    const allNavItems = [...navItems, ...videoNavItems, { href: '/settings', label: 'Settings'}];
+    const currentNavItem = allNavItems.find(item => pathname === item.href);
+    if (currentNavItem) return currentNavItem.label;
+
+    if (pathname.startsWith('/video-generator')) return 'Video Generator';
+
+    return 'Dashboard';
   }
 
   return (
@@ -114,7 +149,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname.startsWith(item.href)}
+                    isActive={pathname === item.href}
                     tooltip={{
                       children: item.label,
                     }}
@@ -126,6 +161,34 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+               <Collapsible open={isVideoOpen} onOpenChange={setIsVideoOpen} className="w-full">
+                  <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                          <SidebarMenuButton isActive={pathname.startsWith('/video-generator')} className='w-full justify-between'>
+                              <div className="flex items-center gap-2">
+                                  <Video />
+                                  <span>Video</span>
+                              </div>
+                              <ChevronDown className={`size-4 transition-transform ${isVideoOpen ? 'rotate-180' : ''}`} />
+                          </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                  </SidebarMenuItem>
+                  <CollapsibleContent>
+                      <SidebarMenu className="ml-4 mt-2 border-l pl-4 space-y-1">
+                          {videoNavItems.map((item) => (
+                              <SidebarMenuItem key={item.label}>
+                                  <SidebarMenuButton asChild isActive={pathname === item.href} href={item.href} variant="ghost" size="sm" onClick={(e) => handleNavClick(e as any, item.href)}>
+                                      <Link href={item.href}>
+                                          <item.icon className="size-3.5" />
+                                          <span>{item.label}</span>
+                                      </Link>
+                                  </SidebarMenuButton>
+                              </SidebarMenuItem>
+                          ))}
+                      </SidebarMenu>
+                  </CollapsibleContent>
+                </Collapsible>
+
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter className="gap-4">
@@ -167,17 +230,24 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </SidebarFooter>
         </Sidebar>
       <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-background/95 px-4 md:px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="md:hidden">
-            <SidebarTrigger />
-          </div>
-          <div className="flex-1">
+        <header className="flex h-14 items-center justify-between gap-4 border-b bg-background/95 px-4 md:px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex items-center gap-2">
+            <div className="md:hidden">
+              <SidebarTrigger />
+            </div>
             <h2 className="text-xl font-semibold">
-              {navItems.find(item => pathname.startsWith(item.href))?.label || (pathname.startsWith('/settings') ? 'Settings' : 'Dashboard')}
+              {getPageTitle()}
             </h2>
           </div>
+          <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">Credits:</span>
+              <span className="font-semibold">40/40</span>
+              <Button variant="outline" size="sm">Upgrade</Button>
+              <Button size="sm"><Plus className="mr-2 size-4" /> Create</Button>
+          </div>
         </header>
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-6 relative">
+           <div className="absolute inset-0 -z-10 bg-grid-white/[0.05] [mask-image:linear-gradient(to_bottom,white_5%,transparent_50%)]" />
           {children}
         </main>
       </SidebarInset>
