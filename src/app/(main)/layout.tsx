@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import Link from 'next/link';
@@ -37,6 +36,7 @@ import {
   Maximize,
   Mic,
   Book,
+  Wand2,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -53,7 +53,7 @@ const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/composer', icon: PenSquare, label: 'Composer' },
   { href: '/calendar', icon: Calendar, label: 'Calendar' },
-  { href: '/templates', icon: Library, label: 'Templates' },
+  { href: '/library', icon: Library, label: 'Library' },
 ];
 
 const videoNavItems = [
@@ -188,7 +188,20 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                       </SidebarMenu>
                   </CollapsibleContent>
                 </Collapsible>
-
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith('/tutorials')}
+                    tooltip={{
+                      children: "Tutorials",
+                    }}
+                  >
+                    <Link href="#" onClick={(e) => handleNavClick(e, '/tutorials')}>
+                      <Book />
+                      <span>Tutorials</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter className="gap-4">

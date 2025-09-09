@@ -1,5 +1,8 @@
 
+'use client';
+
 import type { SVGProps } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import StatsCard from "@/components/dashboard/stats-card";
@@ -7,10 +10,29 @@ import EngagementChart from "@/components/dashboard/engagement-chart";
 import PostsOverview from "@/components/dashboard/posts-overview";
 import VideoStats from '@/components/dashboard/video-stats';
 import RecentVideos from '@/components/dashboard/recent-videos';
-import { Twitter, Facebook, Instagram, Users, ThumbsUp, MessageSquare, Share2, TrendingUp, ArrowRight, Video, Mic, Text, Maximize } from "lucide-react";
+import { Twitter, Facebook, Instagram, Users, ThumbsUp, MessageSquare, Share2, TrendingUp, ArrowRight, Video, Mic, Text, Maximize, Loader2, Wand2, Music, Hash } from "lucide-react";
 import Link from 'next/link';
+import { findTrends, type FindTrendsOutput } from '@/ai/flows/find-trends';
 
 export default function DashboardPage() {
+  const [trends, setTrends] = useState<FindTrendsOutput['trends']>([]);
+  const [isLoadingTrends, setIsLoadingTrends] = useState(true);
+
+  useEffect(() => {
+    async function loadTrends() {
+      setIsLoadingTrends(true);
+      try {
+        const result = await findTrends({ industry: 'AI and Technology' });
+        setTrends(result.trends);
+      } catch (error) {
+        console.error('Failed to load trends:', error);
+      } finally {
+        setIsLoadingTrends(false);
+      }
+    }
+    loadTrends();
+  }, []);
+
   const socialStats = [
     {
       platform: "Twitter",
@@ -70,6 +92,12 @@ export default function DashboardPage() {
     { label: "Upscale Video", icon: Maximize, href: "/video-generator/video-upscale" },
     { label: "Create Story", icon: Video, href: "#" },
   ];
+  
+  const trendIcons = {
+    hashtag: <Hash className="size-5 text-primary" />,
+    sound: <Music className="size-5 text-primary" />,
+    challenge: <Wand2 className="size-5 text-primary" />,
+  }
 
   return (
     <div className="grid gap-6">
@@ -144,17 +172,28 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="text-primary" />
-              Trending Topics
+              Trend Finder
             </CardTitle>
-            <CardDescription>Hot topics to inspire your next post.</CardDescription>
+            <CardDescription>Hot topics & sounds to inspire your next post.</CardDescription>
           </CardHeader>
           <CardContent>
+            {isLoadingTrends ? (
+              <div className="flex justify-center items-center h-40">
+                <Loader2 className="animate-spin text-primary" />
+              </div>
+            ) : (
             <ul className="space-y-4">
-              <li className="flex justify-between items-center"><span>#AITechnology</span> <span className="text-sm text-muted-foreground">1.2M Posts</span></li>
-              <li className="flex justify-between items-center"><span>#FutureOfWork</span> <span className="text-sm text-muted-foreground">890K Posts</span></li>
-              <li className="flex justify-between items-center"><span>#DigitalMarketing</span> <span className="text-sm text-muted-foreground">750K Posts</span></li>
-              <li className="flex justify-between items-center"><span>#StartupLife</span> <span className="text-sm text-muted-foreground">610K Posts</span></li>
+                {trends.map((trend) => (
+                  <li key={trend.title} className="flex items-start gap-4">
+                    <div>{trendIcons[trend.type]}</div>
+                    <div>
+                      <h4 className="font-semibold">{trend.title}</h4>
+                      <p className="text-sm text-muted-foreground">{trend.description}</p>
+                    </div>
+                  </li>
+                ))}
             </ul>
+            )}
             <Button variant="outline" className="w-full mt-4">
               Explore More Trends <ArrowRight className="ml-2" />
             </Button>

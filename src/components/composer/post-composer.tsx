@@ -6,8 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { generatePostContent } from '@/ai/flows/generate-post-content';
 import { suggestHashtags } from '@/ai/flows/suggest-hashtags';
+import { rewriteCaption } from '@/ai/flows/rewrite-caption';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -27,6 +28,7 @@ import {
   Clock,
   Loader2,
   Copy,
+  Wand2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -49,6 +51,7 @@ export default function PostComposer() {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSuggesting, setIsSuggesting] = useState(false);
+  const [isRewriting, setIsRewriting] = useState(false);
   const [generatedPost, setGeneratedPost] = useState<{ content: string; reasoning: string } | null>(null);
   const [suggestedHashtags, setSuggestedHashtags] = useState<string[]>([]);
   const { showLoading } = useLoading();
@@ -71,8 +74,8 @@ export default function PostComposer() {
       form.setError('topic', { message: 'Please enter a topic.' });
       return;
     }
-    showLoading(3000);
     setIsGenerating(true);
+    showLoading(2000);
     setGeneratedPost(null);
     try {
       const result = await generatePostContent({
@@ -80,13 +83,36 @@ export default function PostComposer() {
         tone,
         userHistory: 'The user is a tech startup focused on AI solutions. Past successful posts include new feature announcements and industry insights.',
       });
-      setGeneratedPost({ content: result.postContent, reasoning: result.reasoning });
+      form.setValue('postContent', result.postContent);
       setSuggestedHashtags(result.suggestedHashtags);
     } catch (error) {
       console.error(error);
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to generate post content.' });
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleRewriteCaption = async () => {
+    const { postContent, tone } = form.getValues();
+    if (!postContent) {
+      form.setError('postContent', { message: 'Please enter some content to rewrite.' });
+      return;
+    }
+    setIsRewriting(true);
+    showLoading(2000);
+    try {
+      const result = await rewriteCaption({
+        caption: postContent,
+        tone,
+      });
+      form.setValue('postContent', result.rewrittenCaption);
+      toast({ title: 'Caption rewritten successfully!' });
+    } catch (error) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to rewrite caption.' });
+    } finally {
+      setIsRewriting(false);
     }
   };
   
@@ -96,23 +122,16 @@ export default function PostComposer() {
       form.setError('postContent', { message: 'Please enter some content to suggest hashtags.' });
       return;
     }
-    showLoading(3000);
     setIsSuggesting(true);
+    showLoading(2000);
     try {
       const result = await suggestHashtags({ postContent: content });
       setSuggestedHashtags(result.hashtags);
-    } catch (error) {
+    } catch (error)_ {
       console.error(error);
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to suggest hashtags.' });
     } finally {
       setIsSuggesting(false);
-    }
-  };
-
-  const useGeneratedContent = () => {
-    if (generatedPost) {
-      form.setValue('postContent', generatedPost.content);
-      setGeneratedPost(null);
     }
   };
 
@@ -133,26 +152,52 @@ export default function PostComposer() {
     setSuggestedHashtags([]);
   };
 
+  const isAiBusy = isGenerating || isRewriting || isSuggesting;
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>AI Post Generator</CardTitle>
-              <CardDescription>Generate engaging post ideas based on a topic and tone.</CardDescription>
+              <CardTitle>Compose Your Post</CardTitle>
+              <CardDescription>Craft your message and use AI tools to enhance it.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="postContent"
+                render={({ field }) => (
+                  <FormItem>
+                    <Textarea 
+                      placeholder="What's on your mind? Type here or generate content below." 
+                      className="min-h-[200px]" 
+                      {...field}
+                      disabled={isAiBusy}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Assistant</CardTitle>
+              <CardDescription>Generate, rewrite, or get hashtag ideas.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-3 gap-4">
+              <div className="grid md:grid-cols-3 gap-4 p-4 border rounded-lg bg-background/50">
                 <div className="md:col-span-2">
                   <FormField
                     control={form.control}
                     name="topic"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Topic</FormLabel>
+                        <FormLabel>Topic for Generation</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., 'Future of AI in marketing'" {...field} />
+                          <Input placeholder="e.g., 'Future of AI in marketing'" {...field} disabled={isAiBusy}/>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -166,7 +211,7 @@ export default function PostComposer() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Tone</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isAiBusy}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a tone" />
@@ -175,8 +220,9 @@ export default function PostComposer() {
                           <SelectContent>
                             <SelectItem value="Informative">Informative</SelectItem>
                             <SelectItem value="Funny">Funny</SelectItem>
-                            <SelectItem value="Serious">Serious</SelectItem>
+                            <SelectItem value="Professional">Professional</SelectItem>
                             <SelectItem value="Inspirational">Inspirational</SelectItem>
+                            <SelectItem value="Short">Short</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -184,61 +230,23 @@ export default function PostComposer() {
                   />
                 </div>
               </div>
-              <Button type="button" onClick={handleGeneratePost} disabled={isGenerating}>
-                {isGenerating ? <Loader2 className="animate-spin" /> : <Sparkles />}
-                Generate Content
-              </Button>
-              {generatedPost && (
-                <div className="border-l-4 border-primary p-4 bg-primary/10 rounded-r-lg space-y-4">
-                  <p className="font-semibold">AI Suggestion:</p>
-                  <p className="text-sm">{generatedPost.content}</p>
-                  <Card className="bg-background/70">
-                    <CardHeader className="p-3">
-                      <CardTitle className="text-sm">Why this works</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-3 pt-0 text-xs">
-                      {generatedPost.reasoning}
-                    </CardContent>
-                  </Card>
-                  <div className="flex gap-2">
-                    <Button type="button" size="sm" onClick={useGeneratedContent}>Use this content</Button>
-                    <Button type="button" variant="ghost" size="sm" onClick={() => copyToClipboard(generatedPost.content)}><Copy className="mr-2" /> Copy</Button>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+               <div className="flex gap-2 flex-wrap">
+                <Button type="button" onClick={handleGeneratePost} disabled={isGenerating || isAiBusy}>
+                  {isGenerating ? <Loader2 className="animate-spin" /> : <Sparkles />}
+                  Generate Post
+                </Button>
+                 <Button type="button" variant="outline" onClick={handleRewriteCaption} disabled={isRewriting || isAiBusy || !postContentValue}>
+                  {isRewriting ? <Loader2 className="animate-spin" /> : <Wand2 />}
+                  Rewrite Caption
+                </Button>
+                <Button type="button" variant="outline" onClick={handleSuggestHashtags} disabled={isSuggesting || isAiBusy || !postContentValue}>
+                  {isSuggesting ? <Loader2 className="animate-spin" /> : <Hash />}
+                  Suggest Hashtags
+                </Button>
+              </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Compose Your Post</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <FormField
-                control={form.control}
-                name="postContent"
-                render={({ field }) => (
-                  <FormItem>
-                    <Textarea placeholder="What's on your mind?" className="min-h-[150px]" {...field} />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>AI Hashtag Suggestions</CardTitle>
-              <CardDescription>Generate or get suggestions for hashtags to boost your reach.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button type="button" onClick={handleSuggestHashtags} disabled={isSuggesting}>
-                {isSuggesting ? <Loader2 className="animate-spin" /> : <Hash />}
-                Suggest Hashtags
-              </Button>
               {suggestedHashtags.length > 0 && (
-                <div className="mt-4 space-y-2">
+                <div className="space-y-2">
                   <Label>Click to add:</Label>
                   <div className="flex flex-wrap gap-2">
                     {suggestedHashtags.map((tag, i) => (
@@ -319,8 +327,10 @@ export default function PostComposer() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">Schedule Post</Button>
             </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full">Schedule Post</Button>
+            </CardFooter>
           </Card>
 
           <Card>
@@ -340,6 +350,11 @@ export default function PostComposer() {
                   </div>
                 </div>
                 <p className="text-sm whitespace-pre-wrap">{postContentValue || "Your post content will appear here..."}</p>
+                <div className="flex gap-2 pt-2 border-t">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground"><ThumbsUp className="size-4" />&nbsp; Like</Button>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground"><MessageSquare className="size-4" />&nbsp; Comment</Button>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground"><Share2 className="size-4" />&nbsp; Share</Button>
+                </div>
               </div>
             </CardContent>
           </Card>
