@@ -59,11 +59,39 @@ const addons = [
     status: "Activate"
   },
   {
-    title: "Auto-Report Generator",
+    title: "Smart Reply Pack",
+    description: "AI-suggested replies for DMs and comments to speed up engagement.",
+    category: "Automations",
+    icon: <Zap className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Engagement Booster Pack",
+    description: "Auto-like and auto-follow relevant accounts with AI safety filters.",
+    category: "Automations",
+    icon: <Zap className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Smart Analytics Alerts",
+    description: "Get notified when your engagement spikes or drops unexpectedly.",
+    category: "Automations",
+    icon: <Zap className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Weekly Report Generator",
     description: "Automatically generates and sends weekly PDF reports to your clients.",
     category: "Automations",
     icon: <Zap className="size-8 text-primary" />,
     status: "Requires Setup"
+  },
+  {
+    title: "Campaign Automation",
+    description: "Schedule multi-day content campaigns with pre-built templates.",
+    category: "Automations",
+    icon: <Zap className="size-8 text-primary" />,
+    status: "Activate"
   },
   {
     title: "Canva Integration",
