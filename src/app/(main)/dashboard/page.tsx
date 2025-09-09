@@ -87,10 +87,10 @@ export default function DashboardPage() {
   ];
 
   const videoQuickActions = [
-    { label: "Text to Video", icon: Text, href: "/video-generator" },
-    { label: "Lip-Sync", icon: Mic, href: "/video-generator/lip-sync" },
-    { label: "Upscale Video", icon: Maximize, href: "/video-generator/video-upscale" },
-    { label: "Create Story", icon: Video, href: "#" },
+    { label: "Text to Video", icon: Text, href: "/video-generator/editor" },
+    { label: "Lip-Sync", icon: Mic, href: "/video-generator/editor" },
+    { label: "Upscale Video", icon: Maximize, href: "/video-generator/editor" },
+    { label: "Create Story", icon: Video, href: "/video-generator/editor" },
   ];
   
   const trendIcons = {
@@ -168,7 +168,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2">
           <PostsOverview />
         </div>
-        <Card>
+        <Card className="flex flex-col">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="text-primary" />
@@ -176,7 +176,7 @@ export default function DashboardPage() {
             </CardTitle>
             <CardDescription>Hot topics & sounds to inspire your next post.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-grow">
             {isLoadingTrends ? (
               <div className="flex justify-center items-center h-40">
                 <Loader2 className="animate-spin text-primary" />
@@ -194,10 +194,12 @@ export default function DashboardPage() {
                 ))}
             </ul>
             )}
-            <Button variant="outline" className="w-full mt-4">
+          </CardContent>
+           <CardFooter>
+            <Button variant="outline" className="w-full">
               Explore More Trends <ArrowRight className="ml-2" />
             </Button>
-          </CardContent>
+          </CardFooter>
         </Card>
       </div>
     </div>
