@@ -15,7 +15,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
@@ -28,7 +27,6 @@ import {
   Calendar as CalendarIcon,
   Clock,
   Loader2,
-  Copy,
   Wand2,
   ThumbsUp,
   MessageSquare,
@@ -56,7 +54,6 @@ export default function PostComposer() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [isRewriting, setIsRewriting] = useState(false);
-  const [generatedPost, setGeneratedPost] = useState<{ content: string; reasoning: string } | null>(null);
   const [suggestedHashtags, setSuggestedHashtags] = useState<string[]>([]);
   const { showLoading, hideLoading } = useLoading();
   
@@ -80,7 +77,6 @@ export default function PostComposer() {
     }
     setIsGenerating(true);
     showLoading();
-    setGeneratedPost(null);
     try {
       const result = await generatePostContent({
         trendingTopic: topic,
@@ -125,7 +121,7 @@ export default function PostComposer() {
   const handleSuggestHashtags = async () => {
     const content = form.getValues('postContent');
     if (!content) {
-      form.setError('postContent', { message: 'Please enter some content to suggest hashtags.' });
+      form.setError('postContent', { message: 'Please enter some content to suggest hashtags for.' });
       return;
     }
     setIsSuggesting(true);
@@ -146,16 +142,10 @@ export default function PostComposer() {
     form.setValue('postContent', `${form.getValues('postContent')} ${tag}`);
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({ title: 'Copied to clipboard!' });
-  };
-
   const onSubmit = (data: ComposerFormValues) => {
     console.log(data);
     toast({ title: 'Post Scheduled!', description: `Your post has been scheduled for ${format(data.scheduleDate!, 'PPP')} at ${data.scheduleTime}.` });
     form.reset();
-    setGeneratedPost(null);
     setSuggestedHashtags([]);
   };
 
@@ -177,8 +167,8 @@ export default function PostComposer() {
                 render={({ field }) => (
                   <FormItem>
                     <Textarea 
-                      placeholder="What's on your mind? Type here or generate content below." 
-                      className="min-h-[200px]" 
+                      placeholder="What's on your mind? Type here or generate content with the AI Assistant below." 
+                      className="min-h-[250px]" 
                       {...field}
                       disabled={isAiBusy}
                     />
@@ -192,50 +182,46 @@ export default function PostComposer() {
           <Card>
             <CardHeader>
               <CardTitle>AI Assistant</CardTitle>
-              <CardDescription>Generate, rewrite, or get hashtag ideas.</CardDescription>
+              <CardDescription>Generate, rewrite, or get hashtag ideas for your post.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-3 gap-4 p-4 border rounded-lg bg-background/50">
-                <div className="md:col-span-2">
-                  <FormField
-                    control={form.control}
-                    name="topic"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Topic for Generation</FormLabel>
+              <div className="grid md:grid-cols-2 gap-4 p-4 border rounded-lg bg-background/50">
+                <FormField
+                  control={form.control}
+                  name="topic"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Topic for Generation</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., 'Future of AI in marketing'" {...field} disabled={isAiBusy}/>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tone</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isAiBusy}>
                         <FormControl>
-                          <Input placeholder="e.g., 'Future of AI in marketing'" {...field} disabled={isAiBusy}/>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a tone" />
+                          </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div>
-                  <FormField
-                    control={form.control}
-                    name="tone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tone</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isAiBusy}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a tone" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Informative">Informative</SelectItem>
-                            <SelectItem value="Funny">Funny</SelectItem>
-                            <SelectItem value="Professional">Professional</SelectItem>
-                            <SelectItem value="Inspirational">Inspirational</SelectItem>
-                            <SelectItem value="Short">Short</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                        <SelectContent>
+                          <SelectItem value="Informative">Informative</SelectItem>
+                          <SelectItem value="Funny">Funny</SelectItem>
+                          <SelectItem value="Professional">Professional</SelectItem>
+                          <SelectItem value="Inspirational">Inspirational</SelectItem>
+                          <SelectItem value="Short">Short</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
               </div>
                <div className="flex gap-2 flex-wrap">
                 <Button type="button" onClick={handleGeneratePost} disabled={isGenerating || isAiBusy}>
@@ -244,7 +230,7 @@ export default function PostComposer() {
                 </Button>
                  <Button type="button" variant="outline" onClick={handleRewriteCaption} disabled={isRewriting || isAiBusy || !postContentValue}>
                   {isRewriting ? <Loader2 className="animate-spin" /> : <Wand2 />}
-                  Rewrite Caption
+                  Rewrite
                 </Button>
                 <Button type="button" variant="outline" onClick={handleSuggestHashtags} disabled={isSuggesting || isAiBusy || !postContentValue}>
                   {isSuggesting ? <Loader2 className="animate-spin" /> : <Hash />}
@@ -253,8 +239,8 @@ export default function PostComposer() {
               </div>
 
               {suggestedHashtags.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Click to add:</Label>
+                <div className="space-y-2 pt-4">
+                  <Label>Suggested Hashtags (click to add):</Label>
                   <div className="flex flex-wrap gap-2">
                     {suggestedHashtags.map((tag, i) => (
                       <Badge
@@ -276,25 +262,24 @@ export default function PostComposer() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Platforms</CardTitle>
+              <CardTitle>Publishing</CardTitle>
+              <CardDescription>Select platforms and schedule your post.</CardDescription>
             </CardHeader>
-            <CardContent className="flex gap-2">
-              <Button variant="outline" size="icon" className="border-primary text-primary"><Twitter /></Button>
-              <Button variant="outline" size="icon"><Facebook /></Button>
-              <Button variant="outline" size="icon"><Instagram /></Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Schedule Post</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
+                <div>
+                    <Label className='text-sm'>Platforms</Label>
+                    <div className="flex gap-2 mt-2">
+                        <Button variant="outline" size="icon" className="border-primary text-primary ring-2 ring-primary"><Twitter /></Button>
+                        <Button variant="outline" size="icon"><Facebook /></Button>
+                        <Button variant="outline" size="icon"><Instagram /></Button>
+                    </div>
+                </div>
               <FormField
                 control={form.control}
                 name="scheduleDate"
                 render={({ field }) => (
                   <FormItem>
+                    <Label>Schedule Date</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -327,6 +312,7 @@ export default function PostComposer() {
                 name="scheduleTime"
                 render={({ field }) => (
                   <FormItem>
+                    <Label>Schedule Time</Label>
                     <div className="relative">
                       <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input type="time" className="pl-9" {...field} />
@@ -345,7 +331,7 @@ export default function PostComposer() {
               <CardTitle>Preview</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg border p-4 space-y-3">
+              <div className="rounded-lg border p-4 space-y-3 bg-background/50">
                 <div className="flex items-center gap-3">
                   <Avatar>
                     <AvatarImage src="https://picsum.photos/100/100" data-ai-hint="avatar" alt="User Avatar" />
@@ -356,11 +342,11 @@ export default function PostComposer() {
                     <p className="text-xs text-muted-foreground">Posting to Twitter</p>
                   </div>
                 </div>
-                <p className="text-sm whitespace-pre-wrap">{postContentValue || "Your post content will appear here..."}</p>
-                <div className="flex gap-2 pt-2 border-t">
-                  <Button variant="ghost" size="sm" className="text-muted-foreground"><ThumbsUp className="size-4" />&nbsp; Like</Button>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground"><MessageSquare className="size-4" />&nbsp; Comment</Button>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground"><Share2 className="size-4" />&nbsp; Share</Button>
+                <p className="text-sm whitespace-pre-wrap min-h-[60px]">{postContentValue || "Your post content will appear here..."}</p>
+                <div className="flex gap-1 pt-2 border-t -mx-4 px-2">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground gap-2"><ThumbsUp className="size-4" />Like</Button>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground gap-2"><MessageSquare className="size-4" />Comment</Button>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground gap-2"><Share2 className="size-4" />Share</Button>
                 </div>
               </div>
             </CardContent>
