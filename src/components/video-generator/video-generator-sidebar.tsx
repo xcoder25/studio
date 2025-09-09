@@ -26,12 +26,12 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/component
 import { useState } from 'react';
 
 const videoNavItems = [
-    { href: '#', icon: Text, label: 'Text to Video' },
-    { href: '#', icon: ImageIcon, label: 'Image to Video' },
-    { href: '#', icon: Shapes, label: 'Elements to Video' },
-    { href: '#', icon: Music, label: 'Add Audio to Video' },
-    { href: '#', icon: Maximize, label: 'Video Upscale' },
-    { href: '#', icon: Mic, label: 'Lip-Sync Video' },
+    { href: '/video-generator', icon: Text, label: 'Text to Video' },
+    { href: '/video-generator', icon: ImageIcon, label: 'Image to Video' },
+    { href: '/video-generator/elements-to-video', icon: Shapes, label: 'Elements to Video' },
+    { href: '/video-generator/add-audio', icon: Music, label: 'Add Audio to Video' },
+    { href: '/video-generator/video-upscale', icon: Maximize, label: 'Video Upscale' },
+    { href: '/video-generator/lip-sync', icon: Mic, label: 'Lip-Sync Video' },
 ];
 
 export default function VideoGeneratorSidebar() {
@@ -78,7 +78,7 @@ export default function VideoGeneratorSidebar() {
                 <SidebarMenu className="ml-4 mt-2 border-l pl-4 space-y-1">
                     {videoNavItems.map((item) => (
                     <SidebarMenuItem key={item.label}>
-                        <SidebarMenuButton asChild isActive={pathname === item.href} variant="ghost" size="sm">
+                        <SidebarMenuButton asChild isActive={pathname === item.href && item.label !== 'Image to Video' && item.label !== 'Text to Video'} variant="ghost" size="sm">
                             <Link href={item.href}>
                                 <item.icon className="size-3.5" />
                                 <span>{item.label}</span>

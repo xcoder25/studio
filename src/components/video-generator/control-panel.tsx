@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import type { GenerationMode } from '@/app/(main)/video-generator/page';
 import { ImageUploadArea } from './image-upload-area';
+import { useRouter } from 'next/navigation';
 
 interface ControlPanelProps {
     mode: GenerationMode;
@@ -40,6 +41,13 @@ export default function ControlPanel({
     setImageDataUri
 }: ControlPanelProps) {
   
+  const router = useRouter();
+
+  const navigateTo = (path: string, newMode: GenerationMode) => {
+    setMode(newMode);
+    router.push(path);
+  }
+
   return (
     <div className="space-y-4 h-full flex flex-col">
         <Card className="bg-card/50">
@@ -47,10 +55,10 @@ export default function ControlPanel({
                 <CardTitle>Create New Video</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
-                <Button variant={mode === 'text-to-video' ? 'secondary' : 'outline'} onClick={() => setMode('text-to-video')}><Text className="mr-2"/> Text to Video</Button>
-                <Button variant={mode === 'image-to-video' ? 'secondary' : 'outline'} onClick={() => setMode('image-to-video')}><ImageIcon className="mr-2"/> Image to Video</Button>
-                <Button variant="outline" disabled><Shapes className="mr-2"/> Elements to Video</Button>
-                <Button variant="outline" disabled><Music className="mr-2"/> Audio to Video</Button>
+                <Button variant={mode === 'text-to-video' ? 'secondary' : 'outline'} onClick={() => navigateTo('/video-generator', 'text-to-video')}><Text className="mr-2"/> Text to Video</Button>
+                <Button variant={mode === 'image-to-video' ? 'secondary' : 'outline'} onClick={() => navigateTo('/video-generator', 'image-to-video')}><ImageIcon className="mr-2"/> Image to Video</Button>
+                <Button variant={mode === 'elements-to-video' ? 'secondary' : 'outline'} onClick={() => navigateTo('/video-generator/elements-to-video', 'elements-to-video')}><Shapes className="mr-2"/> Elements to Video</Button>
+                <Button variant={mode === 'audio-to-video' ? 'secondary' : 'outline'} onClick={() => navigateTo('/video-generator/add-audio', 'audio-to-video')}><Music className="mr-2"/> Audio to Video</Button>
             </CardContent>
         </Card>
         
