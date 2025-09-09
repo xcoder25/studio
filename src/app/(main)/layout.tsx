@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode, useCallback } from 'react';
 import {
   SidebarProvider,
   Sidebar,
@@ -36,6 +36,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import SplashScreen from '@/components/splash-screen';
+import { useLoading } from '@/context/loading-context';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -47,17 +48,25 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const { showLoading } = useLoading();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setLoading(false);
+      setInitialLoading(false);
     }, 2000); // Show splash screen for 2 seconds
 
     return () => clearTimeout(timer);
   }, []);
 
-  if (loading) {
+  const handleNavClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (pathname !== href) {
+      showLoading(3000);
+    }
+  }, [pathname, showLoading]);
+
+
+  if (initialLoading) {
     return <SplashScreen />;
   }
 
@@ -66,7 +75,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <Link href="/dashboard" className="flex items-center gap-2">
+            <Link href="/dashboard" className="flex items-center gap-2" onClick={(e) => handleNavClick(e, '/dashboard')}>
                 <Image
                   src="/Trendix Logo.png"
                   alt="Trendix Logo"
@@ -89,7 +98,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     children: item.label,
                   }}
                 >
-                  <Link href={item.href}>
+                  <Link href={item.href} onClick={(e) => handleNavClick(e, item.href)}>
                     <item.icon />
                     <span>{item.label}</span>
                   </Link>
@@ -106,7 +115,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 isActive={pathname.startsWith('/settings')}
                 tooltip={{ children: 'Settings' }}
               >
-                <Link href="/settings">
+                <Link href="/settings" onClick={(e) => handleNavClick(e, '/settings')}>
                   <Settings />
                   <span>Settings</span>
                 </Link>

@@ -33,6 +33,7 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useLoading } from '@/context/loading-context';
 
 const composerSchema = z.object({
   postContent: z.string().min(1, 'Post content cannot be empty.'),
@@ -50,6 +51,7 @@ export default function PostComposer() {
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [generatedPost, setGeneratedPost] = useState<{ content: string; reasoning: string } | null>(null);
   const [suggestedHashtags, setSuggestedHashtags] = useState<string[]>([]);
+  const { showLoading } = useLoading();
   
   const form = useForm<ComposerFormValues>({
     resolver: zodResolver(composerSchema),
@@ -69,6 +71,7 @@ export default function PostComposer() {
       form.setError('topic', { message: 'Please enter a topic.' });
       return;
     }
+    showLoading(3000);
     setIsGenerating(true);
     setGeneratedPost(null);
     try {
@@ -93,6 +96,7 @@ export default function PostComposer() {
       form.setError('postContent', { message: 'Please enter some content to suggest hashtags.' });
       return;
     }
+    showLoading(3000);
     setIsSuggesting(true);
     try {
       const result = await suggestHashtags({ postContent: content });
