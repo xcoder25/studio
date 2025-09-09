@@ -1,3 +1,4 @@
+
 import type { SVGProps } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -72,6 +73,31 @@ export default function DashboardPage() {
 
   return (
     <div className="grid gap-6">
+      
+      <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <VideoStats />
+          </div>
+          <Card className="bg-card/50">
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>Jump right into video creation.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+              {videoQuickActions.map((action) => (
+                <Button key={action.label} variant="outline" asChild>
+                  <Link href={action.href} className='flex items-center justify-center gap-2'>
+                    <action.icon className="size-4" />
+                    <span>{action.label}</span>
+                  </Link>
+                </Button>
+              ))}
+            </CardContent>
+          </Card>
+      </div>
+
+      <RecentVideos />
+
       <div className="grid md:grid-cols-3 gap-6">
         {socialStats.map((stat) => (
           <StatsCard
@@ -85,30 +111,6 @@ export default function DashboardPage() {
           />
         ))}
       </div>
-
-      <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <VideoStats />
-          </div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Jump right into video creation.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              {videoQuickActions.map((action) => (
-                <Button key={action.label} variant="outline" asChild>
-                  <Link href={action.href}>
-                    <action.icon className="mr-2" />
-                    {action.label}
-                  </Link>
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
-      </div>
-
-      <RecentVideos />
 
       <Card>
         <CardHeader>
