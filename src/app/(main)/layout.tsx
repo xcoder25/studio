@@ -29,7 +29,6 @@ import {
   ChevronDown,
   Video,
   Link2,
-  Plus,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -40,8 +39,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import SplashScreen from '@/components/splash-screen';
 import { useLoading } from '@/context/loading-context';
-import VideoGeneratorSidebar from '@/components/video-generator/video-generator-sidebar';
-import TopBar from '@/components/video-generator/top-bar';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -58,8 +55,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const [initialLoading, setInitialLoading] = useState(true);
   const { showLoading } = useLoading();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  const isVideoGeneratorPage = pathname.startsWith('/video-generator');
 
   useEffect(() => {
     const token = localStorage.getItem('auth-token');
@@ -94,21 +89,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   if (!isAuthenticated || initialLoading) {
     return <SplashScreen />;
-  }
-  
-  if (isVideoGeneratorPage) {
-    return (
-        <SidebarProvider>
-            <div className="flex h-screen bg-background relative overflow-hidden">
-                <div className="absolute inset-0 z-0 bg-grid-white/[0.05] [mask-image:linear-gradient(to_bottom,white_5%,transparent_50%)]" />
-                <VideoGeneratorSidebar />
-                <div className="flex flex-1 flex-col z-10">
-                   <TopBar />
-                    {children}
-                </div>
-            </div>
-        </SidebarProvider>
-    )
   }
 
   return (

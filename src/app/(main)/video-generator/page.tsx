@@ -10,7 +10,7 @@ import OutputPanel from '@/components/video-generator/output-panel';
 import TopBar from '@/components/video-generator/top-bar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
-export type GenerationMode = 'text-to-video' | 'image-to-video' | 'elements-to-video' | 'audio-to-video';
+export type GenerationMode = 'text-to-video' | 'image-to-video';
 
 export default function VideoGeneratorPage() {
   const [prompt, setPrompt] = useState('');
