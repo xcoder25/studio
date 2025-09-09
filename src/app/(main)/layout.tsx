@@ -53,11 +53,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-2">
             <Link href="/dashboard" className="flex items-center gap-2">
                 <Image
-                  src="/logo.svg"
+                  src="/Trendix Logo.png"
                   alt="Trendix Logo"
                   width={28}
                   height={28}
-                  className="size-7 text-primary"
+                  className="size-7"
                 />
               <h1 className="text-lg font-semibold text-foreground">Trendix</h1>
             </Link>
