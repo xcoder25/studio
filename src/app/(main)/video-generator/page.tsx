@@ -1,21 +1,13 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Loader2, Video, Image as ImageIcon, Upload, Text, Settings, ChevronDown, Music, Sparkles, History, Search } from 'lucide-react';
+import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { generateVideo } from '@/ai/flows/generate-video';
-import Image from 'next/image';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import VideoGeneratorSidebar from '@/components/video-generator/video-generator-sidebar';
 import ControlPanel from '@/components/video-generator/control-panel';
 import OutputPanel from '@/components/video-generator/output-panel';
+import TopBar from '@/components/video-generator/top-bar';
 
 export type GenerationMode = 'text-to-video' | 'image-to-video' | 'elements-to-video' | 'audio-to-video';
 
@@ -81,31 +73,34 @@ export default function VideoGeneratorPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-theme(spacing.14))] bg-background">
-      <VideoGeneratorSidebar />
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-10 gap-4 p-4">
-        <div className="lg:col-span-7 xl:col-span-6">
-            <ControlPanel 
-                mode={mode}
-                setMode={setMode}
-                prompt={prompt}
-                setPrompt={setPrompt}
-                aspectRatio={aspectRatio}
-                setAspectRatio={setAspectRatio}
-                isLoading={isLoading}
-                handleGenerateVideo={handleGenerateVideo}
-                imagePreview={imagePreview}
-                setImagePreview={setImagePreview}
-                setImageDataUri={setImageDataUri}
-            />
+    <div className="flex h-screen bg-muted/40">
+        <VideoGeneratorSidebar />
+        <div className="flex flex-1 flex-col">
+            <TopBar />
+            <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-10 gap-4 p-4 overflow-y-auto">
+                <div className="lg:col-span-7 xl:col-span-6 h-full">
+                    <ControlPanel 
+                        mode={mode}
+                        setMode={setMode}
+                        prompt={prompt}
+                        setPrompt={setPrompt}
+                        aspectRatio={aspectRatio}
+                        setAspectRatio={setAspectRatio}
+                        isLoading={isLoading}
+                        handleGenerateVideo={handleGenerateVideo}
+                        imagePreview={imagePreview}
+                        setImagePreview={setImagePreview}
+                        setImageDataUri={setImageDataUri}
+                    />
+                </div>
+                <div className="lg:col-span-5 xl:col-span-4 h-full">
+                    <OutputPanel
+                        isLoading={isLoading}
+                        videoUrl={videoUrl}
+                    />
+                </div>
+            </main>
         </div>
-        <div className="lg:col-span-5 xl:col-span-4">
-            <OutputPanel
-                isLoading={isLoading}
-                videoUrl={videoUrl}
-            />
-        </div>
-      </div>
     </div>
   );
 }

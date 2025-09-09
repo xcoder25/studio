@@ -24,42 +24,41 @@ import {
   Mic,
   Book,
   Settings,
+  ChevronDown,
 } from 'lucide-react';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
-import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { Button } from '../ui/button';
 
 const videoNavItems = [
-    { href: '/video-generator/text-to-video', icon: Text, label: 'Text to Video' },
-    { href: '/video-generator/image-to-video', icon: ImageIcon, label: 'Image to Video' },
-    { href: '/video-generator/elements-to-video', icon: Shapes, label: 'Elements to Video' },
-    { href: '/video-generator/add-audio', icon: Music, label: 'Add Audio to Video' },
-    { href: '/video-generator/upscale', icon: Maximize, label: 'Video Upscale' },
-    { href: '/video-generator/lip-sync', icon: Mic, label: 'Lip-Sync Video' },
+    { href: '#', icon: Text, label: 'Text to Video' },
+    { href: '#', icon: ImageIcon, label: 'Image to Video' },
+    { href: '#', icon: Shapes, label: 'Elements to Video' },
+    { href: '#', icon: Music, label: 'Add Audio to Video' },
+    { href: '#', icon: Maximize, label: 'Video Upscale' },
+    { href: '#', icon: Mic, label: 'Lip-Sync Video' },
 ];
 
 export default function VideoGeneratorSidebar() {
   const pathname = usePathname();
-  const [isVideOpen, setIsVideoOpen] = useState(true);
+  const [isVideoOpen, setIsVideoOpen] = useState(true);
 
   return (
-    <Sidebar className="w-64 border-r bg-card/20 p-2">
-      <SidebarHeader className='p-0'>
+    <div className="w-64 border-r bg-card p-2 flex flex-col">
         <div className="flex items-center gap-2 p-2">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <Image
-              src="/Trendix Logo.png"
-              alt="Trendix Logo"
-              width={28}
-              height={28}
-              className="size-7"
-            />
-            <h1 className="text-lg font-semibold text-foreground">Trendix</h1>
-          </Link>
+            <Link href="/dashboard" className="flex items-center gap-2">
+                <Image
+                src="/Trendix Logo.png"
+                alt="Trendix Logo"
+                width={28}
+                height={28}
+                className="size-7"
+                />
+                <h1 className="text-lg font-semibold text-foreground">Trendix</h1>
+            </Link>
         </div>
-      </SidebarHeader>
-      <SidebarContent className="p-0">
-        <SidebarMenu>
+      <div className="flex-1 flex flex-col overflow-y-auto">
+        <SidebarMenu className="p-2">
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/dashboard'}>
               <Link href="/dashboard">
@@ -68,12 +67,15 @@ export default function VideoGeneratorSidebar() {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <Collapsible open={isVideOpen} onOpenChange={setIsVideoOpen}>
+          <Collapsible open={isVideoOpen} onOpenChange={setIsVideoOpen} className="w-full">
             <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                    <SidebarMenuButton isActive={pathname.startsWith('/video-generator')} className='w-full'>
-                        <Video />
-                        <span>Video</span>
+                    <SidebarMenuButton isActive={pathname.startsWith('/video-generator')} className='w-full justify-between'>
+                        <div className="flex items-center gap-2">
+                            <Video />
+                            <span>Video</span>
+                        </div>
+                        <ChevronDown className={`size-4 transition-transform ${isVideoOpen ? 'rotate-180' : ''}`} />
                     </SidebarMenuButton>
                 </CollapsibleTrigger>
             </SidebarMenuItem>
@@ -109,13 +111,13 @@ export default function VideoGeneratorSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-      </SidebarContent>
-      <SidebarFooter className='p-0'>
-        <div className="p-2 space-y-2">
-            <Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Help & Support</Link>
-            <Link href="#" className="text-xs text-muted-foreground hover:text-foreground">News & Updates</Link>
+      </div>
+      <div className="mt-auto p-2">
+        <div className="p-2 space-y-1">
+            <Link href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Help & Support</Link>
+            <Link href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">News & Updates</Link>
         </div>
-      </SidebarFooter>
-    </Sidebar>
+      </div>
+    </div>
   );
 }

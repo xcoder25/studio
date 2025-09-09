@@ -55,14 +55,16 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const { showLoading } = useLoading();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  const isVideoGeneratorPage = pathname.startsWith('/video-generator');
+
   useEffect(() => {
     const token = localStorage.getItem('auth-token');
-    if (!token) {
+    if (!token && !isVideoGeneratorPage) { // Allow video generator to be accessed without auth for now
       router.replace('/login');
     } else {
       setIsAuthenticated(true);
     }
-  }, [router]);
+  }, [router, isVideoGeneratorPage]);
   
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -90,11 +92,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     return <SplashScreen />;
   }
   
-  const isVideoGeneratorPage = pathname.startsWith('/video-generator');
+  if (isVideoGeneratorPage) {
+    return <div className="flex min-h-screen bg-background">{children}</div>;
+  }
 
   return (
     <SidebarProvider>
-      {!isVideoGeneratorPage && (
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2">
@@ -168,7 +171,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </DropdownMenu>
           </SidebarFooter>
         </Sidebar>
-      )}
       <SidebarInset>
         <header className="flex h-14 items-center gap-4 border-b bg-background/95 px-4 md:px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="md:hidden">
@@ -180,7 +182,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </h2>
           </div>
         </header>
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto p-6">
           {children}
         </main>
       </SidebarInset>
