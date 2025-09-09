@@ -1,9 +1,10 @@
+
 'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import {
   SidebarProvider,
   Sidebar,
@@ -34,6 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import SplashScreen from '@/components/splash-screen';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -45,6 +47,19 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000); // Show splash screen for 2 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <SplashScreen />;
+  }
 
   return (
     <SidebarProvider>
