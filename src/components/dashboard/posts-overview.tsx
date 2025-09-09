@@ -57,7 +57,7 @@ export default function PostsOverview() {
         </div>
         <Button variant="outline" size="sm">View All <ArrowRight className="ml-2 size-4" /></Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="h-72 overflow-auto">
         <Table>
           <TableHeader>
             <TableRow>
