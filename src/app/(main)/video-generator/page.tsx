@@ -8,6 +8,7 @@ import VideoGeneratorSidebar from '@/components/video-generator/video-generator-
 import ControlPanel from '@/components/video-generator/control-panel';
 import OutputPanel from '@/components/video-generator/output-panel';
 import TopBar from '@/components/video-generator/top-bar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 export type GenerationMode = 'text-to-video' | 'image-to-video' | 'elements-to-video' | 'audio-to-video';
 
@@ -73,34 +74,36 @@ export default function VideoGeneratorPage() {
   };
 
   return (
-    <div className="flex h-screen bg-muted/40">
-        <VideoGeneratorSidebar />
-        <div className="flex flex-1 flex-col">
-            <TopBar />
-            <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-10 gap-4 p-4 overflow-y-auto">
-                <div className="lg:col-span-7 xl:col-span-6 h-full">
-                    <ControlPanel 
-                        mode={mode}
-                        setMode={setMode}
-                        prompt={prompt}
-                        setPrompt={setPrompt}
-                        aspectRatio={aspectRatio}
-                        setAspectRatio={setAspectRatio}
-                        isLoading={isLoading}
-                        handleGenerateVideo={handleGenerateVideo}
-                        imagePreview={imagePreview}
-                        setImagePreview={setImagePreview}
-                        setImageDataUri={setImageDataUri}
-                    />
-                </div>
-                <div className="lg:col-span-5 xl:col-span-4 h-full">
-                    <OutputPanel
-                        isLoading={isLoading}
-                        videoUrl={videoUrl}
-                    />
-                </div>
-            </main>
-        </div>
-    </div>
+    <SidebarProvider>
+      <div className="flex h-screen bg-muted/40">
+          <VideoGeneratorSidebar />
+          <div className="flex flex-1 flex-col">
+              <TopBar />
+              <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-10 gap-4 p-4 overflow-y-auto">
+                  <div className="lg:col-span-7 xl:col-span-6 h-full">
+                      <ControlPanel 
+                          mode={mode}
+                          setMode={setMode}
+                          prompt={prompt}
+                          setPrompt={setPrompt}
+                          aspectRatio={aspectRatio}
+                          setAspectRatio={setAspectRatio}
+                          isLoading={isLoading}
+                          handleGenerateVideo={handleGenerateVideo}
+                          imagePreview={imagePreview}
+                          setImagePreview={setImagePreview}
+                          setImageDataUri={setImageDataUri}
+                      />
+                  </div>
+                  <div className="lg:col-span-5 xl:col-span-4 h-full">
+                      <OutputPanel
+                          isLoading={isLoading}
+                          videoUrl={videoUrl}
+                      />
+                  </div>
+              </main>
+          </div>
+      </div>
+    </SidebarProvider>
   );
 }
