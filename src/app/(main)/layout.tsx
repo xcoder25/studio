@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import {
@@ -16,7 +17,6 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Icons } from '@/components/icons';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   LayoutDashboard,
@@ -51,10 +51,16 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-primary shrink-0">
-              <Icons.logo className="size-5" />
-            </Button>
-            <h1 className="text-lg font-semibold text-foreground">Trendix</h1>
+            <Link href="/dashboard" className="flex items-center gap-2">
+                <Image
+                  src="/logo.svg"
+                  alt="Trendix Logo"
+                  width={28}
+                  height={28}
+                  className="size-7 text-primary"
+                />
+              <h1 className="text-lg font-semibold text-foreground">Trendix</h1>
+            </Link>
           </div>
         </SidebarHeader>
         <SidebarContent>
