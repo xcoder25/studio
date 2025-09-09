@@ -100,6 +100,55 @@ const addons = [
     icon: <Puzzle className="size-8 text-primary" />,
     status: "Activate"
   },
+  {
+    title: "HubSpot Integration",
+    description: "Sync contacts and marketing data with your HubSpot CRM.",
+    category: "Integrations",
+    icon: <Puzzle className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Salesforce Integration",
+    description: "Connect with Salesforce to manage leads and customer interactions.",
+    category: "Integrations",
+    icon: <Puzzle className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Mailchimp Integration",
+    description: "Integrate with Mailchimp to sync your email marketing campaigns.",
+    category: "Integrations",
+    icon: <Puzzle className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Shopify Integration",
+    description: "Connect your Shopify store to easily promote products.",
+    category: "Integrations",
+    icon: <Puzzle className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Figma Integration",
+    description: "Import your designs and assets directly from Figma.",
+    category: "Integrations",
+    icon: <Puzzle className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Google Drive Integration",
+    description: "Access and use your media from Google Drive.",
+    category: "Integrations",
+    icon: <Puzzle className="size-8 text-primary" />,
+    status: "Activate"
+  },
+  {
+    title: "Google Ads Integration",
+    description: "Manage and track your Google Ad campaigns from Trendix.",
+    category: "Integrations",
+    icon: <Puzzle className="size-8 text-primary" />,
+    status: "Activate"
+  },
 ];
 
 const categories = ["All", "AI Assistants", "Automations", "Integrations"];
