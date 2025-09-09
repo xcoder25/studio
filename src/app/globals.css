@@ -122,4 +122,9 @@ body {
   .animate-bounce-subtle {
     animation: bounce-subtle 1.5s infinite;
   }
+  .bg-grid-white\/\[0\.05\] {
+    background-image: linear-gradient(to right,hsl(var(--foreground)) 1px,transparent 1px),linear-gradient(to bottom,hsl(var(--foreground)) 1px,transparent 1px);
+    background-size: 4rem 4rem;
+    opacity: 0.05;
+  }
 }
