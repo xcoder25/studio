@@ -139,6 +139,26 @@ export default function DashboardPage() {
 
   return (
     <div className="grid gap-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+            <div>
+                <h1 className="text-2xl font-bold">Welcome back, Jane!</h1>
+                <p className="text-muted-foreground">Here's your all-in-one hub for social media and content creation.</p>
+            </div>
+            {isProPlan && (
+                <div className="flex gap-2">
+                    <Button variant="outline" asChild>
+                        <Link href="/video-generator/editor">
+                            <Video className="mr-2" /> Create Video
+                        </Link>
+                    </Button>
+                    <Button asChild>
+                        <Link href="/composer">
+                             <PenSquare className="mr-2" /> Create Post
+                        </Link>
+                    </Button>
+                </div>
+            )}
+        </div>
       
       <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">

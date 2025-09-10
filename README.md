@@ -1,5 +1,5 @@
-# Firebase Studio
+# Trendix - All-in-One Social Media Manager
 
-This is a NextJS starter in Firebase Studio.
+This is the repository for Trendix, an AI-powered platform for social media management, content creation, and more.
 
-To get started, take a look at src/app/page.tsx.
+To get started, run `npm install` and then `npm run dev`.

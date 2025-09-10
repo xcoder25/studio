@@ -121,10 +121,10 @@ export default function LandingPage() {
           <div className="container relative z-10 mx-auto px-4 md:px-6">
             <div className="mx-auto max-w-3xl">
               <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl lg:text-6xl">
-                Supercharge Your Social Media with AI
+                Your All-in-One Social Media & Content Creation Studio
               </h1>
               <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-                Trendix is the all-in-one platform to generate content, schedule posts, and analyze your performance. Effortlessly.
+                Trendix is the all-in-one platform to generate content, schedule posts, create videos, and analyze your performance. Effortlessly.
               </p>
               <div className="mt-8 flex justify-center gap-4">
                 <Link

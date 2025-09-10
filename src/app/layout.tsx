@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 
 export const metadata: Metadata = {
   title: 'Trendix',
-  description: 'AI-Powered Social Media Management',
+  description: 'Trendix: The All-in-One AI-Powered Social Media Manager and Content Creation Studio.',
 };
 
 export default function RootLayout({
