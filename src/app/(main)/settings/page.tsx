@@ -1,11 +1,12 @@
 
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Twitter, Facebook, Instagram, CheckCircle, Link, Linkedin, Youtube, Pinterest } from "lucide-react";
+import { Twitter, Facebook, Instagram, CheckCircle, Link, Linkedin, Youtube } from "lucide-react";
 
 const TikTokIcon = () => (
     <svg
@@ -34,6 +35,18 @@ const WhatsAppIcon = () => (
     </svg>
 );
 
+const PinterestIcon = () => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="h-6 w-6 text-red-700"
+    >
+        <path d="M12.017 0C5.385 0 0 5.385 0 12.017c0 5.072 3.068 9.423 7.316 11.243-.04-1.034-.14-2.58.077-3.646.208-.94.1.39-1.854.7-2.6.48-1.222-1.222.923-2.915.65-3.415-1.742-10.457.1-10.457 2.164 0 3.823 1.523 3.823 3.755 0 2.2-1.383 3.823-3.122 3.823-.865 0-1.503-.7-1.3-1.56.248-1.056.772-2.19.772-2.954 0-1.343-.772-2.484-2.31-2.484-1.742 0-3.122 1.815-3.122 4.145 0 1.523.538 2.684.538 2.684s-1.742 7.356-2.076 8.647c-.576 2.238.48 4.618 2.6 4.618 3.456 0 4.93-4.223 3.535-6.53.287-.538.538-1.037.538-1.64 0-1.18-.323-2.19-.922-3.122-1.076-1.68-7.85-7.433-2.44-8.85 4.383-1.144 3.415 6.34 5.076 7.646.615.48 1.223.884 1.89 1.18.96.44 2.03.56 3.03.32.1.28.32.96.44 1.2.56 1.24 1.16 2.4 1.96 3.48 1.48 1.96 4.16 2.84 6.56 1.84 2.84-1.2 4.08-4.28 2.88-7.08-1.04-2.4-3.52-1.8-1.52-3.44 2.84-2.28 1.28-7.8-2.12-8.52-3.24-.68-5.24 1.44-5.88 2.48" />
+    </svg>
+)
 
 export default function SettingsPage() {
   return (
@@ -137,7 +150,7 @@ export default function SettingsPage() {
              <Separator />
              <li className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Pinterest className="h-6 w-6 text-red-700" />
+                <PinterestIcon />
                 <span className="font-medium">Pinterest</span>
               </div>
               <Button variant="outline">
