@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -57,7 +58,12 @@ const suggestYoutubeIdeasFlow = ai.defineFlow(
     outputSchema: SuggestYoutubeIdeasOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    try {
+        const {output} = await prompt(input);
+        return output!;
+    } catch (error) {
+        console.error('Error suggesting YouTube ideas:', error);
+        return { ideas: [] };
+    }
   }
 );
