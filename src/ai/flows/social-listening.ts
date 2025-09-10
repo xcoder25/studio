@@ -35,11 +35,18 @@ const SentimentAnalysisSchema = z.object({
     keyTopics: z.array(z.string()).describe("Key topics or themes emerging from the mentions."),
 });
 
+const CrisisMonitoringSchema = z.object({
+    isCrisisDetected: z.boolean().describe("Whether a potential PR crisis is detected based on a high volume of negative mentions or sensitive topics."),
+    activeAlerts: z.array(z.string()).describe("A list of real-time alerts for sudden spikes in negative sentiment or sensitive keyword mentions."),
+    proactiveIssues: z.array(z.string()).describe("A list of potential issues identified by the AI before they escalate."),
+});
+
 
 const SocialListeningOutputSchema = z.object({
     summary: z.string().describe('A high-level summary of the social listening results.'),
     sentimentAnalysis: SentimentAnalysisSchema,
     recentMentions: z.array(MentionSchema).describe('A list of the most recent and relevant mentions.'),
+    crisisMonitoring: CrisisMonitoringSchema,
 });
 export type SocialListeningOutput = z.infer<typeof SocialListeningOutputSchema>;
 
@@ -53,17 +60,22 @@ const prompt = ai.definePrompt({
   name: 'socialListeningPrompt',
   input: { schema: SocialListeningInputSchema },
   output: { schema: SocialListeningOutputSchema },
-  prompt: `You are a social media monitoring AI. Your task is to find and analyze recent public mentions for a given brand and keywords.
+  prompt: `You are a social media monitoring and crisis detection AI. Your task is to find and analyze recent public mentions for a given brand and keywords.
 
   Brand to monitor: {{{brandName}}}
   Keywords to track: {{#each keywords}}"{{this}}" {{/each}}
 
   Please provide:
-  1.  A high-level summary of the recent online conversation.
-  2.  A detailed sentiment analysis, including the overall sentiment, counts for positive/negative/neutral mentions, and key conversation topics.
-  3.  A list of 5-7 recent, representative mentions from a variety of platforms (Twitter, Blogs, Forums, etc.).
+  1.  **Summary**: A high-level summary of the recent online conversation.
+  2.  **Sentiment Analysis**: A detailed sentiment analysis, including overall sentiment, counts, and key topics.
+  3.  **Recent Mentions**: A list of 5-7 recent, representative mentions from various platforms.
+  4.  **Crisis Monitoring**: 
+      - Analyze the mentions for signs of a PR crisis (e.g., a sudden spike in negative sentiment, mentions of sensitive keywords like 'outage', 'scandal', 'fail').
+      - If a crisis is detected, set 'isCrisisDetected' to true.
+      - Generate 1-2 'activeAlerts' if there are sudden negative spikes.
+      - Generate 1-2 'proactiveIssues' by identifying subtle negative themes that could escalate.
 
-  Generate realistic but hypothetical data for this analysis. Ensure the mentions you create are varied and reflect different sentiments.`,
+  Generate realistic but hypothetical data for this analysis. For this run, ensure that 'isCrisisDetected' is **true**, and create a few negative mentions related to a fictional "billing issue" to justify the crisis.`,
 });
 
 const socialListeningFlow = ai.defineFlow(

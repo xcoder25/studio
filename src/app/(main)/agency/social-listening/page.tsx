@@ -12,9 +12,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, MicVocal, PlusCircle, Smile, Frown, Meh, Twitter, Rss, MessageSquare, ExternalLink, Activity } from 'lucide-react';
+import { Loader2, MicVocal, PlusCircle, Smile, Frown, Meh, Twitter, Rss, MessageSquare, ExternalLink, Activity, Siren, ShieldCheck, Zap } from 'lucide-react';
 import { useLoading } from '@/context/loading-context';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const listeningSchema = z.object({
   brandName: z.string().min(2, 'Please enter a brand name to monitor.'),
@@ -73,12 +74,23 @@ export default function SocialListeningPage() {
         { name: 'Neutral', value: analysisResult.sentimentAnalysis.neutralMentions },
     ] : [];
 
+    const handleContentSuspension = () => {
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+            toast({
+                title: "Content Suspended",
+                description: "All scheduled posts have been paused to prevent insensitive content from going live during this event."
+            })
+        }, 1500)
+    }
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Social Listening</CardTitle>
-          <CardDescription>Monitor brand mentions and analyze audience sentiment across the web.</CardDescription>
+          <CardDescription>Monitor brand mentions, analyze sentiment, and detect potential crises across the web.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -87,7 +99,7 @@ export default function SocialListeningPage() {
                 <FormItem><FormLabel>Brand Name</FormLabel><FormControl><Input placeholder="e.g., Trendix" {...field} /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="keywords" render={({ field }) => (
-                <FormItem><FormLabel>Keywords (comma-separated)</FormLabel><FormControl><Input placeholder="e.g., customer service, pricing" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Keywords (comma-separated)</FormLabel><FormControl><Input placeholder="e.g., customer service, billing" {...field} /></FormControl><FormMessage /></FormItem>
               )} />
               <div className="md:pt-8">
                  <Button type="submit" disabled={isLoading} className="w-full">
@@ -119,31 +131,33 @@ export default function SocialListeningPage() {
             </Card>
 
             <div className="grid lg:grid-cols-3 gap-6">
-                <Card className="lg:col-span-2">
-                    <CardHeader><CardTitle>Recent Mentions</CardTitle></CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {analysisResult.recentMentions.map(mention => (
-                                <div key={mention.id} className="p-3 rounded-lg border bg-card/50">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center gap-2">
-                                            {platformConfig[mention.platform].icon}
-                                            <span className="font-semibold text-sm">{mention.author}</span>
+                <div className="space-y-6 lg:col-span-2">
+                    <Card>
+                        <CardHeader><CardTitle>Recent Mentions</CardTitle></CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                {analysisResult.recentMentions.map(mention => (
+                                    <div key={mention.id} className="p-3 rounded-lg border bg-card/50">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-2">
+                                                {platformConfig[mention.platform].icon}
+                                                <span className="font-semibold text-sm">{mention.author}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm">
+                                                {sentimentConfig[mention.sentiment].icon}
+                                                <span className='hidden sm:inline'>{mention.sentiment}</span>
+                                                <Button variant="ghost" size="icon" asChild className="h-7 w-7">
+                                                    <a href={mention.url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-4" /></a>
+                                                </Button>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm">
-                                            {sentimentConfig[mention.sentiment].icon}
-                                            <span className='hidden sm:inline'>{mention.sentiment}</span>
-                                            <Button variant="ghost" size="icon" asChild className="h-7 w-7">
-                                                <a href={mention.url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-4" /></a>
-                                            </Button>
-                                        </div>
+                                        <p className="text-sm text-muted-foreground">{mention.content}</p>
                                     </div>
-                                    <p className="text-sm text-muted-foreground">{mention.content}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
                 <div className="space-y-6">
                     <Card>
                         <CardHeader><CardTitle>Sentiment Analysis</CardTitle></CardHeader>
@@ -163,7 +177,7 @@ export default function SocialListeningPage() {
                             </div>
                         </CardContent>
                     </Card>
-                     <Card>
+                    <Card>
                         <CardHeader><CardTitle>Key Topics</CardTitle></CardHeader>
                         <CardContent>
                            <div className="flex flex-wrap gap-2">
@@ -175,6 +189,47 @@ export default function SocialListeningPage() {
                     </Card>
                 </div>
             </div>
+             <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Siren className="text-primary"/>
+                        Crisis Monitoring
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                     {analysisResult.crisisMonitoring.isCrisisDetected && (
+                        <Alert variant="destructive">
+                            <Siren className="h-4 w-4" />
+                            <AlertTitle>Potential Crisis Detected!</AlertTitle>
+                            <AlertDescription>
+                                Our AI has detected a significant increase in negative sentiment that may require your immediate attention.
+                                 <Button size="sm" className="mt-4 w-full sm:w-auto" onClick={handleContentSuspension}>
+                                    <Zap className="mr-2" />
+                                    Activate Content Suspension
+                                </Button>
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 className="font-semibold flex items-center gap-2"><Siren/> Active Alerts</h4>
+                            <div className="mt-2 space-y-2">
+                                {analysisResult.crisisMonitoring.activeAlerts.map((alert, i) => (
+                                    <p key={i} className="text-sm p-2 bg-card/50 border rounded-lg">{alert}</p>
+                                ))}
+                            </div>
+                        </div>
+                         <div>
+                            <h4 className="font-semibold flex items-center gap-2"><ShieldCheck /> Proactive Issues</h4>
+                            <div className="mt-2 space-y-2">
+                                {analysisResult.crisisMonitoring.proactiveIssues.map((issue, i) => (
+                                    <p key={i} className="text-sm p-2 bg-card/50 border rounded-lg">{issue}</p>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
       )}
     </div>
