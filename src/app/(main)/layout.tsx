@@ -49,6 +49,7 @@ import {
   CreditCard,
   Star,
   Lock,
+  Cpu,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -147,6 +148,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (pathname.startsWith('/youtube-studio/go-live')) return 'Go Live';
     if (pathname.startsWith('/youtube-studio')) return 'YouTube Studio';
     if (pathname.startsWith('/pricing')) return 'Pricing & Plans';
+    if (pathname.startsWith('/model-builder')) return 'Model Builder';
     
     const currentNavItem = navItems.find(item => pathname.startsWith(item.href));
     if (currentNavItem) return currentNavItem.label;
@@ -291,7 +293,20 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                       </SidebarMenuSub>
                   </CollapsibleContent>
                 </Collapsible>
-
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith('/model-builder')}
+                    tooltip={{
+                      children: "Model Builder",
+                    }}
+                  >
+                    <Link href="/model-builder" onClick={(e) => handleNavClick(e, '/model-builder')}>
+                      <Cpu />
+                      <span className="group-hover:inline hidden">Model Builder</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
@@ -437,5 +452,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     </SidebarProvider>
   );
 }
+
+    
 
     
