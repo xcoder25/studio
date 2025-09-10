@@ -113,14 +113,15 @@ export default function LandingPage() {
       <main className="flex-1">
         <section className="relative w-full py-20 text-center md:py-32 overflow-hidden">
           <div className="absolute inset-0 -z-10 bg-black">
-             <Image 
-                src="https://picsum.photos/seed/bg/1920/1080" 
-                alt="Background" 
-                layout="fill" 
-                objectFit="cover" 
-                className="opacity-20"
-                data-ai-hint="abstract background"
-                />
+             <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover opacity-20"
+              >
+                <source src="/trendix.mp4" type="video/mp4" />
+              </video>
           </div>
 
           <div className="container mx-auto px-4 md:px-6">
