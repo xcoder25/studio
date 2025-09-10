@@ -1,8 +1,13 @@
 
+'use client'
+
+import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import Autoplay from "embla-carousel-autoplay";
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { ArrowRight, Bot, BarChart, Calendar, Video, Palette, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -67,6 +72,10 @@ const plans = [
 
 
 export default function LandingPage() {
+    const plugin = React.useRef(
+        Autoplay({ delay: 5000, stopOnInteraction: true })
+    )
+
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
@@ -106,12 +115,33 @@ export default function LandingPage() {
           <div className="absolute inset-0 -z-10 bg-grid-white/[0.05] [mask-image:linear-gradient(to_bottom,white_5%,transparent_50%)]" />
           <div className="container mx-auto px-4 md:px-6">
             <div className="mx-auto max-w-4xl">
-              <h1 className="text-5xl font-extrabold tracking-tight md:text-6xl lg:text-7xl">
-                The All-in-One Social Media Super-App
-              </h1>
-              <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-                Trendix combines content creation, scheduling, analytics, and an AI-powered video editor into one seamless platform.
-              </p>
+              <Carousel 
+                plugins={[plugin.current]}
+                className="w-full"
+                onMouseEnter={plugin.current.stop}
+                onMouseLeave={plugin.current.reset}
+                opts={{ loop: true }}
+              >
+                <CarouselContent>
+                  <CarouselItem>
+                    <h1 className="text-5xl font-extrabold tracking-tight md:text-6xl lg:text-7xl">
+                        The All-in-One Social Media Super-App
+                    </h1>
+                    <p className="mt-6 text-lg text-muted-foreground md:text-xl">
+                        Trendix combines content creation, scheduling, analytics, and an AI-powered video editor into one seamless platform.
+                    </p>
+                  </CarouselItem>
+                  <CarouselItem>
+                    <h1 className="text-5xl font-extrabold tracking-tight md:text-6xl lg:text-7xl">
+                        AI-powered editor for everyone
+                    </h1>
+                     <p className="mt-6 text-lg text-muted-foreground md:text-xl">
+                        Think bigger. Edit faster.
+                    </p>
+                  </CarouselItem>
+                </CarouselContent>
+              </Carousel>
+
               <div className="mt-8 flex justify-center gap-4">
                 <Button size="lg" asChild>
                   <Link href="/signup">
