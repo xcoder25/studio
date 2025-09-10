@@ -49,6 +49,7 @@ import {
   CreditCard,
   Star,
   Lock,
+  Cpu,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -152,6 +153,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
     if (pathname.startsWith('/settings')) return 'Settings';
     if (pathname.startsWith('/tutorials')) return 'Tutorials';
+    if (pathname.startsWith('/model-builder')) return 'Model Builder';
 
     return 'Dashboard';
   }
