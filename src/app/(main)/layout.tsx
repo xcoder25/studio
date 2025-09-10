@@ -296,20 +296,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname.startsWith('/model-builder')}
-                    tooltip={{
-                      children: "Model Builder",
-                    }}
-                  >
-                    <Link href="/model-builder" onClick={(e) => handleNavClick(e, '/model-builder')}>
-                      <Cpu />
-                      <span className="group-hover:inline hidden">Model Builder</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
                     isActive={pathname.startsWith('/tutorials')}
                     tooltip={{
                       children: "Tutorials",
