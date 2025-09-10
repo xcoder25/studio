@@ -9,13 +9,18 @@ type StatsCardProps = {
   followers: string;
   change: string;
   changeType?: 'positive' | 'negative';
-  color: string;
 };
 
-export default function StatsCard({ platform, icon: Icon, followers, change, changeType = 'positive', color }: StatsCardProps) {
+export default function StatsCard({ platform, icon: Icon, followers, change, changeType = 'positive' }: StatsCardProps) {
+    const platformColorMap: { [key: string]: string } = {
+        Twitter: "bg-sky-500",
+        Facebook: "bg-blue-600",
+        Instagram: "bg-fuchsia-600",
+        TikTok: "bg-black",
+      };
   return (
     <Card className="relative overflow-hidden">
-      <div className={cn("absolute top-0 left-0 h-1.5 w-full", color)}></div>
+      <div className={cn("absolute top-0 left-0 h-1.5 w-full", platformColorMap[platform])}></div>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">{platform}</h3>

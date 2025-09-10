@@ -14,8 +14,10 @@ import RecentVideos from '@/components/dashboard/recent-videos';
 import { Twitter, Facebook, Instagram, Users, ThumbsUp, MessageSquare, Share2, TrendingUp, ArrowRight, Video, Mic, Text, Maximize, Loader2, Wand2, Music, Hash, AlertCircle, PenSquare, MicVocal, Megaphone, Scale, Plus } from "lucide-react";
 import Link from 'next/link';
 import { findTrends, type FindTrendsOutput } from '@/ai/flows/find-trends';
+import { generateDashboardData, type GenerateDashboardDataOutput } from '@/ai/flows/generate-dashboard-data';
 import { cn } from '@/lib/utils';
 import { useProStatus } from '@/context/pro-status-context';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const TikTokIcon = () => (
     <svg
@@ -30,91 +32,47 @@ const TikTokIcon = () => (
     </svg>
   );
 
+  const platformIcons: { [key: string]: React.ElementType } = {
+    Twitter,
+    Facebook,
+    Instagram,
+    TikTok: TikTokIcon,
+  };
+
 export default function DashboardPage() {
   const { isProPlan } = useProStatus();
   const [trends, setTrends] = useState<FindTrendsOutput['trends']>([]);
-  const [isLoadingTrends, setIsLoadingTrends] = useState(true);
+  const [dashboardData, setDashboardData] = useState<GenerateDashboardDataOutput | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [errorLoadingTrends, setErrorLoadingTrends] = useState(false);
 
   useEffect(() => {
-    async function loadTrends() {
-      setIsLoadingTrends(true);
+    async function loadData() {
+      setIsLoading(true);
       setErrorLoadingTrends(false);
       try {
-        const result = await findTrends({ industry: 'AI and Technology' });
-        if (result.trends.length === 0) {
+        const [trendsResult, dashboardDataResult] = await Promise.all([
+          findTrends({ industry: 'AI and Technology' }),
+          generateDashboardData({
+              userContext: 'The user is Jane Doe, a social media manager for the tech startup Trendix.',
+          }),
+        ]);
+
+        if (trendsResult.trends.length === 0) {
             setErrorLoadingTrends(true);
         }
-        setTrends(result.trends);
+        setTrends(trendsResult.trends);
+        setDashboardData(dashboardDataResult);
+
       } catch (error) {
-        console.error('Failed to load trends:', error);
-        setErrorLoadingTrends(true);
+        console.error('Failed to load dashboard data:', error);
+        setErrorLoadingTrends(true); // Also indicate error for trend-dependent sections
       } finally {
-        setIsLoadingTrends(false);
+        setIsLoading(false);
       }
     }
-    loadTrends();
+    loadData();
   }, []);
-
-  const socialStats = [
-    {
-      platform: "Twitter",
-      icon: Twitter,
-      followers: "12.5K",
-      change: "+12.2%",
-      color: "bg-sky-500",
-    },
-    {
-      platform: "Facebook",
-      icon: Facebook,
-      followers: "8.2K",
-      change: "+8.1%",
-      color: "bg-blue-600",
-    },
-    {
-      platform: "Instagram",
-      icon: Instagram,
-      followers: "24.1K",
-      change: "-2.3%",
-      changeType: "negative",
-      color: "bg-fuchsia-600",
-    },
-    {
-      platform: "TikTok",
-      icon: TikTokIcon,
-      followers: "48.7K",
-      change: "+25.5%",
-      color: "bg-black",
-    },
-  ];
-
-  const engagementStats = [
-    {
-      metric: "Likes",
-      icon: ThumbsUp,
-      value: "42.8K",
-      change: "+21%",
-    },
-    {
-      metric: "Comments",
-      icon: MessageSquare,
-      value: "10.3K",
-      change: "+15%",
-    },
-    {
-      metric: "Shares",
-      icon: Share2,
-      value: "6.7K",
-      change: "-5%",
-      changeType: "negative",
-    },
-    {
-      metric: "Reach",
-      icon: Users,
-      value: "1.2M",
-      change: "+30%",
-    },
-  ];
 
   const videoQuickActions = [
     { label: "Text to Video", icon: Text, href: "/video-generator/editor" },
@@ -160,94 +118,51 @@ export default function DashboardPage() {
                 </div>
             )}
         </div>
-      
-      <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <VideoStats />
+
+      {isLoading ? <Skeleton className="h-48 w-full" /> : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {dashboardData?.socialStats.map((stat) => (
+              <StatsCard
+                key={stat.platform}
+                platform={stat.platform}
+                icon={platformIcons[stat.platform] || Users}
+                followers={stat.followers}
+                change={stat.change}
+                changeType={stat.changeType as 'positive' | 'negative' | undefined}
+              />
+            ))}
           </div>
-          <Card className="bg-card/50">
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Jump right into video creation.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              {videoQuickActions.map((action) => (
-                <Button key={action.label} variant="outline" asChild>
-                  <Link href={action.href} className='flex items-center justify-center gap-2'>
-                    <action.icon className="size-4" />
-                    <span>{action.label}</span>
-                  </Link>
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
-      </div>
+      )}
 
-      <RecentVideos />
-
-      {isProPlan && (
+      {isLoading ? <Skeleton className="h-96 w-full" /> : (
         <Card>
             <CardHeader>
-                <CardTitle>AI Social Media Tools</CardTitle>
-                <CardDescription>Your suite of AI-powered tools for social media management.</CardDescription>
+            <CardTitle>Engagement Overview</CardTitle>
+            <CardDescription>Track your audience engagement across all platforms.</CardDescription>
             </CardHeader>
-            <CardContent className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {proTools.map((tool) => (
-                    <Button key={tool.label} variant="outline" asChild className="h-auto p-4 justify-start">
-                        <Link href={tool.href}>
-                            <tool.icon className="size-6 mr-4 text-primary" />
-                            <div>
-                                <p className="font-semibold">{tool.label}</p>
-                                <p className="text-xs text-muted-foreground">{tool.description}</p>
-                            </div>
-                        </Link>
-                    </Button>
+            <CardContent>
+            <EngagementChart data={dashboardData?.engagementChartData || []} />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 text-center">
+                {dashboardData?.engagementStats.map((stat) => (
+                    <div key={stat.metric}>
+                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
+                            {React.createElement(Users, { className: "size-4" })}
+                            {stat.metric}
+                        </p>
+                        <p className="text-2xl font-bold">{stat.value}</p>
+                        <p className={`text-xs font-medium ${stat.changeType === "negative" ? "text-red-500" : "text-green-500"}`}>
+                        {stat.change} vs last month
+                        </p>
+                    </div>
                 ))}
+            </div>
             </CardContent>
         </Card>
       )}
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {socialStats.map((stat) => (
-          <StatsCard
-            key={stat.platform}
-            platform={stat.platform}
-            icon={stat.icon as React.FC<SVGProps<SVGSVGElement>>}
-            followers={stat.followers}
-            change={stat.change}
-            changeType={stat.changeType as 'positive' | 'negative' | undefined}
-            color={stat.color}
-          />
-        ))}
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Engagement Overview</CardTitle>
-          <CardDescription>Track your audience engagement across all platforms.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <EngagementChart />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 text-center">
-            {engagementStats.map((stat) => (
-              <div key={stat.metric}>
-                <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
-                  <stat.icon className="size-4" />
-                  {stat.metric}
-                </p>
-                <p className="text-2xl font-bold">{stat.value}</p>
-                <p className={`text-xs font-medium ${stat.changeType === "negative" ? "text-red-500" : "text-green-500"}`}>
-                  {stat.change} vs last month
-                </p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <PostsOverview />
+            {isLoading ? <Skeleton className="h-96 w-full" /> : <PostsOverview posts={dashboardData?.postsOverview || []} />}
         </div>
         <Card className="flex flex-col">
           <CardHeader>
@@ -258,7 +173,7 @@ export default function DashboardPage() {
             <CardDescription>Hot topics & sounds to inspire your next post.</CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
-            {isLoadingTrends ? (
+            {isLoading ? (
               <div className="flex justify-center items-center h-40">
                 <Loader2 className="animate-spin text-primary" />
               </div>
@@ -298,6 +213,31 @@ export default function DashboardPage() {
           </CardFooter>
         </Card>
       </div>
+
+       {isLoading ? <Skeleton className="h-96 w-full" /> : <RecentVideos videos={dashboardData?.recentVideos || []} />}
+
+        {isProPlan && (
+        <Card>
+            <CardHeader>
+                <CardTitle>AI Social Media Tools</CardTitle>
+                <CardDescription>Your suite of AI-powered tools for social media management.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {proTools.map((tool) => (
+                    <Button key={tool.label} variant="outline" asChild className="h-auto p-4 justify-start">
+                        <Link href={tool.href}>
+                            <tool.icon className="size-6 mr-4 text-primary" />
+                            <div>
+                                <p className="font-semibold">{tool.label}</p>
+                                <p className="text-xs text-muted-foreground">{tool.description}</p>
+                            </div>
+                        </Link>
+                    </Button>
+                ))}
+            </CardContent>
+        </Card>
+      )}
+
     </div>
   );
 }

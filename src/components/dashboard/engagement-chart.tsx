@@ -1,18 +1,8 @@
 "use client"
 
 import { Line, LineChart, CartesianGrid, XAxis, Tooltip, ResponsiveContainer } from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartTooltipContent, ChartContainer } from "@/components/ui/chart"
-
-const chartData = [
-  { month: "Jan", engagement: 1230 },
-  { month: "Feb", engagement: 1450 },
-  { month: "Mar", engagement: 1300 },
-  { month: "Apr", engagement: 1600 },
-  { month: "May", engagement: 1890 },
-  { month: "Jun", engagement: 2100 },
-  { month: "Jul", engagement: 2350 },
-]
+import { type EngagementChartData } from "@/ai/flows/generate-dashboard-data";
 
 const chartConfig = {
   engagement: {
@@ -21,11 +11,11 @@ const chartConfig = {
   },
 }
 
-export default function EngagementChart() {
+export default function EngagementChart({ data }: { data: EngagementChartData[] }) {
   return (
     <ChartContainer config={chartConfig} className="h-[250px] w-full">
       <LineChart
-        data={chartData}
+        data={data}
         margin={{ top: 5, right: 10, left: 10, bottom: 0 }}
       >
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border) / 0.5)" />

@@ -4,37 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Twitter, Facebook, Instagram } from "lucide-react"
 import Link from 'next/link';
-
-const posts = [
-  {
-    content: "Excited to launch our new AI feature for post generation! 🚀",
-    platform: "Twitter",
-    status: "Published",
-    date: "2 days ago",
-    engagement: "1.2K Likes",
-  },
-  {
-    content: "Deep dive into our latest analytics dashboard updates. 📊",
-    platform: "Facebook",
-    status: "Published",
-    date: "5 days ago",
-    engagement: "876 Likes",
-  },
-  {
-    content: "Check out our new content calendar view for easy planning.",
-    platform: "Twitter",
-    status: "Scheduled",
-    date: "in 3 days",
-    engagement: "-",
-  },
-  {
-    content: "How to leverage trending hashtags for maximum reach.",
-    platform: "Instagram",
-    status: "Draft",
-    date: "-",
-    engagement: "-",
-  },
-]
+import { type PostsOverviewData } from "@/ai/flows/generate-dashboard-data";
 
 const platformIcons = {
   Twitter: <Twitter className="size-4 text-sky-500" />,
@@ -48,7 +18,7 @@ const statusColors = {
   Draft: "bg-gray-500/20 text-gray-400 border-gray-500/30",
 }
 
-export default function PostsOverview() {
+export default function PostsOverview({ posts }: { posts: PostsOverviewData[] }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">

@@ -2,15 +2,10 @@ import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlayCircle, MoreHorizontal } from "lucide-react";
+import { type RecentVideoData } from "@/ai/flows/generate-dashboard-data";
 
-const recentVideos = [
-    { title: "AI in Marketing", duration: "1:23", image: "https://picsum.photos/600/400?random=11", aiHint: "abstract technology" },
-    { title: "Team Culture Highlights", duration: "2:45", image: "https://picsum.photos/600/400?random=12", aiHint: "people office" },
-    { title: "New Feature Launch", duration: "0:58", image: "https://picsum.photos/600/400?random=13", aiHint: "product design" },
-    { title: "A Day at Trendix", duration: "5:10", image: "https://picsum.photos/600/400?random=14", aiHint: "modern workspace" },
-]
 
-export default function RecentVideos() {
+export default function RecentVideos({ videos }: { videos: RecentVideoData[] }) {
     return (
         <Card>
             <CardHeader>
@@ -19,7 +14,7 @@ export default function RecentVideos() {
             </CardHeader>
             <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {recentVideos.map((video) => (
+                    {videos.map((video) => (
                         <div key={video.title} className="group relative rounded-lg overflow-hidden">
                             <Image 
                                 src={video.image} 

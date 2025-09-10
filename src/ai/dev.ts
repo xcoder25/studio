@@ -16,10 +16,12 @@ import '@/ai/flows/generate-reply.ts';
 import '@/ai/flows/generate-ad-copy.ts';
 import '@/ai/flows/suggest-youtube-ideas.ts';
 import '@/ai/flows/refine-reply.ts';
+import '@/ai/flows/generate-dashboard-data.ts';
 
     
 
     
+
 
 
 
