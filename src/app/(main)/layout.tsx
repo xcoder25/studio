@@ -81,6 +81,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAgencyOpen, setIsAgencyOpen] = useState(pathname.startsWith('/agency'));
   const [selectedClient, setSelectedClient] = useState('trendix');
+  const [isProPlan, setIsProPlan] = useState(true); // Example state
 
 
   useEffect(() => {
@@ -343,9 +344,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                         <Star className="mr-2 size-3.5" />
                         Pro Plan
                     </Badge>
-                    <Button variant="default" size="sm" asChild>
-                        <Link href="/pricing">Go Pro</Link>
-                    </Button>
+                    {!isProPlan && (
+                      <Button variant="default" size="sm" asChild>
+                          <Link href="/pricing">Go Pro</Link>
+                      </Button>
+                    )}
                 </div>
                 
                 <Select value={selectedClient} onValueChange={setSelectedClient}>
