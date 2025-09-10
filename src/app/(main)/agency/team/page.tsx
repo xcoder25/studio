@@ -24,10 +24,10 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
 const initialTeamMembers = [
-  { id: 1, name: 'Jane Doe', email: 'jane.doe@example.com', role: 'Admin', avatar: 'https://picsum.photos/100/100?random=1' },
-  { id: 2, name: 'John Smith', email: 'john.smith@example.com', role: 'Editor', avatar: 'https://picsum.photos/100/100?random=2' },
-  { id: 3, name: 'Peter Jones', email: 'peter.jones@example.com', role: 'Analyst', avatar: 'https://picsum.photos/100/100?random=3' },
-  { id: 4, name: 'Sara Miller', email: 'sara.miller@example.com', role: 'Editor', avatar: 'https://picsum.photos/100/100?random=4' },
+  { id: 1, name: 'Jane Doe', email: 'jane.doe@example.com', role: 'Admin', avatar: 'https://picsum.photos/seed/1/100/100', aiHint: 'avatar' },
+  { id: 2, name: 'John Smith', email: 'john.smith@example.com', role: 'Editor', avatar: 'https://picsum.photos/seed/2/100/100', aiHint: 'avatar' },
+  { id: 3, name: 'Peter Jones', email: 'peter.jones@example.com', role: 'Analyst', avatar: 'https://picsum.photos/seed/3/100/100', aiHint: 'avatar' },
+  { id: 4, name: 'Sara Miller', email: 'sara.miller@example.com', role: 'Editor', avatar: 'https://picsum.photos/seed/4/100/100', aiHint: 'avatar' },
 ];
 
 type TeamMember = typeof initialTeamMembers[0];
@@ -46,21 +46,22 @@ export default function TeamManagementPage() {
     const [newMemberRole, setNewMemberRole] = useState('Editor');
 
     const handleInvite = () => {
-        if (!newMemberEmail) {
-            toast({ variant: 'destructive', title: 'Email is required' });
+        if (!newMemberEmail || !/^\S+@\S+\.\S+$/.test(newMemberEmail)) {
+            toast({ variant: 'destructive', title: 'Valid email is required' });
             return;
         }
 
         const newMember: TeamMember = {
             id: teamMembers.length + 1,
-            name: 'New Member',
+            name: 'Invited Member',
             email: newMemberEmail,
             role: newMemberRole,
-            avatar: `https://picsum.photos/100/100?random=${Math.random()}`,
+            avatar: `https://picsum.photos/seed/${newMemberEmail}/100/100`,
+            aiHint: 'avatar',
         };
 
         setTeamMembers([...teamMembers, newMember]);
-        toast({ title: "Invitation Sent!", description: `${newMemberEmail} has been invited to the team.` });
+        toast({ title: "Invitation Sent!", description: `${newMemberEmail} has been invited to the team as an ${newMemberRole}.` });
         
         setIsInviteOpen(false);
         setNewMemberEmail('');
@@ -95,7 +96,7 @@ export default function TeamManagementPage() {
                             <TableCell>
                                 <div className="flex items-center gap-3">
                                     <Avatar>
-                                    <AvatarImage src={member.avatar} alt={member.name} data-ai-hint="avatar" />
+                                    <AvatarImage src={member.avatar} alt={member.name} data-ai-hint={member.aiHint} />
                                     <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                                     </Avatar>
                                     <div>
