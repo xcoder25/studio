@@ -45,6 +45,7 @@ import {
   BarChart,
   UserPlus,
   Store,
+  Youtube,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -137,6 +138,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (pathname.startsWith('/agency/inbox')) return 'Unified Inbox';
     if (pathname.startsWith('/agency/ad-campaigns')) return 'Ad Campaign Assistant';
     if (pathname.startsWith('/store')) return 'Trendix Store';
+    if (pathname.startsWith('/youtube-studio')) return 'YouTube Studio';
     
     const currentNavItem = navItems.find(item => pathname.startsWith(item.href));
     if (currentNavItem) return currentNavItem.label;
@@ -191,6 +193,21 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     <Link href="/video-generator/editor" onClick={(e) => handleNavClick(e, '/video-generator/editor')}>
                       <Video />
                       <span className="group-hover:inline hidden">Video Editor</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                 <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith('/youtube-studio')}
+                    tooltip={{
+                      children: "YouTube Studio",
+                    }}
+                  >
+                    <Link href="/youtube-studio" onClick={(e) => handleNavClick(e, '/youtube-studio')}>
+                      <Youtube />
+                      <span className="group-hover:inline hidden">YouTube Studio</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
