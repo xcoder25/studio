@@ -9,6 +9,8 @@ import { z } from 'zod';
 import { generatePostContent } from '@/ai/flows/generate-post-content';
 import { suggestHashtags } from '@/ai/flows/suggest-hashtags';
 import { rewriteCaption } from '@/ai/flows/rewrite-caption';
+import { suggestBestTime, type SuggestBestTimeOutput } from '@/ai/flows/suggest-best-time';
+
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,13 +35,15 @@ import {
   MessageSquare,
   Share2,
   BarChart2,
+  Lightbulb,
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, nextWednesday, set } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useLoading } from '@/context/loading-context';
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 
 const composerSchema = z.object({
   postContent: z.string().min(1, 'Post content cannot be empty.'),
@@ -58,6 +62,8 @@ export default function PostComposer() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [isRewriting, setIsRewriting] = useState(false);
+  const [isSuggestingTime, setIsSuggestingTime] = useState(false);
+  const [suggestedTime, setSuggestedTime] = useState<SuggestBestTimeOutput | null>(null);
   const [suggestedHashtags, setSuggestedHashtags] = useState<string[]>([]);
   const { showLoading, hideLoading } = useLoading();
   
@@ -153,6 +159,50 @@ export default function PostComposer() {
       hideLoading();
     }
   };
+  
+  const handleSuggestTime = async () => {
+    setIsSuggestingTime(true);
+    showLoading();
+    try {
+        const result = await suggestBestTime({
+            platform: 'Twitter',
+            audienceDescription: 'Tech professionals and startup enthusiasts'
+        });
+        setSuggestedTime(result);
+    } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to suggest best time.' });
+    } finally {
+        setIsSuggestingTime(false);
+        hideLoading();
+    }
+  }
+  
+  const applySuggestedTime = () => {
+    if (!suggestedTime) return;
+
+    const dayMapping: { [key: string]: (date: Date) => Date } = {
+        'Sunday': (d) => set(d, { day: 0 }),
+        'Monday': (d) => set(d, { day: 1 }),
+        'Tuesday': (d) => set(d, { day: 2 }),
+        'Wednesday': (d) => set(d, { day: 3 }),
+        'Thursday': (d) => set(d, { day: 4 }),
+        'Friday': (d) => set(d, { day: 5 }),
+        'Saturday': (d) => set(d, { day: 6 }),
+    };
+
+    const today = new Date();
+    // A simplified logic to get the next occurrence of the suggested day
+    const nextSuggestedDay = dayMapping[suggestedTime.day] ? dayMapping[suggestedTime.day](today) : today;
+     if (nextSuggestedDay < today) {
+        nextSuggestedDay.setDate(nextSuggestedDay.getDate() + 7);
+    }
+
+    form.setValue('scheduleDate', nextSuggestedDay);
+    form.setValue('scheduleTime', suggestedTime.time);
+    setSuggestedTime(null);
+    toast({ title: 'Time applied!'});
+  }
 
   const addHashtag = (tag: string) => {
     form.setValue('postContent', `${form.getValues('postContent')} ${tag}`);
@@ -165,7 +215,7 @@ export default function PostComposer() {
     setSuggestedHashtags([]);
   };
 
-  const isAiBusy = isGenerating || isRewriting || isSuggesting;
+  const isAiBusy = isGenerating || isRewriting || isSuggesting || isSuggestingTime;
 
   return (
     <Form {...form}>
@@ -305,39 +355,52 @@ export default function PostComposer() {
                         <Button variant="outline" size="icon"><Instagram /></Button>
                     </div>
                 </div>
-              <FormField
-                control={form.control}
-                name="scheduleDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <Label>Schedule Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </FormItem>
+                {suggestedTime && (
+                    <Alert>
+                        <Lightbulb className="h-4 w-4" />
+                        <AlertTitle>AI Suggestion: Post on {suggestedTime.day} at {suggestedTime.time}</AlertTitle>
+                        <AlertDescription className="text-xs">
+                           {suggestedTime.reasoning}
+                        </AlertDescription>
+                        <div className="mt-4 flex gap-2">
+                            <Button size="sm" onClick={applySuggestedTime}>Apply</Button>
+                            <Button size="sm" variant="ghost" onClick={() => setSuggestedTime(null)}>Dismiss</Button>
+                        </div>
+                    </Alert>
                 )}
-              />
+                <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <Label>Schedule Date</Label>
+                        <Button type="button" variant="link" size="sm" className="p-0 h-auto" onClick={handleSuggestTime} disabled={isAiBusy}>
+                            {isSuggestingTime ? <Loader2 className="animate-spin size-3 mr-1"/> : <Sparkles className="size-3 mr-1"/>}
+                            Best time to post?
+                        </Button>
+                    </div>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <FormControl>
+                            <Button
+                                variant={"outline"}
+                                className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !form.getValues().scheduleDate && "text-muted-foreground"
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {form.getValues().scheduleDate ? format(form.getValues().scheduleDate!, "PPP") : <span>Pick a date</span>}
+                            </Button>
+                            </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                            mode="single"
+                            selected={form.getValues().scheduleDate}
+                            onSelect={(date) => form.setValue('scheduleDate', date)}
+                            initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
+                </div>
                <FormField
                 control={form.control}
                 name="scheduleTime"
