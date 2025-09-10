@@ -78,7 +78,7 @@ export default function LandingPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <header className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
+      <header className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6 z-10">
         <Link href="/" className="flex items-center gap-2">
           <Image
             src="/Trendix Logo.png"
@@ -111,8 +111,18 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-1">
-        <section className="relative w-full py-20 text-center md:py-32">
-          <div className="absolute inset-0 -z-10 bg-grid-white/[0.05] [mask-image:linear-gradient(to_bottom,white_5%,transparent_50%)]" />
+        <section className="relative w-full py-20 text-center md:py-32 overflow-hidden">
+          <div className="absolute inset-0 -z-10 bg-black">
+             <Image 
+                src="https://picsum.photos/seed/bg/1920/1080" 
+                alt="Background" 
+                layout="fill" 
+                objectFit="cover" 
+                className="opacity-20"
+                data-ai-hint="abstract background"
+                />
+          </div>
+
           <div className="container mx-auto px-4 md:px-6">
             <div className="mx-auto max-w-4xl">
               <Carousel 
@@ -166,7 +176,7 @@ export default function LandingPage() {
             </div>
             <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {features.map((feature, index) => (
-                <Card key={index} className="bg-card/50">
+                <Card key={index} className="bg-card/50 transition-all duration-300 hover:scale-105 hover:shadow-lg animate-fade-in" style={{ animationDelay: `${index * 150}ms` }}>
                   <CardHeader className="flex flex-row items-center gap-4">
                     <div className="rounded-lg bg-primary/20 p-3">
                       <feature.icon className="h-6 w-6 text-primary" />
