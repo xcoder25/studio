@@ -6,33 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ArrowRight, Bot, BarChart, Calendar, Video, Palette, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const features = [
-  {
-    icon: <Bot className="h-8 w-8 text-primary" />,
-    title: 'AI-Powered Content Creation',
-    description:
-      'Generate engaging social media posts in seconds. Our AI helps you craft the perfect message for your audience.',
-  },
-  {
-    icon: <BarChart className="h-8 w-8 text-primary" />,
-    title: 'Analytics & Insights',
-    description:
-      'Track your performance with our detailed analytics. Understand what works and what doesn’t to grow your presence.',
-  },
-  {
-    icon: <Calendar className="h-8 w-8 text-primary" />,
-    title: 'Content Scheduling',
-    description:
-      'Plan your content in advance with our intuitive calendar. Never miss an opportunity to engage with your followers.',
-  },
-    {
-    icon: <Video className="h-8 w-8 text-primary" />,
-    title: 'Video Generation',
-    description:
-      'Create stunning videos from text prompts using AI. Describe the scene you want to see, and watch it come to life.',
-  },
-];
-
 const pricingPlans = [
   {
     name: 'Free Trial',
@@ -143,31 +116,92 @@ export default function LandingPage() {
         </section>
 
         <section id="features" className="py-20 md:py-24 bg-background/50">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="mx-auto mb-12 max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-                Everything You Need to Go Viral
-              </h2>
-              <p className="mt-4 text-muted-foreground">
-                From content creation to performance tracking, we've got you covered.
-              </p>
-            </div>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-              {features.map((feature) => (
-                <Card key={feature.title} className="bg-card/50 backdrop-blur-sm">
-                  <CardContent className="flex flex-col items-center p-6 text-center">
-                    <div className="mb-4 rounded-full bg-primary/10 p-4">
-                      {feature.icon}
+            <div className="container mx-auto px-4 md:px-6 space-y-24">
+                 <div className="items-center gap-12 grid lg:grid-cols-2">
+                    <div className="order-2 lg:order-1">
+                        <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                            AI-Powered Content Creation
+                        </h2>
+                        <p className="mt-4 text-muted-foreground">
+                            From a simple idea to a polished post, our AI content composer is your ultimate creative partner. Generate engaging copy, find trending hashtags, and rewrite captions in any tone to perfectly match your brand's voice.
+                        </p>
+                         <div className="mt-8 flex gap-4">
+                            <Link
+                            href="/signup"
+                            className={cn(buttonVariants())}
+                            >
+                            Start Creating
+                            </Link>
+                        </div>
                     </div>
-                    <h3 className="text-xl font-semibold">{feature.title}</h3>
-                    <p className="mt-2 text-muted-foreground">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
+                    <div className="order-1 lg:order-2">
+                        <Image
+                            src="https://picsum.photos/seed/composer/1200/800"
+                            alt="Content Composer"
+                            width={1200}
+                            height={800}
+                            data-ai-hint="content creation social media"
+                            className="rounded-xl shadow-lg"
+                        />
+                    </div>
+                 </div>
+
+                 <div className="items-center gap-12 grid lg:grid-cols-2">
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                           Turn Text into Viral Videos
+                        </h2>
+                        <p className="mt-4 text-muted-foreground">
+                           Describe the video you want to create, and our AI video generator will bring it to life. Create stunning visuals, animated stories, and lip-synced videos from just a text prompt or an image, ready for any platform.
+                        </p>
+                         <div className="mt-8 flex gap-4">
+                             <Link
+                                href="/signup"
+                                className={cn(buttonVariants())}
+                                >
+                                Generate Your First Video
+                            </Link>
+                        </div>
+                    </div>
+                     <Image
+                        src="https://picsum.photos/seed/videoedit/1200/800"
+                        alt="Video Editor"
+                        width={1200}
+                        height={800}
+                        data-ai-hint="video editing interface"
+                        className="rounded-xl shadow-lg"
+                    />
+                 </div>
+
+                 <div className="items-center gap-12 grid lg:grid-cols-2">
+                    <div className="order-2 lg:order-1">
+                        <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                            Visualize Your Success
+                        </h2>
+                        <p className="mt-4 text-muted-foreground">
+                            Our dashboard provides a clear overview of your social media performance. Track key metrics, understand your audience, and make data-driven decisions to boost your engagement.
+                        </p>
+                         <div className="mt-8 flex gap-4">
+                            <Link
+                            href="/signup"
+                            className={cn(buttonVariants())}
+                            >
+                            Explore Dashboard
+                            </Link>
+                        </div>
+                    </div>
+                    <div className="order-1 lg:order-2">
+                        <Image
+                            src="/landing.png"
+                            alt="Dashboard preview"
+                            width={1200}
+                            height={800}
+                            data-ai-hint="dashboard analytics"
+                            className="rounded-xl shadow-lg"
+                        />
+                    </div>
+                 </div>
             </div>
-          </div>
         </section>
         
         <section id="pricing" className="py-20 md:py-24">
@@ -210,37 +244,6 @@ export default function LandingPage() {
                         </Card>
                     ))}
                 </div>
-            </div>
-        </section>
-
-        <section className="py-20 md:py-24  bg-background/50">
-            <div className="container mx-auto px-4 md:px-6">
-                 <div className="items-center gap-12 grid lg:grid-cols-2">
-                    <div>
-                        <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-                            Visualize Your Success
-                        </h2>
-                        <p className="mt-4 text-muted-foreground">
-                            Our dashboard provides a clear overview of your social media performance. Track key metrics, understand your audience, and make data-driven decisions to boost your engagement.
-                        </p>
-                         <div className="mt-8 flex gap-4">
-                            <Link
-                            href="/signup"
-                            className={cn(buttonVariants())}
-                            >
-                            Explore Dashboard
-                            </Link>
-                        </div>
-                    </div>
-                    <Image
-                        src="https://picsum.photos/seed/dashboard/1200/800"
-                        alt="Dashboard preview"
-                        width={1200}
-                        height={800}
-                        data-ai-hint="dashboard analytics"
-                        className="rounded-xl shadow-lg"
-                    />
-                 </div>
             </div>
         </section>
       </main>
