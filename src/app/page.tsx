@@ -54,13 +54,15 @@ const pricingPlans = [
     period: '/ month',
     description: 'For creators and small businesses.',
     features: [
-      '5 Social Accounts',
+      'Up to 5 Social Accounts',
       'AI Content Generation',
       'AI Caption Rewriter',
       'AI Hashtag Suggestions',
       'AI Trend Analysis',
-      'Video Editor (50 credits)',
-      'Advanced Analytics',
+      'YouTube Studio Access',
+      'Video Editor (50 credits/month)',
+      'Advanced Analytics & Reporting',
+      'Content Scheduling',
     ],
     cta: 'Choose Pro',
     popular: true,
@@ -73,9 +75,10 @@ const pricingPlans = [
     description: 'For agencies and marketing teams.',
     features: [
       'Unlimited Social Accounts',
-      'Team Collaboration Tools',
-      'Video Editor (200 credits)',
-      'Client Reporting',
+      'Team Collaboration Tools (3 seats)',
+      'Video Editor (200 credits/month)',
+      'White-label Client Reporting',
+      'Priority Support',
     ],
     cta: 'Contact Sales',
     ctaLink: '/pricing'
@@ -230,7 +233,7 @@ export default function LandingPage() {
                         </div>
                     </div>
                     <Image
-                        src="https://picsum.photos/1200/800"
+                        src="https://picsum.photos/seed/dashboard/1200/800"
                         alt="Dashboard preview"
                         width={1200}
                         height={800}
