@@ -50,6 +50,7 @@ import {
   Star,
   Lock,
   Cpu,
+  Bot,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -73,6 +74,7 @@ const navItems = [
   { href: '/composer', icon: PenSquare, label: 'Composer' },
   { href: '/calendar', icon: Calendar, label: 'Calendar' },
   { href: '/library', icon: Library, label: 'Library' },
+  { href: '/campaigns', icon: Bot, label: 'Campaigns' },
   { href: '/store', icon: Store, label: 'Store' },
 ];
 
@@ -149,6 +151,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (pathname.startsWith('/youtube-studio/go-live')) return 'Go Live';
     if (pathname.startsWith('/youtube-studio')) return 'YouTube Studio';
     if (pathname.startsWith('/pricing')) return 'Pricing & Plans';
+    if (pathname.startsWith('/campaigns')) return 'Campaigns';
     
     const currentNavItem = navItems.find(item => pathname.startsWith(item.href));
     if (currentNavItem) return currentNavItem.label;
