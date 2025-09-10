@@ -47,6 +47,7 @@ import {
   Store,
   Youtube,
   CreditCard,
+  Star,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -337,6 +338,16 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </h2>
           </div>
           <div className="flex items-center gap-4 text-sm">
+                <div className='hidden md:flex items-center gap-2'>
+                    <Badge variant="outline" className="border-primary/50 text-primary">
+                        <Star className="mr-2 size-3.5" />
+                        Pro Plan
+                    </Badge>
+                    <Button variant="default" size="sm" asChild>
+                        <Link href="/pricing">Go Pro</Link>
+                    </Button>
+                </div>
+                
                 <Select value={selectedClient} onValueChange={setSelectedClient}>
                     <SelectTrigger className="w-[180px] h-9 hidden md:flex">
                         <div className="flex items-center gap-2">
