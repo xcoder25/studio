@@ -29,8 +29,20 @@ const AdCopySchema = z.object({
 });
 export type AdCopy = z.infer<typeof AdCopySchema>;
 
+const BudgetRecommendationSchema = z.object({
+    suggestedBudget: z.string().describe("Suggested daily or campaign budget (e.g., '$50/day')."),
+    reasoning: z.string().describe("A brief justification for the suggested budget."),
+});
+
+const RoiAnalysisSchema = z.object({
+    projectedRoi: z.string().describe("The projected Return on Investment (e.g., '3.5x')."),
+    keyAssumptions: z.string().describe("The key assumptions made for the ROI projection (e.g., 'Assumes a 2% conversion rate and $50 average order value.')."),
+});
+
 const GenerateAdCopyOutputSchema = z.object({
   adCopy: z.array(AdCopySchema).describe('A list of 2-3 generated ad copy variations.'),
+  budgetRecommendation: BudgetRecommendationSchema.describe('A recommendation for the ad campaign budget.'),
+  roiAnalysis: RoiAnalysisSchema.describe('A high-level analysis of the potential ROI.'),
 });
 export type GenerateAdCopyOutput = z.infer<typeof GenerateAdCopyOutputSchema>;
 
@@ -44,7 +56,7 @@ const prompt = ai.definePrompt({
   name: 'generateAdCopyPrompt',
   input: {schema: GenerateAdCopyInputSchema},
   output: {schema: GenerateAdCopyOutputSchema},
-  prompt: `You are an expert advertising copywriter and video strategist. Your task is to generate 2-3 compelling ad copy variations and a corresponding video concept for each.
+  prompt: `You are an expert advertising copywriter and financial strategist. Your task is to generate compelling ad copy, a video concept, budget recommendations, and a projected ROI.
 
   **Platform:** {{{platform}}}
   **Product Name:** {{{productName}}}
@@ -55,13 +67,18 @@ const prompt = ai.definePrompt({
   {{/if}}
 
   Instructions:
-  - Tailor the tone and style to the specified platform. Instagram should be more visual, while Google Ads should be concise.
-  - Create a strong hook in the headline.
-  - Clearly communicate the value proposition in the body.
-  - Include a clear call-to-action.
-  - For each ad copy, generate a **short, punchy, one-sentence concept** for a 5-10 second video that could accompany the ad. This should be a visual instruction.
-  - For social platforms, suggest relevant hashtags.
-  - Provide 2 to 3 distinct variations.`,
+  1.  **Ad Copy**:
+      - Generate 2-3 compelling ad copy variations tailored to the platform.
+      - For each, create a strong headline, clear body text with a call-to-action, and relevant hashtags (for social platforms).
+      - For each ad copy, generate a **short, punchy, one-sentence concept** for a 5-10 second video.
+  2.  **Budget Recommendation**:
+      - Suggest a realistic daily or total campaign budget.
+      - Provide a brief reasoning based on the platform and target audience (e.g., "A $50/day budget is recommended for reaching a targeted niche on Instagram...").
+  3.  **ROI Analysis**:
+      - Provide a projected, hypothetical ROI (e.g., '3x - 4x').
+      - State the key assumptions used for this projection, such as estimated conversion rate and average order value. This data should be realistic but hypothetical.
+  
+  Provide a complete response with all requested fields.`,
 });
 
 const generateAdCopyFlow = ai.defineFlow(

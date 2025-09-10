@@ -13,7 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Sparkles, Wand2, Copy, Video } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, Copy, Video, DollarSign, BarChart } from 'lucide-react';
 import { useLoading } from '@/context/loading-context';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -30,12 +30,13 @@ const adSchema = z.object({
 
 type AdFormValues = z.infer<typeof adSchema>;
 type AdResultWithVideo = (AdCopy & { videoUrl?: string; isGeneratingVideo?: boolean });
+type FullAdOutput = GenerateAdCopyOutput & { adCopy: AdResultWithVideo[] };
 
 export default function AdCampaignsPage() {
   const { toast } = useToast();
   const { showLoading, hideLoading } = useLoading();
   const [isLoading, setIsLoading] = useState(false);
-  const [adResults, setAdResults] = useState<AdResultWithVideo[] | null>(null);
+  const [adResults, setAdResults] = useState<FullAdOutput | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageDataUri, setImageDataUri] = useState<string | null>(null);
 
@@ -55,11 +56,11 @@ export default function AdCampaignsPage() {
     showLoading();
     try {
       const result = await generateAdCopy({...data, imageDataUri});
-      setAdResults(result.adCopy);
-      toast({ title: 'Ad Copy Generated!' });
+      setAdResults(result as FullAdOutput);
+      toast({ title: 'Ad Strategy Generated!' });
     } catch (error) {
       console.error(error);
-      toast({ variant: 'destructive', title: 'Generation Failed', description: 'Could not generate ad copy.' });
+      toast({ variant: 'destructive', title: 'Generation Failed', description: 'Could not generate ad strategy.' });
     } finally {
       setIsLoading(false);
       hideLoading();
@@ -67,23 +68,23 @@ export default function AdCampaignsPage() {
   };
   
   const handleGenerateVideo = async (index: number) => {
-    if (!adResults || !adResults[index]) return;
+    if (!adResults || !adResults.adCopy[index]) return;
 
     setAdResults(currentResults => {
         if (!currentResults) return null;
-        const newResults = [...currentResults];
-        newResults[index].isGeneratingVideo = true;
+        const newResults = {...currentResults};
+        newResults.adCopy[index].isGeneratingVideo = true;
         return newResults;
     });
 
     try {
-        const ad = adResults[index];
+        const ad = adResults.adCopy[index];
         const result = await generateVideo({ prompt: ad.videoIdea, imageDataUri });
         
         setAdResults(currentResults => {
             if (!currentResults) return null;
-            const newResults = [...currentResults];
-            newResults[index].videoUrl = result.videoUrl;
+            const newResults = {...currentResults};
+            newResults.adCopy[index].videoUrl = result.videoUrl;
             return newResults;
         });
 
@@ -94,8 +95,8 @@ export default function AdCampaignsPage() {
     } finally {
         setAdResults(currentResults => {
             if (!currentResults) return null;
-            const newResults = [...currentResults];
-            newResults[index].isGeneratingVideo = false;
+            const newResults = {...currentResults};
+            newResults.adCopy[index].isGeneratingVideo = false;
             return newResults;
         });
     }
@@ -170,7 +171,7 @@ export default function AdCampaignsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Ad Campaign Assistant</CardTitle>
-            <CardDescription>Generate compelling ad copy and videos with AI.</CardDescription>
+            <CardDescription>Generate a full ad campaign strategy with AI.</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -204,7 +205,7 @@ export default function AdCampaignsPage() {
                  </FormItem>
                 <Button type="submit" disabled={isLoading} className="w-full">
                   {isLoading ? <Loader2 className="animate-spin" /> : <Sparkles />}
-                  Generate Ad Copy
+                  Generate Strategy
                 </Button>
               </form>
             </Form>
@@ -217,15 +218,39 @@ export default function AdCampaignsPage() {
             <div className="flex flex-col h-full justify-center items-center py-20 rounded-lg border border-dashed">
                 <div className="text-center">
                     <Loader2 className="animate-spin size-12 text-primary mx-auto" />
-                    <p className="mt-4 text-muted-foreground">Generating ad copy variants...</p>
+                    <p className="mt-4 text-muted-foreground">Generating your campaign strategy...</p>
                 </div>
             </div>
         )}
         {adResults ? (
             <div className="space-y-6">
-                 <h2 className="text-2xl font-bold">Generated Ad Copy for {form.getValues('platform')}</h2>
+                 <h2 className="text-2xl font-bold">Generated Strategy for {form.getValues('platform')}</h2>
+                 
+                 <div className="grid md:grid-cols-2 gap-6">
+                    <Card>
+                        <CardHeader className="flex-row items-center gap-2">
+                           <DollarSign className="size-6 text-primary" />
+                           <CardTitle>Budget Recommendation</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            <p className="text-2xl font-bold">{adResults.budgetRecommendation.suggestedBudget}</p>
+                            <p className="text-sm text-muted-foreground">{adResults.budgetRecommendation.reasoning}</p>
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader className="flex-row items-center gap-2">
+                           <BarChart className="size-6 text-primary" />
+                           <CardTitle>ROI Analysis</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            <p className="text-2xl font-bold">{adResults.roiAnalysis.projectedRoi} Projected ROI</p>
+                            <p className="text-sm text-muted-foreground">{adResults.roiAnalysis.keyAssumptions}</p>
+                        </CardContent>
+                    </Card>
+                 </div>
+
                  <div className="grid md:grid-cols-2 gap-4">
-                    {adResults.map((ad, i) => (
+                    {adResults.adCopy.map((ad, i) => (
                         <AdCopyCard key={i} index={i} ad={ad} platform={form.getValues('platform')} />
                     ))}
                  </div>
@@ -234,7 +259,7 @@ export default function AdCampaignsPage() {
              <div className="flex flex-col h-full justify-center items-center py-20 rounded-lg border border-dashed">
                 <div className="text-center">
                     <Wand2 className="size-12 text-muted-foreground mx-auto" />
-                    <p className="mt-4 text-muted-foreground">Your generated ad copy will appear here.</p>
+                    <p className="mt-4 text-muted-foreground">Your generated ad strategy will appear here.</p>
                 </div>
             </div>
         )}
