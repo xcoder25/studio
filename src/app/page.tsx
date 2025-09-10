@@ -124,7 +124,7 @@ export default function LandingPage() {
                 Your All-in-One Social Media & Content Creation Studio
               </h1>
               <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-                Trendix is the all-in-one platform to generate content, schedule posts, create videos, and analyze your performance. Effortlessly.
+                Let our AI manage multiple social accounts, so you can focus on what matters most. Generate content, schedule posts, create videos, and analyze performance—all in one place.
               </p>
               <div className="mt-8 flex justify-center gap-4">
                 <Link
