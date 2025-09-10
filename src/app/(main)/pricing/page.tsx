@@ -32,7 +32,10 @@ const plans = [
     description: 'For individual creators and small businesses ready to grow.',
     features: [
       'Up to 5 Social Accounts',
-      'Full AI Assistant Suite',
+      'AI Content Generation',
+      'AI Caption Rewriter',
+      'AI Hashtag Suggestions',
+      'AI Trend Analysis',
       'YouTube Studio Access',
       'Video Editor (50 credits/month)',
       'Advanced Analytics & Reporting',

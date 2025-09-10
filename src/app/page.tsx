@@ -55,7 +55,10 @@ const pricingPlans = [
     description: 'For creators and small businesses.',
     features: [
       '5 Social Accounts',
-      'Full AI Assistant Suite',
+      'AI Content Generation',
+      'AI Caption Rewriter',
+      'AI Hashtag Suggestions',
+      'AI Trend Analysis',
       'Video Editor (50 credits)',
       'Advanced Analytics',
     ],
