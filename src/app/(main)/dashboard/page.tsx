@@ -11,22 +11,28 @@ import EngagementChart from "@/components/dashboard/engagement-chart";
 import PostsOverview from "@/components/dashboard/posts-overview";
 import VideoStats from '@/components/dashboard/video-stats';
 import RecentVideos from '@/components/dashboard/recent-videos';
-import { Twitter, Facebook, Instagram, Users, ThumbsUp, MessageSquare, Share2, TrendingUp, ArrowRight, Video, Mic, Text, Maximize, Loader2, Wand2, Music, Hash } from "lucide-react";
+import { Twitter, Facebook, Instagram, Users, ThumbsUp, MessageSquare, Share2, TrendingUp, ArrowRight, Video, Mic, Text, Maximize, Loader2, Wand2, Music, Hash, AlertCircle } from "lucide-react";
 import Link from 'next/link';
 import { findTrends, type FindTrendsOutput } from '@/ai/flows/find-trends';
 
 export default function DashboardPage() {
   const [trends, setTrends] = useState<FindTrendsOutput['trends']>([]);
   const [isLoadingTrends, setIsLoadingTrends] = useState(true);
+  const [errorLoadingTrends, setErrorLoadingTrends] = useState(false);
 
   useEffect(() => {
     async function loadTrends() {
       setIsLoadingTrends(true);
+      setErrorLoadingTrends(false);
       try {
         const result = await findTrends({ industry: 'AI and Technology' });
+        if (result.trends.length === 0) {
+            setErrorLoadingTrends(true);
+        }
         setTrends(result.trends);
       } catch (error) {
         console.error('Failed to load trends:', error);
+        setErrorLoadingTrends(true);
       } finally {
         setIsLoadingTrends(false);
       }
@@ -181,6 +187,12 @@ export default function DashboardPage() {
             {isLoadingTrends ? (
               <div className="flex justify-center items-center h-40">
                 <Loader2 className="animate-spin text-primary" />
+              </div>
+            ) : errorLoadingTrends ? (
+              <div className="flex flex-col text-center justify-center items-center h-40 text-muted-foreground">
+                <AlertCircle className="size-8 mb-2" />
+                <p>Could not load trends.</p>
+                <p className="text-xs">Please try again later.</p>
               </div>
             ) : (
             <ul className="space-y-4">

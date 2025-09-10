@@ -55,7 +55,13 @@ const findTrendsFlow = ai.defineFlow(
     outputSchema: FindTrendsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    try {
+        const {output} = await prompt(input);
+        return output!;
+    } catch (error) {
+        console.error('Error finding trends:', error);
+        // Return an empty array if the AI call fails
+        return { trends: [] };
+    }
   }
 );
