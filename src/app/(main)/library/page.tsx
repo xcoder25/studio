@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import Image from "next/image";
@@ -14,37 +13,37 @@ const templates = [
   {
     title: "New Feature Announcement",
     category: "Announcement",
-    image: "https://picsum.photos/600/400?random=1",
+    image: "https://picsum.photos/seed/1/600/400",
     aiHint: "technology abstract",
   },
   {
     title: "Tech Insight Infographic",
     category: "Informative",
-    image: "https://picsum.photos/600/400?random=2",
+    image: "https://picsum.photos/seed/2/600/400",
     aiHint: "data visualization",
   },
   {
     title: "Quote of the Day",
     category: "Inspirational",
-    image: "https://picsum.photos/600/400?random=3",
+    image: "https://picsum.photos/seed/3/600/400",
     aiHint: "nature landscape",
   },
   {
     title: "Behind the Scenes",
     category: "Team Culture",
-    image: "https://picsum.photos/600/400?random=4",
+    image: "https://picsum.photos/seed/4/600/400",
     aiHint: "office people",
   },
   {
     title: "Product Hunt Launch",
     category: "Announcement",
-    image: "https://picsum.photos/600/400?random=5",
+    image: "https://picsum.photos/seed/5/600/400",
     aiHint: "space rocket",
     },
   {
     title: "Weekly Newsletter",
     category: "Informative",
-    image: "https://picsum.photos/600/400?random=6",
+    image: "https://picsum.photos/seed/6/600/400",
     aiHint: "reading book",
     },
 ];
@@ -57,10 +56,10 @@ const savedHashtags = [
 ]
 
 const recentVideos = [
-    { title: "AI in Marketing", duration: "1:23", image: "https://picsum.photos/600/400?random=11", aiHint: "abstract technology" },
-    { title: "Team Culture Highlights", duration: "2:45", image: "https://picsum.photos/600/400?random=12", aiHint: "people office" },
-    { title: "New Feature Launch", duration: "0:58", image: "https://picsum.photos/600/400?random=13", aiHint: "product design" },
-    { title: "A Day at Trendix", duration: "5:10", image: "https://picsum.photos/600/400?random=14", aiHint: "modern workspace" },
+    { title: "AI in Marketing", duration: "1:23", image: "https://picsum.photos/seed/11/600/400", aiHint: "abstract technology" },
+    { title: "Team Culture Highlights", duration: "2:45", image: "https://picsum.photos/seed/12/600/400", aiHint: "people office" },
+    { title: "New Feature Launch", duration: "0:58", image: "https://picsum.photos/seed/13/600/400", aiHint: "product design" },
+    { title: "A Day at Trendix", duration: "5:10", image: "https://picsum.photos/seed/14/600/400", aiHint: "modern workspace" },
 ]
 
 
