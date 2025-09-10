@@ -6,18 +6,20 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { generateAdCopy, type GenerateAdCopyOutput, type AdCopy } from '@/ai/flows/generate-ad-copy';
+import { generateVideo } from '@/ai/flows/generate-video';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Sparkles, Wand2, Copy } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, Copy, Video } from 'lucide-react';
 import { useLoading } from '@/context/loading-context';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-
+import { ImageUploadArea } from '@/components/video-generator/image-upload-area';
+import { Label } from '@/components/ui/label';
 
 const adSchema = z.object({
   productName: z.string().min(3, 'Product name is required.'),
@@ -27,12 +29,15 @@ const adSchema = z.object({
 });
 
 type AdFormValues = z.infer<typeof adSchema>;
+type AdResultWithVideo = (AdCopy & { videoUrl?: string; isGeneratingVideo?: boolean });
 
 export default function AdCampaignsPage() {
   const { toast } = useToast();
   const { showLoading, hideLoading } = useLoading();
   const [isLoading, setIsLoading] = useState(false);
-  const [adResult, setAdResult] = useState<GenerateAdCopyOutput | null>(null);
+  const [adResults, setAdResults] = useState<AdResultWithVideo[] | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageDataUri, setImageDataUri] = useState<string | null>(null);
 
   const form = useForm<AdFormValues>({
     resolver: zodResolver(adSchema),
@@ -46,11 +51,11 @@ export default function AdCampaignsPage() {
 
   const onSubmit = async (data: AdFormValues) => {
     setIsLoading(true);
-    setAdResult(null);
+    setAdResults(null);
     showLoading();
     try {
-      const result = await generateAdCopy(data);
-      setAdResult(result);
+      const result = await generateAdCopy({...data, imageDataUri});
+      setAdResults(result.adCopy);
       toast({ title: 'Ad Copy Generated!' });
     } catch (error) {
       console.error(error);
@@ -60,18 +65,73 @@ export default function AdCampaignsPage() {
       hideLoading();
     }
   };
+  
+  const handleGenerateVideo = async (index: number) => {
+    if (!adResults || !adResults[index]) return;
+
+    setAdResults(currentResults => {
+        if (!currentResults) return null;
+        const newResults = [...currentResults];
+        newResults[index].isGeneratingVideo = true;
+        return newResults;
+    });
+
+    try {
+        const ad = adResults[index];
+        const result = await generateVideo({ prompt: ad.videoIdea, imageDataUri });
+        
+        setAdResults(currentResults => {
+            if (!currentResults) return null;
+            const newResults = [...currentResults];
+            newResults[index].videoUrl = result.videoUrl;
+            return newResults;
+        });
+
+        toast({ title: 'Video generated successfully!' });
+    } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Video generation failed' });
+    } finally {
+        setAdResults(currentResults => {
+            if (!currentResults) return null;
+            const newResults = [...currentResults];
+            newResults[index].isGeneratingVideo = false;
+            return newResults;
+        });
+    }
+  };
+
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({ title: 'Copied to clipboard!' });
   };
 
-  const AdCopyCard = ({ ad, platform }: { ad: AdCopy; platform: string }) => (
-    <Card className="bg-card/50">
+  const AdCopyCard = ({ ad, index, platform }: { ad: AdResultWithVideo; index: number; platform: string }) => (
+    <Card className="bg-card/50 flex flex-col">
       <CardHeader>
-        <CardTitle className="text-lg">{platform} Ad</CardTitle>
+        <CardTitle className="text-lg">{platform} Ad Variation {index + 1}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 flex-grow">
+         {ad.videoUrl ? (
+            <video src={ad.videoUrl} controls className="w-full rounded-md" />
+        ) : ad.isGeneratingVideo ? (
+            <div className="aspect-video bg-background/50 rounded-md flex flex-col items-center justify-center text-center p-4">
+                <Loader2 className="size-8 animate-spin text-primary" />
+                <p className="text-sm mt-2 text-muted-foreground">Generating video...</p>
+            </div>
+        ) : (
+            <div className="aspect-video bg-background/50 rounded-md flex flex-col items-center justify-center text-center p-4">
+                <p className="text-sm text-muted-foreground"><b>Video Idea:</b> {ad.videoIdea}</p>
+                <Button size="sm" className="mt-4" onClick={() => handleGenerateVideo(index)} disabled={!imageDataUri}>
+                    <Video className="mr-2"/> Generate Video
+                </Button>
+                {!imageDataUri && <p className="text-xs text-muted-foreground mt-2">(Upload an image to enable)</p>}
+            </div>
+        )}
+        
+        <Separator />
+        
         <div>
           <Label className="text-xs text-muted-foreground">Headline</Label>
           <div className="flex items-center gap-2">
@@ -110,7 +170,7 @@ export default function AdCampaignsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Ad Campaign Assistant</CardTitle>
-            <CardDescription>Generate compelling ad copy with AI. Fill in the details below to get started.</CardDescription>
+            <CardDescription>Generate compelling ad copy and videos with AI.</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -138,6 +198,10 @@ export default function AdCampaignsPage() {
                 <FormField control={form.control} name="targetAudience" render={({ field }) => (
                   <FormItem><FormLabel>Target Audience</FormLabel><FormControl><Input placeholder="e.g., Social media managers at startups" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
+                 <FormItem>
+                    <FormLabel>Product Image (Optional)</FormLabel>
+                    <ImageUploadArea imagePreview={imagePreview} setImagePreview={setImagePreview} setImageDataUri={setImageDataUri} isLoading={isLoading}/>
+                 </FormItem>
                 <Button type="submit" disabled={isLoading} className="w-full">
                   {isLoading ? <Loader2 className="animate-spin" /> : <Sparkles />}
                   Generate Ad Copy
@@ -157,12 +221,12 @@ export default function AdCampaignsPage() {
                 </div>
             </div>
         )}
-        {adResult ? (
+        {adResults ? (
             <div className="space-y-6">
                  <h2 className="text-2xl font-bold">Generated Ad Copy for {form.getValues('platform')}</h2>
                  <div className="grid md:grid-cols-2 gap-4">
-                    {adResult.adCopy.map((ad, i) => (
-                        <AdCopyCard key={i} ad={ad} platform={form.getValues('platform')} />
+                    {adResults.map((ad, i) => (
+                        <AdCopyCard key={i} index={i} ad={ad} platform={form.getValues('platform')} />
                     ))}
                  </div>
             </div>
