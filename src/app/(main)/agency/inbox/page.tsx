@@ -20,8 +20,8 @@ const accounts = {
     trendix: {
         name: 'Trendix',
         conversations: [
-            { id: 1, name: 'Alice Johnson', handle: '@alicej', platform: 'Twitter', message: 'Just wanted to say I love your new feature! It\'s a game-changer. 🚀', avatar: 'https://picsum.photos/100/100?random=5', type: 'Mention', unread: 2 },
-            { id: 2, name: 'Bob Williams', handle: 'bobw', platform: 'Instagram', message: 'Can you tell me more about your pricing plans?', avatar: 'https://picsum.photos/100/100?random=6', type: 'DM' },
+            { id: 1, name: 'Alice Johnson', handle: '@alicej', platform: 'Twitter', message: 'Just wanted to say I love your new feature! It\'s a game-changer. 🚀', avatar: 'https://picsum.photos/seed/5/100/100', type: 'Mention', unread: 2 },
+            { id: 2, name: 'Bob Williams', handle: 'bobw', platform: 'Instagram', message: 'Can you tell me more about your pricing plans?', avatar: 'https://picsum.photos/seed/6/100/100', type: 'DM' },
         ],
         messageThread: {
             1: [
@@ -35,8 +35,8 @@ const accounts = {
     client_a: {
         name: 'Client A',
         conversations: [
-            { id: 3, name: 'Charlie Brown', handle: '@charlieb', platform: 'Twitter', message: 'I\'m having some trouble with the setup process. Can you help?', avatar: 'https://picsum.photos/100/100?random=7', type: 'Comment' },
-            { id: 4, name: 'Diana Miller', handle: 'dianam', platform: 'Facebook', message: 'Your last post was so insightful! Looking forward to more content like that.', avatar: 'https://picsum.photos/100/100?random=8', type: 'Comment' },
+            { id: 3, name: 'Charlie Brown', handle: '@charlieb', platform: 'Twitter', message: 'I\'m having some trouble with the setup process. Can you help?', avatar: 'https://picsum.photos/seed/7/100/100', type: 'Comment' },
+            { id: 4, name: 'Diana Miller', handle: 'dianam', platform: 'Facebook', message: 'Your last post was so insightful! Looking forward to more content like that.', avatar: 'https://picsum.photos/seed/8/100/100', type: 'Comment' },
         ],
         messageThread: {
             3: [ { from: 'user', text: 'I\'m having some trouble with the setup process. Can you help?' } ],
@@ -118,13 +118,13 @@ export default function UnifiedInboxPage() {
   return (
     <div className="grid grid-cols-10 gap-4 h-[calc(100vh-8rem)]">
         {/* Conversations List */}
-        <Card className="col-span-3 lg:col-span-2 flex flex-col">
+        <Card className="col-span-3 flex flex-col">
             <CardHeader className='p-3 space-y-3'>
                 <Select value={selectedAccount} onValueChange={handleAccountChange}>
                     <SelectTrigger className="h-10">
                         <div className="flex items-center gap-2">
                              <Avatar className="size-6">
-                                <AvatarImage src={`https://picsum.photos/100/100?random=${selectedAccount === 'trendix' ? 1 : 99}`} data-ai-hint="logo company"/>
+                                <AvatarImage src={`https://picsum.photos/seed/${selectedAccount === 'trendix' ? 1 : 99}/100/100`} data-ai-hint="logo company"/>
                                 <AvatarFallback>{currentAccountData.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <SelectValue />
@@ -137,7 +137,7 @@ export default function UnifiedInboxPage() {
                                 <SelectItem key={key} value={key}>
                                     <div className="flex items-center gap-2">
                                         <Avatar className="size-6">
-                                            <AvatarImage src={`https://picsum.photos/100/100?random=${key === 'trendix' ? 1 : 99}`} data-ai-hint="logo company"/>
+                                            <AvatarImage src={`https://picsum.photos/seed/${key === 'trendix' ? 1 : 99}/100/100`} data-ai-hint="logo company"/>
                                             <AvatarFallback>{account.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <span>{account.name}</span>
@@ -197,7 +197,7 @@ export default function UnifiedInboxPage() {
         </Card>
 
         {/* Message Thread */}
-        <div className="col-span-7 lg:col-span-5 flex flex-col gap-4">
+        <div className="col-span-4 flex flex-col gap-4">
             <Card className="flex-grow flex flex-col">
                 {selectedConversation ? (
                     <>
@@ -238,7 +238,7 @@ export default function UnifiedInboxPage() {
         </div>
 
         {/* AI Assistant Panel */}
-        <Card className="col-span-4 lg:col-span-3 flex flex-col">
+        <Card className="col-span-3 flex flex-col">
             <CardHeader className="text-center">
                 <Bot className="mx-auto size-8 text-primary" />
                 <CardTitle>Serai AI</CardTitle>
