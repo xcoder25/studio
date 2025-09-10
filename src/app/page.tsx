@@ -42,6 +42,18 @@ const features = [
 
 const plans = [
   {
+    name: 'Free Trial',
+    price: '$0',
+    description: 'Explore the core features for 14 days.',
+    features: [
+        '1 Social Account',
+        'AI Content Generation (10 posts)',
+        'Basic Analytics',
+    ],
+    cta: 'Start Trial',
+    ctaLink: '/signup'
+  },
+  {
     name: 'Pro',
     price: '$49',
     description: 'For individual creators and small businesses ready to grow.',
@@ -55,6 +67,7 @@ const plans = [
       'Content Scheduling',
     ],
     cta: 'Upgrade to Pro',
+    ctaLink: '/pricing'
   },
   {
     name: 'Agency',
@@ -68,6 +81,7 @@ const plans = [
       'Priority Support',
     ],
     cta: 'Contact Sales',
+    ctaLink: '#'
   },
 ];
 
@@ -112,7 +126,7 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-1">
-        <section className="relative w-full py-20 text-center md:py-32 overflow-hidden bg-black">
+        <section className="relative w-full py-20 text-center md:py-32 overflow-hidden">
           <video
             autoPlay
             loop
@@ -191,73 +205,64 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="pricing" className="w-full bg-card/20 py-20 md:py-32">
+        <section className="w-full py-20 md:py-32">
             <div className="container mx-auto px-4 md:px-6">
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                     <div className="relative aspect-video rounded-xl bg-muted flex items-center justify-center">
                         <PlayCircle className="size-20 text-muted-foreground" />
-                        <p className="absolute bottom-4 text-sm text-muted-foreground">Video placeholder</p>
+                        <p className="absolute bottom-4 text-sm text-muted-foreground">Watch a 2-min demo</p>
                     </div>
-                    <div className="space-y-8">
-                         <div className="space-y-2">
-                            <h2 className="text-4xl font-bold">Simple Pricing for Teams of All Sizes</h2>
-                            <p className="text-lg text-muted-foreground">
-                                Choose the plan that's right for you. Cancel anytime.
-                            </p>
-                        </div>
-                        <div className="grid gap-8 sm:grid-cols-2">
-                             <Card className="flex flex-col">
-                                <CardHeader>
-                                    <CardTitle className="text-2xl">Free Trial</CardTitle>
-                                    <CardDescription>Explore the core features.</CardDescription>
-                                    <div className="pt-4">
-                                        <span className="text-4xl font-bold">$0</span>
-                                        <span className="text-muted-foreground">/ 14 days</span>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="flex-grow">
-                                <ul className="space-y-3">
-                                    {['1 Social Account', 'AI Content Generation (10 posts)', 'Basic Analytics'].map(feature => (
-                                    <li key={feature} className="flex items-center gap-3">
-                                        <Check className="size-5 text-primary" />
-                                        <span className="text-muted-foreground">{feature}</span>
-                                    </li>
-                                    ))}
-                                </ul>
-                                </CardContent>
-                                <CardContent>
-                                    <Button className="w-full" asChild>
-                                        <Link href="/signup">Start Trial</Link>
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                          {plans.map((plan) => (
-                            <Card key={plan.name} className="flex flex-col border-primary/50">
-                              <CardHeader>
-                                <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                                <CardDescription>{plan.description}</CardDescription>
-                                <div className="pt-4">
-                                    <span className="text-4xl font-bold">{plan.price}</span>
-                                    <span className="text-muted-foreground">/ month</span>
-                                </div>
-                              </CardHeader>
-                              <CardContent className="flex-grow">
-                                <ul className="space-y-3">
-                                    {plan.features.map(feature => (
-                                    <li key={feature} className="flex items-center gap-3">
-                                        <Check className="size-5 text-primary" />
-                                        <span className="text-muted-foreground">{feature}</span>
-                                    </li>
-                                    ))}
-                                </ul>
-                              </CardContent>
-                              <CardContent>
-                                <Button className="w-full">{plan.cta}</Button>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
+                    <div className="space-y-4">
+                        <h2 className="text-4xl font-bold">See Trendix in Action</h2>
+                        <p className="text-lg text-muted-foreground">
+                            Words can only say so much. Watch a quick demo to see how Trendix's AI-powered tools can revolutionize your social media workflow, from content creation to analytics.
+                        </p>
+                         <Button size="lg" asChild>
+                            <Link href="/signup">
+                                Get Started Now <ArrowRight className="ml-2" />
+                            </Link>
+                        </Button>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="pricing" className="w-full bg-card/20 py-20 md:py-32">
+            <div className="container mx-auto px-4 md:px-6">
+                <div className="mx-auto max-w-3xl text-center">
+                    <h2 className="text-4xl font-bold">Simple Pricing for Teams of All Sizes</h2>
+                    <p className="mt-4 text-lg text-muted-foreground">
+                        Choose the plan that's right for you. Cancel anytime.
+                    </p>
+                </div>
+                <div className="mt-12 grid gap-8 md:grid-cols-3">
+                  {plans.map((plan) => (
+                    <Card key={plan.name} className={cn("flex flex-col", plan.name === "Pro" && "border-primary/50")}>
+                      <CardHeader>
+                        <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                        <CardDescription>{plan.description}</CardDescription>
+                        <div className="pt-4">
+                            <span className="text-4xl font-bold">{plan.price}</span>
+                            {plan.name !== 'Free Trial' && <span className="text-muted-foreground">/ month</span>}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="flex-grow">
+                        <ul className="space-y-3">
+                            {plan.features.map(feature => (
+                            <li key={feature} className="flex items-center gap-3">
+                                <Check className="size-5 text-primary" />
+                                <span className="text-muted-foreground">{feature}</span>
+                            </li>
+                            ))}
+                        </ul>
+                      </CardContent>
+                      <CardContent>
+                        <Button className="w-full" asChild>
+                            <Link href={plan.ctaLink}>{plan.cta}</Link>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
             </div>
         </section>
