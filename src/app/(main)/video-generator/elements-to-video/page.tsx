@@ -8,7 +8,7 @@ import { Scissors, Video, Music, Type, Clapperboard, Plus } from "lucide-react";
 
 export default function VideoEditorPage() {
     return (
-        <div className="grid grid-cols-12 gap-4 h-full">
+        <div className="grid grid-cols-12 gap-4 h-[calc(100vh-8rem)]">
             {/* Asset and Tool Panel */}
             <div className="col-span-3 h-full">
                 <Card className="h-full flex flex-col bg-card/50">

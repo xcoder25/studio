@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Video, ImageIcon, Mic, Clapperboard, Loader2, Play } from "lucide-react";
+import { Video, ImageIcon, Mic, Clapperboard, Loader2, Play, Scissors } from "lucide-react";
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -16,6 +16,7 @@ import { generateAudioFromText } from '@/ai/flows/generate-audio-from-text';
 import { lipSync } from '@/ai/flows/lip-sync';
 import OutputPanel from '@/components/video-generator/output-panel';
 import { useLoading } from '@/context/loading-context';
+import Link from 'next/link';
 
 const voices = [
     { id: 'Alloy', name: 'Alloy' },
@@ -135,7 +136,7 @@ export default function VideoEditorPage() {
             <div className="col-span-4 lg:col-span-3 h-full">
                 <Card className="h-full flex flex-col bg-card/50">
                     <CardHeader>
-                        <CardTitle>Tools</CardTitle>
+                        <CardTitle>AI Tools</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-grow p-2 pt-0">
                         <Tabs defaultValue="text-to-video" className="h-full flex flex-col">
@@ -209,6 +210,13 @@ export default function VideoEditorPage() {
                              </TabsContent>
                         </Tabs>
                     </CardContent>
+                    <CardFooter className="p-2">
+                        <Button variant="outline" asChild className="w-full">
+                            <Link href="/video-generator/elements-to-video">
+                                <Scissors className="mr-2" /> Open Timeline Editor
+                            </Link>
+                        </Button>
+                    </CardFooter>
                 </Card>
             </div>
 
@@ -216,13 +224,13 @@ export default function VideoEditorPage() {
                 <div className="flex-grow-[3]">
                     <OutputPanel isLoading={isLoading} videoUrl={videoUrl} />
                 </div>
-                <Card className="flex-grow-[1] bg-card/50">
+                 <Card className="flex-grow-[1] bg-card/50">
                     <CardHeader>
-                        <CardTitle>Timeline</CardTitle>
+                        <CardTitle>Generated Clips</CardTitle>
                     </CardHeader>
                      <CardContent className="p-4 pt-0">
                          <div className="w-full h-24 bg-background/50 rounded-lg flex items-center justify-center">
-                             <p className="text-muted-foreground">Timeline Controls (Coming Soon)</p>
+                             <p className="text-muted-foreground">Your generated clips will appear here</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -230,5 +238,3 @@ export default function VideoEditorPage() {
         </div>
     )
 }
-
-    
