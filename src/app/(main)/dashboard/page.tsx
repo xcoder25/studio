@@ -11,7 +11,7 @@ import EngagementChart from "@/components/dashboard/engagement-chart";
 import PostsOverview from "@/components/dashboard/posts-overview";
 import VideoStats from '@/components/dashboard/video-stats';
 import RecentVideos from '@/components/dashboard/recent-videos';
-import { Twitter, Facebook, Instagram, Users, ThumbsUp, MessageSquare, Share2, TrendingUp, ArrowRight, Video, Mic, Text, Maximize, Loader2, Wand2, Music, Hash, AlertCircle, PenSquare, MicVocal, Megaphone, Scale } from "lucide-react";
+import { Twitter, Facebook, Instagram, Users, ThumbsUp, MessageSquare, Share2, TrendingUp, ArrowRight, Video, Mic, Text, Maximize, Loader2, Wand2, Music, Hash, AlertCircle, PenSquare, MicVocal, Megaphone, Scale, Plus } from "lucide-react";
 import Link from 'next/link';
 import { findTrends, type FindTrendsOutput } from '@/ai/flows/find-trends';
 import { cn } from '@/lib/utils';
@@ -270,12 +270,19 @@ export default function DashboardPage() {
             ) : (
             <ul className="space-y-4">
                 {trends.slice(0, 3).map((trend) => (
-                  <li key={trend.title} className="flex items-start gap-4">
-                    <div>{trendIcons[trend.type as keyof typeof trendIcons]}</div>
-                    <div>
-                      <h4 className="font-semibold">{trend.title}</h4>
-                      <p className="text-sm text-muted-foreground">{trend.description}</p>
+                  <li key={trend.title} className="flex flex-col items-start gap-3 p-3 rounded-lg border bg-card/50">
+                    <div className='flex items-start gap-3'>
+                        <div>{trendIcons[trend.type as keyof typeof trendIcons]}</div>
+                        <div>
+                        <h4 className="font-semibold">{trend.title}</h4>
+                        <p className="text-sm text-muted-foreground">{trend.description}</p>
+                        </div>
                     </div>
+                     <Button variant="secondary" size="sm" asChild className="mt-2 w-full">
+                        <Link href={`/composer?topic=${encodeURIComponent(trend.title)}`}>
+                            <Plus className="mr-2 size-3.5"/> Use Trend
+                        </Link>
+                    </Button>
                   </li>
                 ))}
             </ul>

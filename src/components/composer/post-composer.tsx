@@ -1,7 +1,8 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -52,6 +53,7 @@ type ComposerFormValues = z.infer<typeof composerSchema>;
 
 export default function PostComposer() {
   const { toast } = useToast();
+  const searchParams = useSearchParams();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [isRewriting, setIsRewriting] = useState(false);
@@ -67,6 +69,14 @@ export default function PostComposer() {
       scheduleTime: '10:00',
     },
   });
+
+  useEffect(() => {
+    const topic = searchParams.get('topic');
+    if (topic) {
+      form.setValue('topic', topic);
+    }
+  }, [searchParams, form]);
+
 
   const postContentValue = useWatch({ control: form.control, name: 'postContent' });
 
