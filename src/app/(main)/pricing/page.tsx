@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Check } from 'lucide-react';
@@ -8,6 +9,7 @@ import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { useLoading } from '@/context/loading-context';
+import { useProStatus } from '@/context/pro-status-context';
 
 const plans = [
   {
@@ -65,10 +67,12 @@ const plans = [
 export default function PricingPage() {
   const { toast } = useToast();
   const { showLoading, hideLoading } = useLoading();
+  const { isProPlan, setIsProPlan } = useProStatus();
 
   const handleUpgrade = () => {
     showLoading();
     setTimeout(() => {
+        setIsProPlan(true);
         hideLoading();
         toast({
             title: "Plan Activated!",
@@ -110,9 +114,9 @@ export default function PricingPage() {
             </CardContent>
             <CardFooter>
               {plan.name === 'Pro' ? (
-                 <Button className="w-full" onClick={handleUpgrade}>{plan.cta}</Button>
+                 <Button className="w-full" onClick={handleUpgrade} disabled={isProPlan}>{isProPlan ? 'Current Plan' : plan.cta}</Button>
               ) : (
-                <Button asChild className="w-full">
+                <Button asChild className="w-full" variant={plan.name === 'Agency' ? 'outline' : 'default'}>
                     <Link href={plan.ctaLink}>{plan.cta}</Link>
                 </Button>
               )}

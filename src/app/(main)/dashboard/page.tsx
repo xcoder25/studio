@@ -15,6 +15,7 @@ import { Twitter, Facebook, Instagram, Users, ThumbsUp, MessageSquare, Share2, T
 import Link from 'next/link';
 import { findTrends, type FindTrendsOutput } from '@/ai/flows/find-trends';
 import { cn } from '@/lib/utils';
+import { useProStatus } from '@/context/pro-status-context';
 
 const TikTokIcon = () => (
     <svg
@@ -30,10 +31,10 @@ const TikTokIcon = () => (
   );
 
 export default function DashboardPage() {
+  const { isProPlan } = useProStatus();
   const [trends, setTrends] = useState<FindTrendsOutput['trends']>([]);
   const [isLoadingTrends, setIsLoadingTrends] = useState(true);
   const [errorLoadingTrends, setErrorLoadingTrends] = useState(false);
-  const [isProPlan, setIsProPlan] = useState(true);
 
   useEffect(() => {
     async function loadTrends() {

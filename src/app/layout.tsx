@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { LoadingProvider } from '@/context/loading-context';
+import { ProStatusProvider } from '@/context/pro-status-context';
 import { Inter } from 'next/font/google'
 import { cn } from '@/lib/utils';
 
@@ -20,9 +21,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" style={{ colorScheme: 'dark' }}>
       <body className={cn("font-sans antialiased", inter.variable)}>
-        <LoadingProvider>
-          {children}
-        </LoadingProvider>
+        <ProStatusProvider>
+            <LoadingProvider>
+            {children}
+            </LoadingProvider>
+        </ProStatusProvider>
         <Toaster />
       </body>
     </html>

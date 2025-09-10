@@ -65,6 +65,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { useProStatus } from '@/context/pro-status-context';
 
 
 const navItems = [
@@ -81,11 +82,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [initialLoading, setInitialLoading] = useState(true);
   const { showLoading, hideLoading, isLoading } = useLoading();
+  const { isProPlan, isAgencyPlan } = useProStatus();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAgencyOpen, setIsAgencyOpen] = useState(pathname.startsWith('/agency'));
   const [selectedClient, setSelectedClient] = useState('trendix');
-  const [isProPlan, setIsProPlan] = useState(true); // Example state
-  const [isAgencyPlan, setIsAgencyPlan] = useState(false); // Example state
 
 
   useEffect(() => {
