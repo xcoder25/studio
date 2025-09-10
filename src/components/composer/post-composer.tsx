@@ -44,7 +44,8 @@ import { useLoading } from '@/context/loading-context';
 const composerSchema = z.object({
   postContent: z.string().min(1, 'Post content cannot be empty.'),
   topic: z.string(),
-  tone: z.string(),
+  brandVoice: z.string(),
+  customBrandVoice: z.string().optional(),
   scheduleDate: z.date().optional(),
   scheduleTime: z.string().optional(),
 });
@@ -65,7 +66,8 @@ export default function PostComposer() {
     defaultValues: {
       postContent: '',
       topic: '',
-      tone: 'Informative',
+      brandVoice: 'Professional & Authoritative',
+      customBrandVoice: '',
       scheduleTime: '10:00',
     },
   });
@@ -79,9 +81,10 @@ export default function PostComposer() {
 
 
   const postContentValue = useWatch({ control: form.control, name: 'postContent' });
+  const selectedBrandVoice = useWatch({ control: form.control, name: 'brandVoice' });
 
   const handleGeneratePost = async () => {
-    const { topic, tone } = form.getValues();
+    const { topic, brandVoice, customBrandVoice } = form.getValues();
     if (!topic) {
       form.setError('topic', { message: 'Please enter a topic.' });
       return;
@@ -89,9 +92,10 @@ export default function PostComposer() {
     setIsGenerating(true);
     showLoading();
     try {
+      const voice = brandVoice === 'Custom' ? customBrandVoice : brandVoice;
       const result = await generatePostContent({
         trendingTopic: topic,
-        tone,
+        brandVoice: voice || 'Default professional tone',
         userHistory: 'The user is a tech startup focused on AI solutions. Past successful posts include new feature announcements and industry insights.',
       });
       form.setValue('postContent', result.postContent);
@@ -106,7 +110,7 @@ export default function PostComposer() {
   };
 
   const handleRewriteCaption = async () => {
-    const { postContent, tone } = form.getValues();
+    const { postContent, brandVoice, customBrandVoice } = form.getValues();
     if (!postContent) {
       form.setError('postContent', { message: 'Please enter some content to rewrite.' });
       return;
@@ -114,9 +118,10 @@ export default function PostComposer() {
     setIsRewriting(true);
     showLoading();
     try {
+      const tone = brandVoice === 'Custom' ? (customBrandVoice || 'professional') : brandVoice;
       const result = await rewriteCaption({
         caption: postContent,
-        tone,
+        tone: `Rewrite with this voice: ${tone}`,
       });
       form.setValue('postContent', result.rewrittenCaption);
       toast({ title: 'Caption rewritten successfully!' });
@@ -196,7 +201,7 @@ export default function PostComposer() {
               <CardDescription>Generate, rewrite, or get hashtag ideas for your post.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4 p-4 border rounded-lg bg-background/50">
+              <div className="space-y-4 p-4 border rounded-lg bg-background/50">
                 <FormField
                   control={form.control}
                   name="topic"
@@ -210,29 +215,44 @@ export default function PostComposer() {
                     </FormItem>
                   )}
                 />
-                <FormField
+                 <FormField
                   control={form.control}
-                  name="tone"
+                  name="brandVoice"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tone</FormLabel>
+                      <FormLabel>Brand Voice</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isAiBusy}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a tone" />
+                            <SelectValue placeholder="Select a brand voice" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Informative">Informative</SelectItem>
-                          <SelectItem value="Funny">Funny</SelectItem>
-                          <SelectItem value="Professional">Professional</SelectItem>
-                          <SelectItem value="Inspirational">Inspirational</SelectItem>
-                          <SelectItem value="Short">Short</SelectItem>
+                          <SelectItem value="Professional & Authoritative">Professional & Authoritative</SelectItem>
+                          <SelectItem value="Witty & Casual">Witty & Casual</SelectItem>
+                          <SelectItem value="Inspirational & Uplifting">Inspirational & Uplifting</SelectItem>
+                          <SelectItem value="Direct & Sales-Oriented">Direct & Sales-Oriented</SelectItem>
+                          <SelectItem value="Custom">Custom</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormItem>
                   )}
                 />
+                {selectedBrandVoice === 'Custom' && (
+                    <FormField
+                    control={form.control}
+                    name="customBrandVoice"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Describe Your Custom Voice</FormLabel>
+                        <FormControl>
+                            <Textarea placeholder="e.g., 'Upbeat but not too informal. Use emojis sparingly...'" {...field} disabled={isAiBusy} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                )}
               </div>
                <div className="flex gap-2 flex-wrap">
                 <Button type="button" onClick={handleGeneratePost} disabled={isGenerating || isAiBusy}>

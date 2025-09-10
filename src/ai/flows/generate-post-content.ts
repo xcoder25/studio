@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview Generates social media post content based on trending topics, user history, and preferred tone.
+ * @fileOverview Generates social media post content based on trending topics, user history, and a specified brand voice.
  *
  * - generatePostContent - A function that generates post content suggestions.
  * - GeneratePostContentInput - The input type for the generatePostContent function.
@@ -16,7 +16,7 @@ const GeneratePostContentInputSchema = z.object({
   userHistory: z
     .string()
     .describe('A summary of the user history and past successful posts.'),
-  tone: z.string().describe('The desired tone or style of the post (e.g., funny, serious, informative).'),
+  brandVoice: z.string().describe('A description of the desired brand voice, style, or tone (e.g., funny, professional, witty and casual).'),
 });
 export type GeneratePostContentInput = z.infer<typeof GeneratePostContentInputSchema>;
 
@@ -41,12 +41,13 @@ const prompt = ai.definePrompt({
 
   Trending Topic: {{{trendingTopic}}}
   User History: {{{userHistory}}}
-  Tone: {{{tone}}}
+  Brand Voice: {{{brandVoice}}}
 
+  Adopt the specified brand voice to craft a post that is authentic and engaging for the user's audience.
   Provide the post content, the reasoning behind the suggestion, and a list of suggested hashtags.
 
   Make sure to include relevant emojis to make the post engaging!
-  Reasoning should include why you think this post will resonate with the users audience.
+  Reasoning should include why you think this post will resonate with the user's audience.
   Hashtags should be diverse and trending.`,
 });
 
