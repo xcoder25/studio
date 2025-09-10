@@ -1,5 +1,5 @@
-import PostComposer from "@/components/composer/post-composer";
+import PlatformOptimizedComposer from '@/components/composer/platform-optimized-composer';
 
 export default function ComposerPage() {
-  return <PostComposer />;
+  return <PlatformOptimizedComposer />;
 }
