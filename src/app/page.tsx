@@ -124,7 +124,7 @@ export default function LandingPage() {
               </video>
           </div>
 
-          <div className="container mx-auto px-4 md:px-6">
+          <div className="container relative z-10 mx-auto px-4 md:px-6">
             <div className="mx-auto max-w-4xl">
               <Carousel 
                 plugins={[plugin.current]}
