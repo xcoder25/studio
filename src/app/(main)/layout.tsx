@@ -51,6 +51,7 @@ import {
   Lock,
   Cpu,
   Bot,
+  Coins,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -84,7 +85,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [initialLoading, setInitialLoading] = useState(true);
   const { showLoading, hideLoading, isLoading } = useLoading();
-  const { isProPlan, isAgencyPlan } = useProStatus();
+  const { isProPlan, isAgencyPlan, credits } = useProStatus();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAgencyOpen, setIsAgencyOpen] = useState(pathname.startsWith('/agency'));
   const [selectedClient, setSelectedClient] = useState('trendix');
@@ -150,6 +151,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (pathname.startsWith('/store')) return 'Trendix Store';
     if (pathname.startsWith('/youtube-studio/go-live')) return 'Go Live';
     if (pathname.startsWith('/youtube-studio')) return 'YouTube Studio';
+    if (pathname.startsWith('/pricing/buy-credits')) return 'Buy Credits';
     if (pathname.startsWith('/pricing')) return 'Pricing & Plans';
     if (pathname.startsWith('/campaigns')) return 'Campaigns';
     
@@ -306,6 +308,18 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </SidebarContent>
           <SidebarFooter className="gap-4">
             <SidebarMenu>
+                <SidebarMenuItem>
+                    <SidebarMenuButton
+                        asChild
+                        isActive={pathname.startsWith('/pricing/buy-credits')}
+                        tooltip={{ children: 'Buy Credits' }}
+                    >
+                        <Link href="/pricing/buy-credits" onClick={(e) => handleNavClick(e, '/pricing/buy-credits')}>
+                            <Coins />
+                            <span className="group-hover:inline hidden">Buy Credits</span>
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
@@ -358,6 +372,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </div>
           <div className="flex items-center gap-4 text-sm">
                 <div className='hidden md:flex items-center gap-2'>
+                    <Badge variant='outline' className='gap-2 border-primary/50 text-primary'>
+                        <Coins className='size-3.5' />
+                        {credits} Credits
+                    </Badge>
                     <Badge variant="outline" className="border-primary/50 text-primary">
                         <Star className="mr-2 size-3.5" />
                         {isAgencyPlan ? 'Agency Plan' : isProPlan ? 'Pro Plan' : 'Free Trial'}
