@@ -34,12 +34,15 @@ const prompt = ai.definePrompt({
   output: {schema: RewriteCaptionOutputSchema},
   prompt: `You are an AI copywriter specializing in social media captions. 
   
-  Rewrite the following caption to have a "{{{tone}}}" tone.
+  Your task is to rewrite the following caption. Apply the following instruction to the rewrite: "{{{tone}}}"
   
   Original Caption:
   "{{{caption}}}"
 
-  Your response should only be the rewritten caption. If the tone is "Short", make the caption more concise and impactful.`,
+  Your response should only be the rewritten caption.
+  - If the tone is "Short", make the caption more concise and impactful.
+  - If the tone is "Funny", add some humor or wit.
+  - If the tone is "Professional", make it more formal and polished.`,
 });
 
 const rewriteCaptionFlow = ai.defineFlow(

@@ -16,7 +16,8 @@ import { rewriteCaption } from './rewrite-caption';
 const RefineReplyInputSchema = z.object({
   originalMessage: z.string().describe('The original message that is being replied to.'),
   suggestedReply: z.string().describe('The AI-generated reply to be refined.'),
-  refinementInstruction: z.string().describe('The instruction for how to refine the reply (e.g., "Make it shorter", "Be more empathetic").'),
+  refinementInstruction: z.string().describe('The instruction for how to refine the reply (e.g., "Make it shorter", "Make it funnier").'),
+  tone: z.string().describe('The desired tone for the refinement (e.g., "Short", "Funny", "Professional").'),
 });
 export type RefineReplyInput = z.infer<typeof RefineReplyInputSchema>;
 
@@ -37,11 +38,7 @@ const refineReplyFlow = ai.defineFlow(
     inputSchema: RefineReplyInputSchema,
     outputSchema: RefineReplyOutputSchema,
   },
-  async ({ originalMessage, suggestedReply, refinementInstruction }) => {
-    // For now, we only support making the caption shorter, so we can hardcode the tone.
-    // In the future, we could parse the refinementInstruction to determine the tone.
-    const tone = "Short";
-
+  async ({ originalMessage, suggestedReply, refinementInstruction, tone }) => {
     const rewrittenResult = await rewriteCaption({
         caption: suggestedReply,
         tone: tone,

@@ -13,9 +13,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { generateReply } from '@/ai/flows/generate-reply';
 import { refineReply } from '@/ai/flows/refine-reply';
-import { Loader2, Send, Twitter, MessageSquare, Instagram, Bot, Sparkles, Wand2, Search, ChevronsUpDown, Facebook } from 'lucide-react';
+import { Loader2, Send, Twitter, MessageSquare, Instagram, Bot, Sparkles, Wand2, Search, ChevronsUpDown, Facebook, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
 const accounts = {
     trendix: {
@@ -117,7 +118,7 @@ export default function UnifiedInboxPage() {
         }
     };
 
-    const handleRefineReply = async () => {
+    const handleRefineReply = async (refinementTone: string) => {
         if (!selectedConversation || !replyText) return;
         setIsRefining(true);
         try {
@@ -125,7 +126,8 @@ export default function UnifiedInboxPage() {
             const result = await refineReply({
                 originalMessage: lastMessage,
                 suggestedReply: replyText,
-                refinementInstruction: "Make the reply shorter"
+                refinementInstruction: `Make the reply ${refinementTone.toLowerCase()}`,
+                tone: refinementTone,
             });
             setReplyText(result.refinedReply);
             toast({ title: "Reply refined!" });
@@ -295,10 +297,22 @@ export default function UnifiedInboxPage() {
                     {isLoading ? <Loader2 className="animate-spin" /> : <Sparkles />}
                     {replyText ? 'Regenerate' : 'Generate'}
                 </Button>
-                 <Button variant="outline" onClick={handleRefineReply} disabled={!replyText || isLoading || isRefining} className="w-full">
-                    {isRefining ? <Loader2 className="animate-spin" /> : <Wand2 />}
-                    Refine (Make Shorter)
-                </Button>
+                <div className="flex w-full gap-2">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-full" disabled={!replyText || isLoading || isRefining}>
+                                {isRefining ? <Loader2 className="animate-spin" /> : <Wand2 />}
+                                Refine
+                                <ChevronDown className="ml-auto size-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
+                            <DropdownMenuItem onClick={() => handleRefineReply("Short")}>Make it shorter</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleRefineReply("Funny")}>Make it funnier</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleRefineReply("Professional")}>Make it more professional</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </CardFooter>
         </Card>
     </div>
