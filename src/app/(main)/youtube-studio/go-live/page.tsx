@@ -270,5 +270,4 @@ export default function GoLivePage() {
             </div>
         </div>
     );
-
-    
+}
