@@ -144,6 +144,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (pathname.startsWith('/agency/team')) return 'Team Management';
     if (pathname.startsWith('/agency/inbox')) return 'Unified Inbox';
     if (pathname.startsWith('/agency/ad-campaigns')) return 'Ad Campaign Assistant';
+    if (pathname.startsWith('/store/engagement-booster')) return 'Engagement Booster';
     if (pathname.startsWith('/store')) return 'Trendix Store';
     if (pathname.startsWith('/youtube-studio/go-live')) return 'Go Live';
     if (pathname.startsWith('/youtube-studio')) return 'YouTube Studio';

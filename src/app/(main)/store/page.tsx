@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bot, Zap, Puzzle, Sparkles, Pencil, Clapperboard, MessageSquareHeart, LayoutTemplate, Image, Music, FileText, Calendar, Brush, BarChart, Users } from "lucide-react";
+import Link from 'next/link';
 import React from 'react';
 
 const addons = [
@@ -98,7 +99,8 @@ const addons = [
     description: "Auto-like and auto-follow relevant accounts with AI safety filters.",
     category: "Automations",
     icon: <Zap className="size-8 text-primary" />,
-    status: "Activate"
+    status: "View Pricing",
+    href: "/store/engagement-booster"
   },
   {
     title: "Smart Analytics Alerts",
@@ -263,7 +265,7 @@ export default function StorePage() {
                     </div>
                  ) : (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredAddons.map((addon) => (
+                        {filteredAddons.map((addon: any) => (
                             <Card key={addon.title} className="flex flex-col">
                                 <CardHeader className="flex-row items-start gap-4">
                                     {addon.icon}
@@ -276,9 +278,15 @@ export default function StorePage() {
                                     <CardDescription>{addon.description}</CardDescription>
                                 </CardContent>
                                 <CardFooter>
-                                    <Button className="w-full" disabled={addon.status !== 'Activate'}>
-                                        {addon.status}
-                                    </Button>
+                                    {addon.href ? (
+                                        <Button asChild className="w-full">
+                                            <Link href={addon.href}>{addon.status}</Link>
+                                        </Button>
+                                    ) : (
+                                        <Button className="w-full" disabled={addon.status !== 'Activate'}>
+                                            {addon.status}
+                                        </Button>
+                                    )}
                                 </CardFooter>
                             </Card>
                         ))}
