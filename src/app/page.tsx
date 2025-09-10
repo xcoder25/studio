@@ -111,19 +111,17 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-1">
-        <section className="relative w-full py-20 text-center md:py-32 overflow-hidden">
-          <div className="absolute inset-0 -z-10 bg-black">
-             <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover opacity-20"
-              >
-                <source src="/trendix.mp4" type="video/mp4" />
-              </video>
-          </div>
-
+        <section className="relative w-full py-20 text-center md:py-32 overflow-hidden bg-black">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover opacity-20 -z-10"
+          >
+            <source src="/trendix.mp4" type="video/mp4" />
+          </video>
+          
           <div className="container relative z-10 mx-auto px-4 md:px-6">
             <div className="mx-auto max-w-4xl">
               <Carousel 
