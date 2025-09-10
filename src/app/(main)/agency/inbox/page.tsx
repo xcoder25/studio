@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { generateReply } from '@/ai/flows/generate-reply';
+import { refineReply } from '@/ai/flows/refine-reply';
 import { Loader2, Send, Twitter, MessageSquare, Instagram, Bot, Sparkles, Wand2, Search, ChevronsUpDown, Facebook } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -68,6 +69,7 @@ export default function UnifiedInboxPage() {
 
     const [selectedConversation, setSelectedConversation] = useState(filteredConversations[0]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isRefining, setIsRefining] = useState(false);
     const [replyText, setReplyText] = useState('');
     const [tone, setTone] = useState('Friendly');
 
@@ -114,6 +116,26 @@ export default function UnifiedInboxPage() {
             setIsLoading(false);
         }
     };
+
+    const handleRefineReply = async () => {
+        if (!selectedConversation || !replyText) return;
+        setIsRefining(true);
+        try {
+            const lastMessage = currentAccountData.messageThread[selectedConversation.id as keyof typeof currentAccountData.messageThread].slice(-1)[0].text;
+            const result = await refineReply({
+                originalMessage: lastMessage,
+                suggestedReply: replyText,
+                refinementInstruction: "Make the reply shorter"
+            });
+            setReplyText(result.refinedReply);
+            toast({ title: "Reply refined!" });
+        } catch (error) {
+            console.error(error);
+            toast({ variant: 'destructive', title: 'Refinement Failed' });
+        } finally {
+            setIsRefining(false);
+        }
+    }
     
   return (
     <div className="grid grid-cols-10 gap-4 h-[calc(100vh-8rem)]">
@@ -269,18 +291,16 @@ export default function UnifiedInboxPage() {
                 </div>
             </CardContent>
             <CardFooter className="flex-col gap-2">
-                 <Button onClick={handleGenerateReply} disabled={isLoading || !selectedConversation} className="w-full">
+                 <Button onClick={handleGenerateReply} disabled={isLoading || isRefining || !selectedConversation} className="w-full">
                     {isLoading ? <Loader2 className="animate-spin" /> : <Sparkles />}
                     {replyText ? 'Regenerate' : 'Generate'}
                 </Button>
-                 <Button variant="outline" disabled={!replyText} className="w-full">
-                    <Wand2 />
-                    Refine
+                 <Button variant="outline" onClick={handleRefineReply} disabled={!replyText || isLoading || isRefining} className="w-full">
+                    {isRefining ? <Loader2 className="animate-spin" /> : <Wand2 />}
+                    Refine (Make Shorter)
                 </Button>
             </CardFooter>
         </Card>
     </div>
   );
 }
-
-    
