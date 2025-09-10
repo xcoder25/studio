@@ -11,9 +11,10 @@ import EngagementChart from "@/components/dashboard/engagement-chart";
 import PostsOverview from "@/components/dashboard/posts-overview";
 import VideoStats from '@/components/dashboard/video-stats';
 import RecentVideos from '@/components/dashboard/recent-videos';
-import { Twitter, Facebook, Instagram, Users, ThumbsUp, MessageSquare, Share2, TrendingUp, ArrowRight, Video, Mic, Text, Maximize, Loader2, Wand2, Music, Hash, AlertCircle } from "lucide-react";
+import { Twitter, Facebook, Instagram, Users, ThumbsUp, MessageSquare, Share2, TrendingUp, ArrowRight, Video, Mic, Text, Maximize, Loader2, Wand2, Music, Hash, AlertCircle, PenSquare, MicVocal, Megaphone, Scale } from "lucide-react";
 import Link from 'next/link';
 import { findTrends, type FindTrendsOutput } from '@/ai/flows/find-trends';
+import { cn } from '@/lib/utils';
 
 const TikTokIcon = () => (
     <svg
@@ -32,6 +33,7 @@ export default function DashboardPage() {
   const [trends, setTrends] = useState<FindTrendsOutput['trends']>([]);
   const [isLoadingTrends, setIsLoadingTrends] = useState(true);
   const [errorLoadingTrends, setErrorLoadingTrends] = useState(false);
+  const [isProPlan, setIsProPlan] = useState(true);
 
   useEffect(() => {
     async function loadTrends() {
@@ -119,6 +121,15 @@ export default function DashboardPage() {
     { label: "Upscale Video", icon: Maximize, href: "/video-generator/editor" },
     { label: "Create Story", icon: Video, href: "/video-generator/editor" },
   ];
+
+  const proTools = [
+      { label: "Composer", icon: PenSquare, href: "/composer", description: "Generate & schedule posts" },
+      { label: "Competitor Analysis", icon: Users, href: "/agency/competitor-analysis", description: "Analyze competitor strategies" },
+      { label: "Social Listening", icon: MicVocal, href: "/agency/social-listening", description: "Monitor brand mentions" },
+      { label: "Ad Assistant", icon: Megaphone, href: "/agency/ad-campaigns", description: "Create ad copy with AI" },
+      { label: "Unified Inbox", icon: MessageSquare, href: "/agency/inbox", description: "Manage all conversations" },
+      { label: "Trend Finder", icon: TrendingUp, href: "/composer", description: "Discover hot topics" },
+  ]
   
   const trendIcons = {
     hashtag: <Hash className="size-5 text-primary" />,
@@ -152,6 +163,28 @@ export default function DashboardPage() {
       </div>
 
       <RecentVideos />
+
+      {isProPlan && (
+        <Card>
+            <CardHeader>
+                <CardTitle>AI Social Media Tools</CardTitle>
+                <CardDescription>Your suite of AI-powered tools for social media management.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {proTools.map((tool) => (
+                    <Button key={tool.label} variant="outline" asChild className="h-auto p-4 justify-start">
+                        <Link href={tool.href}>
+                            <tool.icon className="size-6 mr-4 text-primary" />
+                            <div>
+                                <p className="font-semibold">{tool.label}</p>
+                                <p className="text-xs text-muted-foreground">{tool.description}</p>
+                            </div>
+                        </Link>
+                    </Button>
+                ))}
+            </CardContent>
+        </Card>
+      )}
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         {socialStats.map((stat) => (
