@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Radio, Video, CameraOff, Send, ScreenShare, Upload, Bot, Sparkles, Shield } from "lucide-react";
+import { Radio, Video, CameraOff, Send, ScreenShare, Upload, Bot, Sparkles, Shield, LayoutGrid, MicOff, Disc } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
@@ -32,6 +32,8 @@ export default function GoLivePage() {
     const [source, setSource] = useState<StreamSource>('camera');
     const [permissionError, setPermissionError] = useState<string | null>(null);
     const [isStreaming, setIsStreaming] = useState(false);
+    const [isMuted, setIsMuted] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
 
     const cleanupStream = () => {
         if (stream) {
@@ -146,6 +148,36 @@ export default function GoLivePage() {
                         )}
                      </div>
                 </Card>
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Studio Controls</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-wrap items-center gap-4">
+                        <div>
+                            <Label className="text-xs text-muted-foreground">Scenes</Label>
+                            <div className="flex gap-2 mt-1">
+                                <Button variant="outline" size="sm" className="flex items-center gap-2"><LayoutGrid className="size-4" /> Camera Only</Button>
+                                <Button variant="outline" size="sm" className="flex items-center gap-2"><LayoutGrid className="size-4" /> Screen + Cam</Button>
+                            </div>
+                        </div>
+                         <div>
+                            <Label className="text-xs text-muted-foreground">Audio</Label>
+                            <div className="flex gap-2 mt-1">
+                                <Button variant={isMuted ? 'destructive' : 'outline'} size="sm" className="flex items-center gap-2" onClick={() => setIsMuted(!isMuted)}>
+                                    <MicOff className="size-4" /> {isMuted ? 'Unmute Mic' : 'Mute Mic'}
+                                </Button>
+                            </div>
+                        </div>
+                         <div>
+                            <Label className="text-xs text-muted-foreground">Recording</Label>
+                            <div className="flex gap-2 mt-1">
+                                <Button variant="outline" size="sm" className={cn("flex items-center gap-2", isRecording && "text-red-500")} onClick={() => setIsRecording(!isRecording)}>
+                                    <Disc className={cn("size-4", isRecording && "animate-pulse")} /> {isRecording ? 'Stop Recording' : 'Start Recording'}
+                                </Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
                 <div className="grid md:grid-cols-2 gap-6">
                     <Card>
                         <CardHeader>
@@ -238,4 +270,5 @@ export default function GoLivePage() {
             </div>
         </div>
     );
-}
+
+    
