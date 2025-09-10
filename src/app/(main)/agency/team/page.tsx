@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, PlusCircle, UserPlus, Shield, Edit, BarChart, Trash2 } from "lucide-react";
+import { MoreHorizontal, UserPlus, Shield, Edit, BarChart, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,13 +21,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
-const teamMembers = [
+const initialTeamMembers = [
   { id: 1, name: 'Jane Doe', email: 'jane.doe@example.com', role: 'Admin', avatar: 'https://picsum.photos/100/100?random=1' },
   { id: 2, name: 'John Smith', email: 'john.smith@example.com', role: 'Editor', avatar: 'https://picsum.photos/100/100?random=2' },
   { id: 3, name: 'Peter Jones', email: 'peter.jones@example.com', role: 'Analyst', avatar: 'https://picsum.photos/100/100?random=3' },
   { id: 4, name: 'Sara Miller', email: 'sara.miller@example.com', role: 'Editor', avatar: 'https://picsum.photos/100/100?random=4' },
 ];
+
+type TeamMember = typeof initialTeamMembers[0];
 
 const roleConfig = {
     Admin: { icon: Shield, color: 'bg-red-500/20 text-red-400 border-red-500/30' },
@@ -36,7 +39,33 @@ const roleConfig = {
 }
 
 export default function TeamManagementPage() {
+    const { toast } = useToast();
+    const [teamMembers, setTeamMembers] = useState<TeamMember[]>(initialTeamMembers);
     const [isInviteOpen, setIsInviteOpen] = useState(false);
+    const [newMemberEmail, setNewMemberEmail] = useState('');
+    const [newMemberRole, setNewMemberRole] = useState('Editor');
+
+    const handleInvite = () => {
+        if (!newMemberEmail) {
+            toast({ variant: 'destructive', title: 'Email is required' });
+            return;
+        }
+
+        const newMember: TeamMember = {
+            id: teamMembers.length + 1,
+            name: 'New Member',
+            email: newMemberEmail,
+            role: newMemberRole,
+            avatar: `https://picsum.photos/100/100?random=${Math.random()}`,
+        };
+
+        setTeamMembers([...teamMembers, newMember]);
+        toast({ title: "Invitation Sent!", description: `${newMemberEmail} has been invited to the team.` });
+        
+        setIsInviteOpen(false);
+        setNewMemberEmail('');
+        setNewMemberRole('Editor');
+    }
 
     return (
     <>
@@ -67,7 +96,7 @@ export default function TeamManagementPage() {
                                 <div className="flex items-center gap-3">
                                     <Avatar>
                                     <AvatarImage src={member.avatar} alt={member.name} data-ai-hint="avatar" />
-                                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                    <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                                     </Avatar>
                                     <div>
                                         <p className="font-medium">{member.name}</p>
@@ -114,11 +143,11 @@ export default function TeamManagementPage() {
                 <div className="space-y-4 py-4">
                     <div className="space-y-2">
                         <Label htmlFor="email">Email Address</Label>
-                        <Input id="email" type="email" placeholder="name@company.com" />
+                        <Input id="email" type="email" placeholder="name@company.com" value={newMemberEmail} onChange={e => setNewMemberEmail(e.target.value)} />
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="role">Role</Label>
-                        <Select>
+                        <Select value={newMemberRole} onValueChange={setNewMemberRole}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a role" />
                             </SelectTrigger>
@@ -132,7 +161,7 @@ export default function TeamManagementPage() {
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={() => setIsInviteOpen(false)}>Cancel</Button>
-                    <Button onClick={() => setIsInviteOpen(false)}>Send Invitation</Button>
+                    <Button onClick={handleInvite}>Send Invitation</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
