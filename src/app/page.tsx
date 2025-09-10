@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import React from 'react';
@@ -8,7 +9,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { ArrowRight, Bot, BarChart, Calendar, Video, Palette, Check } from 'lucide-react';
+import { ArrowRight, Bot, BarChart, Calendar, Video, Palette, Check, PlayCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const features = [
@@ -191,67 +192,76 @@ export default function LandingPage() {
         </section>
 
         <section id="pricing" className="w-full bg-card/20 py-20 md:py-32">
-          <div className="container mx-auto px-4 md:px-6">
-             <div className="mx-auto max-w-3xl text-center">
-              <h2 className="text-4xl font-bold">Simple Pricing for Teams of All Sizes</h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                Choose the plan that's right for you. Cancel anytime.
-              </p>
-            </div>
-            <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                 <Card className="flex flex-col">
-                    <CardHeader>
-                        <CardTitle className="text-2xl">Free Trial</CardTitle>
-                        <CardDescription>Explore the core features.</CardDescription>
-                        <div className="pt-4">
-                            <span className="text-4xl font-bold">$0</span>
-                            <span className="text-muted-foreground">/ 14 days</span>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                       <ul className="space-y-3">
-                        {['1 Social Account', 'AI Content Generation (10 posts)', 'Basic Analytics'].map(feature => (
-                        <li key={feature} className="flex items-center gap-3">
-                            <Check className="size-5 text-primary" />
-                            <span className="text-muted-foreground">{feature}</span>
-                        </li>
-                        ))}
-                    </ul>
-                    </CardContent>
-                    <CardContent>
-                        <Button className="w-full" asChild>
-                            <Link href="/signup">Start Trial</Link>
-                        </Button>
-                    </CardContent>
-                </Card>
-              {plans.map((plan) => (
-                <Card key={plan.name} className="flex flex-col border-primary/50">
-                  <CardHeader>
-                    <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                    <CardDescription>{plan.description}</CardDescription>
-                     <div className="pt-4">
-                        <span className="text-4xl font-bold">{plan.price}</span>
-                        <span className="text-muted-foreground">/ month</span>
+            <div className="container mx-auto px-4 md:px-6">
+                <div className="grid lg:grid-cols-2 gap-12 items-center">
+                    <div className="relative aspect-video rounded-xl bg-muted flex items-center justify-center">
+                        <PlayCircle className="size-20 text-muted-foreground" />
+                        <p className="absolute bottom-4 text-sm text-muted-foreground">Video placeholder</p>
                     </div>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <ul className="space-y-3">
-                        {plan.features.map(feature => (
-                        <li key={feature} className="flex items-center gap-3">
-                            <Check className="size-5 text-primary" />
-                            <span className="text-muted-foreground">{feature}</span>
-                        </li>
-                        ))}
-                    </ul>
-                  </CardContent>
-                  <CardContent>
-                    <Button className="w-full">{plan.cta}</Button>
-                  </CardContent>
-                </Card>
-              ))}
+                    <div className="space-y-8">
+                         <div className="space-y-2">
+                            <h2 className="text-4xl font-bold">Simple Pricing for Teams of All Sizes</h2>
+                            <p className="text-lg text-muted-foreground">
+                                Choose the plan that's right for you. Cancel anytime.
+                            </p>
+                        </div>
+                        <div className="grid gap-8 sm:grid-cols-2">
+                             <Card className="flex flex-col">
+                                <CardHeader>
+                                    <CardTitle className="text-2xl">Free Trial</CardTitle>
+                                    <CardDescription>Explore the core features.</CardDescription>
+                                    <div className="pt-4">
+                                        <span className="text-4xl font-bold">$0</span>
+                                        <span className="text-muted-foreground">/ 14 days</span>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="flex-grow">
+                                <ul className="space-y-3">
+                                    {['1 Social Account', 'AI Content Generation (10 posts)', 'Basic Analytics'].map(feature => (
+                                    <li key={feature} className="flex items-center gap-3">
+                                        <Check className="size-5 text-primary" />
+                                        <span className="text-muted-foreground">{feature}</span>
+                                    </li>
+                                    ))}
+                                </ul>
+                                </CardContent>
+                                <CardContent>
+                                    <Button className="w-full" asChild>
+                                        <Link href="/signup">Start Trial</Link>
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                          {plans.map((plan) => (
+                            <Card key={plan.name} className="flex flex-col border-primary/50">
+                              <CardHeader>
+                                <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                                <CardDescription>{plan.description}</CardDescription>
+                                <div className="pt-4">
+                                    <span className="text-4xl font-bold">{plan.price}</span>
+                                    <span className="text-muted-foreground">/ month</span>
+                                </div>
+                              </CardHeader>
+                              <CardContent className="flex-grow">
+                                <ul className="space-y-3">
+                                    {plan.features.map(feature => (
+                                    <li key={feature} className="flex items-center gap-3">
+                                        <Check className="size-5 text-primary" />
+                                        <span className="text-muted-foreground">{feature}</span>
+                                    </li>
+                                    ))}
+                                </ul>
+                              </CardContent>
+                              <CardContent>
+                                <Button className="w-full">{plan.cta}</Button>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </section>
+
       </main>
 
        <footer className="border-t">
@@ -274,3 +284,4 @@ export default function LandingPage() {
     </div>
   );
 }
+
