@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
+import { useLoading } from '@/context/loading-context';
 
 const plans = [
   {
@@ -31,6 +33,7 @@ const plans = [
     features: [
       'Up to 5 Social Accounts',
       'Full AI Assistant Suite',
+      'YouTube Studio Access',
       'Video Editor (50 credits/month)',
       'Advanced Analytics & Reporting',
       'Content Scheduling',
@@ -57,6 +60,20 @@ const plans = [
 ];
 
 export default function PricingPage() {
+  const { toast } = useToast();
+  const { showLoading, hideLoading } = useLoading();
+
+  const handleUpgrade = () => {
+    showLoading();
+    setTimeout(() => {
+        hideLoading();
+        toast({
+            title: "Plan Activated!",
+            description: "You've successfully upgraded to the Pro Plan. All features are now unlocked."
+        })
+    }, 1500)
+  }
+
   return (
     <div className="space-y-8">
       <div className="text-center max-w-2xl mx-auto">
@@ -89,9 +106,13 @@ export default function PricingPage() {
               </ul>
             </CardContent>
             <CardFooter>
-              <Button asChild className="w-full">
-                <Link href={plan.ctaLink}>{plan.cta}</Link>
-              </Button>
+              {plan.name === 'Pro' ? (
+                 <Button className="w-full" onClick={handleUpgrade}>{plan.cta}</Button>
+              ) : (
+                <Button asChild className="w-full">
+                    <Link href={plan.ctaLink}>{plan.cta}</Link>
+                </Button>
+              )}
             </CardFooter>
           </Card>
         ))}

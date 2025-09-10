@@ -46,6 +46,7 @@ const pricingPlans = [
       'Video Editor (5 credits)',
     ],
     cta: 'Start Your Free Trial',
+    ctaLink: '/signup'
   },
   {
     name: 'Pro',
@@ -60,6 +61,7 @@ const pricingPlans = [
     ],
     cta: 'Choose Pro',
     popular: true,
+    ctaLink: '/pricing'
   },
   {
     name: 'Agency',
@@ -73,6 +75,7 @@ const pricingPlans = [
       'Client Reporting',
     ],
     cta: 'Contact Sales',
+    ctaLink: '/pricing'
   },
 ];
 
@@ -194,7 +197,9 @@ export default function LandingPage() {
                                 </ul>
                             </CardContent>
                             <CardContent>
-                                <Button className="w-full">{plan.cta}</Button>
+                                <Button asChild className="w-full">
+                                    <Link href={plan.ctaLink}>{plan.cta}</Link>
+                                </Button>
                             </CardContent>
                         </Card>
                     ))}
