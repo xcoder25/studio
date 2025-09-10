@@ -145,7 +145,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (pathname.startsWith('/agency/inbox')) return 'Unified Inbox';
     if (pathname.startsWith('/agency/ad-campaigns')) return 'Ad Campaign Assistant';
     if (pathname.startsWith('/store')) return 'Trendix Store';
-    if (pathname.startsWith('/youtube-studio/go-live')) return 'Go Live';
     if (pathname.startsWith('/youtube-studio')) return 'YouTube Studio';
     if (pathname.startsWith('/pricing')) return 'Pricing & Plans';
     if (pathname.startsWith('/model-builder')) return 'Model Builder';
@@ -209,23 +208,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
                  <SidebarMenuItem>
                    <SidebarMenuButton
-                        asChild={isProPlan}
+                        asChild
                         isActive={pathname.startsWith('/youtube-studio')}
-                        className={cn(!isProPlan && "cursor-not-allowed opacity-50")}
-                        tooltip={{ children: isProPlan ? 'YouTube Studio' : 'Upgrade to Pro' }}
+                        tooltip={{ children: 'YouTube Studio' }}
                     >
-                        {isProPlan ? (
-                             <Link href="/youtube-studio" onClick={(e) => handleNavClick(e, '/youtube-studio')}>
-                                <Youtube />
-                                <span className="group-hover:inline hidden">YouTube Studio</span>
-                             </Link>
-                        ) : (
-                            <Link href="/pricing" className="w-full">
-                                <Lock />
-                                <span className="group-hover:inline hidden">YouTube Studio</span>
-                                <Badge variant="secondary" className="ml-auto group-hover:inline hidden">Pro</Badge>
-                            </Link>
-                        )}
+                        <Link href="/youtube-studio" onClick={(e) => handleNavClick(e, '/youtube-studio')}>
+                            <Youtube />
+                            <span className="group-hover:inline hidden">YouTube Studio</span>
+                        </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
 
@@ -293,6 +283,20 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                       </SidebarMenuSub>
                   </CollapsibleContent>
                 </Collapsible>
+                 <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith('/model-builder')}
+                    tooltip={{
+                      children: "Model Builder",
+                    }}
+                  >
+                    <Link href="/model-builder" onClick={(e) => handleNavClick(e, '/model-builder')}>
+                      <Cpu />
+                      <span className="group-hover:inline hidden">Model Builder</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
@@ -438,7 +442,3 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     </SidebarProvider>
   );
 }
-
-    
-
-    
