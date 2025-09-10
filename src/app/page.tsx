@@ -117,10 +117,9 @@ export default function LandingPage() {
             loop
             muted
             playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-20 -z-10"
-          >
-            <source src="/trendix.mp4" type="video/mp4" />
-          </video>
+            className="absolute inset-0 w-full h-full object-cover opacity-20"
+            src="/trendix.mp4"
+          />
           
           <div className="container relative z-10 mx-auto px-4 md:px-6">
             <div className="mx-auto max-w-4xl">
