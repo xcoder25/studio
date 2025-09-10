@@ -144,6 +144,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (pathname.startsWith('/agency/inbox')) return 'Unified Inbox';
     if (pathname.startsWith('/agency/ad-campaigns')) return 'Ad Campaign Assistant';
     if (pathname.startsWith('/store')) return 'Trendix Store';
+    if (pathname.startsWith('/youtube-studio/go-live')) return 'Go Live';
     if (pathname.startsWith('/youtube-studio')) return 'YouTube Studio';
     if (pathname.startsWith('/pricing')) return 'Pricing & Plans';
     
@@ -205,18 +206,25 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 </SidebarMenuItem>
 
                  <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith('/youtube-studio')}
-                    tooltip={{
-                      children: "YouTube Studio",
-                    }}
-                  >
-                    <Link href="/youtube-studio" onClick={(e) => handleNavClick(e, '/youtube-studio')}>
-                      <Youtube />
-                      <span className="group-hover:inline hidden">YouTube Studio</span>
-                    </Link>
-                  </SidebarMenuButton>
+                   <SidebarMenuButton
+                        asChild={isProPlan}
+                        isActive={pathname.startsWith('/youtube-studio')}
+                        className={cn(!isProPlan && "cursor-not-allowed opacity-50")}
+                        tooltip={{ children: isProPlan ? 'YouTube Studio' : 'Upgrade to Pro' }}
+                    >
+                        {isProPlan ? (
+                             <Link href="/youtube-studio" onClick={(e) => handleNavClick(e, '/youtube-studio')}>
+                                <Youtube />
+                                <span className="group-hover:inline hidden">YouTube Studio</span>
+                             </Link>
+                        ) : (
+                            <Link href="/pricing" className="w-full">
+                                <Lock />
+                                <span className="group-hover:inline hidden">YouTube Studio</span>
+                                <Badge variant="secondary" className="ml-auto group-hover:inline hidden">Pro</Badge>
+                            </Link>
+                        )}
+                    </SidebarMenuButton>
                 </SidebarMenuItem>
 
                 <Collapsible open={isAgencyOpen && isAgencyPlan} onOpenChange={setIsAgencyOpen} disabled={!isAgencyPlan}>
@@ -356,7 +364,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 <div className='hidden md:flex items-center gap-2'>
                     <Badge variant="outline" className="border-primary/50 text-primary">
                         <Star className="mr-2 size-3.5" />
-                        {isAgencyPlan ? 'Agency Plan' : 'Pro Plan'}
+                        {isAgencyPlan ? 'Agency Plan' : isProPlan ? 'Pro Plan' : 'Free Trial'}
                     </Badge>
                     {!isProPlan && (
                       <Button variant="default" size="sm" asChild>
@@ -429,3 +437,5 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     </SidebarProvider>
   );
 }
+
+    

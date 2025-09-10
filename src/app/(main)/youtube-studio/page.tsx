@@ -1,10 +1,12 @@
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, BarChart, Lightbulb } from "lucide-react";
+import { Upload, BarChart, Radio } from "lucide-react";
 import YouTubeStats from "@/components/youtube/youtube-stats";
 import RecentVideosYT from "@/components/youtube/recent-videos-yt";
 import ViewsChart from "@/components/youtube/views-chart";
 import ContentIdeas from "@/components/youtube/content-ideas";
+import Link from "next/link";
 
 export default function YouTubeStudioPage() {
     return (
@@ -16,6 +18,11 @@ export default function YouTubeStudioPage() {
                 </div>
                 <div className="flex gap-2">
                     <Button variant="outline"><BarChart className="mr-2"/> Channel Analytics</Button>
+                    <Button variant="secondary" asChild>
+                        <Link href="/youtube-studio/go-live">
+                            <Radio className="mr-2" /> Go Live
+                        </Link>
+                    </Button>
                     <Button><Upload className="mr-2"/> Upload Video</Button>
                 </div>
             </div>
@@ -40,3 +47,5 @@ export default function YouTubeStudioPage() {
         </div>
     );
 }
+
+    
