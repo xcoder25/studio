@@ -2,8 +2,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight, Bot, BarChart, Calendar, Video, Palette } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ArrowRight, Bot, BarChart, Calendar, Video, Palette, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const features = [
@@ -33,6 +33,49 @@ const features = [
   },
 ];
 
+const pricingPlans = [
+  {
+    name: 'Free Trial',
+    price: '$0',
+    period: 'for 14 days',
+    description: 'Explore the core features of Trendix.',
+    features: [
+      '1 Facebook Page',
+      '1 Instagram Account',
+      'AI Content Generation',
+      'Video Editor (5 credits)',
+    ],
+    cta: 'Start Your Free Trial',
+  },
+  {
+    name: 'Pro',
+    price: '$49',
+    period: '/ month',
+    description: 'For creators and small businesses.',
+    features: [
+      '5 Social Accounts',
+      'Full AI Assistant Suite',
+      'Video Editor (50 credits)',
+      'Advanced Analytics',
+    ],
+    cta: 'Choose Pro',
+    popular: true,
+  },
+  {
+    name: 'Agency',
+    price: '$129',
+    period: '/ month',
+    description: 'For agencies and marketing teams.',
+    features: [
+      'Unlimited Social Accounts',
+      'Team Collaboration Tools',
+      'Video Editor (200 credits)',
+      'Client Reporting',
+    ],
+    cta: 'Contact Sales',
+  },
+];
+
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -47,6 +90,8 @@ export default function LandingPage() {
           <span className="text-xl font-bold">Trendix</span>
         </Link>
         <nav className="flex items-center gap-2">
+            <Link href="#features" className={cn(buttonVariants({ variant: 'ghost' }))}>Features</Link>
+            <Link href="#pricing" className={cn(buttonVariants({ variant: 'ghost' }))}>Pricing</Link>
           <Link
             href="/login"
             className={cn(buttonVariants({ variant: 'ghost' }))}
@@ -115,8 +160,49 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+        
+        <section id="pricing" className="py-20 md:py-24">
+            <div className="container mx-auto px-4 md:px-6">
+                <div className="mx-auto mb-12 max-w-2xl text-center">
+                    <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                        Find a Plan That's Right for You
+                    </h2>
+                    <p className="mt-4 text-muted-foreground">
+                        Start for free and scale up as you grow. No hidden fees.
+                    </p>
+                </div>
+                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    {pricingPlans.map((plan) => (
+                        <Card key={plan.name} className={cn("flex flex-col", plan.popular && "border-primary ring-2 ring-primary")}>
+                            <CardHeader>
+                                {plan.popular && <div className="text-center"><div className="inline-block px-3 py-1 text-xs font-semibold tracking-wider text-primary-foreground bg-primary rounded-full">Most Popular</div></div>}
+                                <CardTitle className="text-center text-3xl font-bold pt-4">{plan.name}</CardTitle>
+                                <CardDescription className="text-center">
+                                    <span className="text-4xl font-bold text-foreground">{plan.price}</span>
+                                    <span className="text-muted-foreground">{plan.period}</span>
+                                </CardDescription>
+                                <CardDescription className="text-center h-10">{plan.description}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex-grow">
+                                <ul className="space-y-3">
+                                    {plan.features.map(feature => (
+                                        <li key={feature} className="flex items-center gap-2">
+                                            <Check className="size-5 text-primary" />
+                                            <span className="text-muted-foreground">{feature}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </CardContent>
+                            <CardContent>
+                                <Button className="w-full">{plan.cta}</Button>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            </div>
+        </section>
 
-        <section className="py-20 md:py-24">
+        <section className="py-20 md:py-24  bg-background/50">
             <div className="container mx-auto px-4 md:px-6">
                  <div className="items-center gap-12 grid lg:grid-cols-2">
                     <div>

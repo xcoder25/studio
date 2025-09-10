@@ -46,6 +46,7 @@ import {
   UserPlus,
   Store,
   Youtube,
+  CreditCard,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -139,6 +140,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (pathname.startsWith('/agency/ad-campaigns')) return 'Ad Campaign Assistant';
     if (pathname.startsWith('/store')) return 'Trendix Store';
     if (pathname.startsWith('/youtube-studio')) return 'YouTube Studio';
+    if (pathname.startsWith('/pricing')) return 'Pricing & Plans';
     
     const currentNavItem = navItems.find(item => pathname.startsWith(item.href));
     if (currentNavItem) return currentNavItem.label;
@@ -314,7 +316,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56 mb-2" align="end">
                     <DropdownMenuItem>Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Billing</DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/pricing">
+                        <CreditCard className="mr-2" />
+                        Billing
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
                   </DropdownMenuContent>
