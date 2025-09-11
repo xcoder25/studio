@@ -65,6 +65,24 @@ export default function SignupPage() {
       password: '',
     },
   });
+  
+  const handleAuthError = (error: any) => {
+    console.error(error);
+    if (error.code === 'auth/unauthorized-domain') {
+        toast({
+            variant: 'destructive',
+            title: 'Configuration Error: Domain Not Authorized',
+            description: "This app's domain is not authorized. Please go to your Firebase Console -> Authentication -> Settings -> Authorized domains and add 'localhost'.",
+            duration: 10000,
+        });
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Sign Up Failed",
+            description: error.message || "An unexpected error occurred.",
+        });
+    }
+  }
 
   const onSubmit = async (data: SignupFormValues) => {
     showLoading();
@@ -85,12 +103,7 @@ export default function SignupPage() {
             router.push('/dashboard');
         }, 1500);
     } catch (error: any) {
-        console.error(error);
-        toast({
-            variant: "destructive",
-            title: "Sign Up Failed",
-            description: error.message || "An unexpected error occurred. Please try again.",
-        });
+        handleAuthError(error);
     } finally {
         hideLoading();
     }
@@ -112,12 +125,7 @@ export default function SignupPage() {
             router.push('/dashboard');
         }, 1500)
     } catch (error: any) {
-        console.error(error);
-        toast({
-            variant: "destructive",
-            title: "Apple Sign-Up Failed",
-            description: error.message || "There was an error signing up with Apple. Please try again.",
-        });
+        handleAuthError(error);
     } finally {
         hideLoading();
     }
@@ -139,12 +147,7 @@ export default function SignupPage() {
             router.push('/dashboard');
         }, 1500);
     } catch (error: any) {
-        console.error(error);
-        toast({
-            variant: "destructive",
-            title: "Google Sign-Up Failed",
-            description: error.message || "There was an error signing up with Google. Please try again.",
-        });
+        handleAuthError(error);
     } finally {
         hideLoading();
     }
@@ -233,3 +236,5 @@ export default function SignupPage() {
     </Card>
   );
 }
+
+    
