@@ -24,8 +24,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useLoading } from '@/context/loading-context';
-import { getAuth, signInWithPopup, OAuthProvider, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
-import { app } from '@/lib/firebase';
+import { signInWithPopup, OAuthProvider, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 
@@ -56,7 +56,6 @@ export default function LoginPage() {
   const router = useRouter();
   const { showLoading, hideLoading } = useLoading();
   const { toast } = useToast();
-  const auth = getAuth(app);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -94,7 +93,7 @@ export default function LoginPage() {
   
   const handleAppleSignIn = async () => {
     const provider = new OAuthProvider('apple.com');
-    showLoading(3000);
+    showLoading();
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
@@ -107,12 +106,12 @@ export default function LoginPage() {
         setTimeout(() => {
             router.push('/dashboard');
         }, 1500)
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
         toast({
             variant: "destructive",
             title: "Apple Sign-In Failed",
-            description: "There was an error signing in with Apple. Please try again.",
+            description: error.message || "There was an error signing in with Apple. Please try again.",
         });
     } finally {
         hideLoading();
@@ -121,7 +120,7 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
-    showLoading(3000);
+    showLoading();
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
@@ -134,12 +133,12 @@ export default function LoginPage() {
         setTimeout(() => {
             router.push('/dashboard');
         }, 1500);
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
         toast({
             variant: "destructive",
             title: "Google Sign-In Failed",
-            description: "There was an error signing in with Google. Please try again.",
+            description: error.message || "There was an error signing in with Google. Please try again.",
         });
     } finally {
         hideLoading();

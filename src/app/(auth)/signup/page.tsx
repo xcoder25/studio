@@ -24,8 +24,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useLoading } from '@/context/loading-context';
-import { getAuth, signInWithPopup, OAuthProvider, GoogleAuthProvider, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { app } from '@/lib/firebase';
+import { signInWithPopup, OAuthProvider, GoogleAuthProvider, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 
@@ -56,7 +56,6 @@ export default function SignupPage() {
   const router = useRouter();
   const { showLoading, hideLoading } = useLoading();
   const { toast } = useToast();
-  const auth = getAuth(app);
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -99,7 +98,7 @@ export default function SignupPage() {
   
   const handleAppleSignIn = async () => {
     const provider = new OAuthProvider('apple.com');
-    showLoading(3000);
+    showLoading();
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
@@ -112,12 +111,12 @@ export default function SignupPage() {
         setTimeout(() => {
             router.push('/dashboard');
         }, 1500)
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
         toast({
             variant: "destructive",
             title: "Apple Sign-Up Failed",
-            description: "There was an error signing up with Apple. Please try again.",
+            description: error.message || "There was an error signing up with Apple. Please try again.",
         });
     } finally {
         hideLoading();
@@ -126,7 +125,7 @@ export default function SignupPage() {
   
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
-    showLoading(3000);
+    showLoading();
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
@@ -139,12 +138,12 @@ export default function SignupPage() {
         setTimeout(() => {
             router.push('/dashboard');
         }, 1500);
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
         toast({
             variant: "destructive",
             title: "Google Sign-Up Failed",
-            description: "There was an error signing up with Google. Please try again.",
+            description: error.message || "There was an error signing up with Google. Please try again.",
         });
     } finally {
         hideLoading();
