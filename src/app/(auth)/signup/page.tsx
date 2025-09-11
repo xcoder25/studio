@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useLoading } from '@/context/loading-context';
-import { GoogleAuthProvider, createUserWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
+import { GoogleAuthProvider, createUserWithEmailAndPassword, signInWithRedirect, updateProfile } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
@@ -65,10 +65,6 @@ export default function SignupPage() {
     const defaultMessage = "An unexpected error occurred.";
     let description = error.message || defaultMessage;
 
-    if (error.code === 'auth/unauthorized-domain') {
-        description = "This domain is not authorized for authentication. Please add 'localhost' to the list of authorized domains in your Firebase project settings.";
-    }
-
     toast({
         variant: "destructive",
         title: "Sign Up Failed",
@@ -105,20 +101,9 @@ export default function SignupPage() {
     const provider = new GoogleAuthProvider();
     showLoading();
     try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        const token = await user.getIdToken();
-        localStorage.setItem('auth-token', token);
-        toast({
-            title: "Sign Up Successful",
-            description: `Welcome, ${user.displayName || user.email}!`,
-        });
-        setTimeout(() => {
-            router.push('/dashboard');
-        }, 1500);
+        await signInWithRedirect(auth, provider);
     } catch (error: any) {
         handleAuthError(error);
-    } finally {
         hideLoading();
     }
   }
