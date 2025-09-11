@@ -8,7 +8,7 @@ import { getAuth } from "firebase/auth";
 const firebaseConfig = {
   "projectId": "studio-6206919014-a31aa",
   "appId": "1:298866475970:web:e7b485559a5d9a2e38cc5b",
-  "storageBucket": "studio-6206919014-a31aa.firebasestorage.app",
+  "storageBucket": "studio-6206919014-a31aa.appspot.com",
   "apiKey": "AIzaSyAMRXTBSLRyeWkAw1KegOkokAHwlHKwenM",
   "authDomain": "studio-6206919014-a31aa.firebaseapp.com",
   "measurementId": "",
