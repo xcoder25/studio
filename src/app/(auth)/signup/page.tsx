@@ -73,8 +73,8 @@ export default function SignupPage() {
         await updateProfile(userCredential.user, { displayName: data.name });
         
         const user = userCredential.user;
-        // @ts-ignore
-        localStorage.setItem('auth-token', user.accessToken);
+        const token = await user.getIdToken();
+        localStorage.setItem('auth-token', token);
 
         toast({
             title: "Sign Up Successful",
@@ -102,8 +102,8 @@ export default function SignupPage() {
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
-        // @ts-ignore
-        localStorage.setItem('auth-token', user.accessToken);
+        const token = await user.getIdToken();
+        localStorage.setItem('auth-token', token);
         toast({
             title: "Sign Up Successful",
             description: `Welcome, ${user.displayName || user.email}!`,
@@ -129,8 +129,8 @@ export default function SignupPage() {
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
-        // @ts-ignore
-        localStorage.setItem('auth-token', user.accessToken);
+        const token = await user.getIdToken();
+        localStorage.setItem('auth-token', token);
         toast({
             title: "Sign Up Successful",
             description: `Welcome, ${user.displayName || user.email}!`,
