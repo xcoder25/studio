@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useLoading } from '@/context/loading-context';
-import { getAuth, signInWithPopup, OAuthProvider, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, signInWithPopup, OAuthProvider, GoogleAuthProvider, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
@@ -54,7 +54,7 @@ const GoogleIcon = () => (
 
 export default function SignupPage() {
   const router = useRouter();
-  const { showLoading } = useLoading();
+  const { showLoading, hideLoading } = useLoading();
   const { toast } = useToast();
   const auth = getAuth(app);
 
@@ -67,13 +67,34 @@ export default function SignupPage() {
     },
   });
 
-  const onSubmit = (data: SignupFormValues) => {
-    console.log(data);
-    showLoading(2000);
-    localStorage.setItem('auth-token', 'user-is-logged-in');
-    setTimeout(() => {
-        router.push('/dashboard');
-    }, 2000);
+  const onSubmit = async (data: SignupFormValues) => {
+    showLoading();
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+        await updateProfile(userCredential.user, { displayName: data.name });
+        
+        const user = userCredential.user;
+        // @ts-ignore
+        localStorage.setItem('auth-token', user.accessToken);
+
+        toast({
+            title: "Sign Up Successful",
+            description: `Welcome, ${user.displayName || user.email}!`,
+        });
+
+        setTimeout(() => {
+            router.push('/dashboard');
+        }, 1500);
+    } catch (error: any) {
+        console.error(error);
+        toast({
+            variant: "destructive",
+            title: "Sign Up Failed",
+            description: error.message || "An unexpected error occurred. Please try again.",
+        });
+    } finally {
+        hideLoading();
+    }
   };
   
   const handleAppleSignIn = async () => {
@@ -82,6 +103,7 @@ export default function SignupPage() {
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
+        // @ts-ignore
         localStorage.setItem('auth-token', user.accessToken);
         toast({
             title: "Sign Up Successful",
@@ -97,6 +119,8 @@ export default function SignupPage() {
             title: "Apple Sign-Up Failed",
             description: "There was an error signing up with Apple. Please try again.",
         });
+    } finally {
+        hideLoading();
     }
   }
   
@@ -106,6 +130,7 @@ export default function SignupPage() {
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
+        // @ts-ignore
         localStorage.setItem('auth-token', user.accessToken);
         toast({
             title: "Sign Up Successful",
@@ -121,6 +146,8 @@ export default function SignupPage() {
             title: "Google Sign-Up Failed",
             description: "There was an error signing up with Google. Please try again.",
         });
+    } finally {
+        hideLoading();
     }
   }
 
@@ -173,7 +200,7 @@ export default function SignupPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
               Sign Up
             </Button>
           </form>

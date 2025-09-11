@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useLoading } from '@/context/loading-context';
-import { getAuth, signInWithPopup, OAuthProvider, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, signInWithPopup, OAuthProvider, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
@@ -54,7 +54,7 @@ const GoogleIcon = () => (
 
 export default function LoginPage() {
   const router = useRouter();
-  const { showLoading } = useLoading();
+  const { showLoading, hideLoading } = useLoading();
   const { toast } = useToast();
   const auth = getAuth(app);
 
@@ -66,13 +66,30 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = (data: LoginFormValues) => {
-    console.log(data);
-    showLoading(2000);
-    localStorage.setItem('auth-token', 'user-is-logged-in');
-    setTimeout(() => {
-        router.push('/dashboard');
-    }, 2000);
+  const onSubmit = async (data: LoginFormValues) => {
+    showLoading();
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+        const user = userCredential.user;
+        // @ts-ignore
+        localStorage.setItem('auth-token', user.accessToken);
+        toast({
+            title: "Sign In Successful",
+            description: `Welcome back, ${user.displayName || user.email}!`,
+        });
+        setTimeout(() => {
+            router.push('/dashboard');
+        }, 1500);
+    } catch (error: any) {
+        console.error(error);
+        toast({
+            variant: "destructive",
+            title: "Sign In Failed",
+            description: error.message || "An unexpected error occurred.",
+        });
+    } finally {
+        hideLoading();
+    }
   };
   
   const handleAppleSignIn = async () => {
@@ -81,6 +98,7 @@ export default function LoginPage() {
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
+        // @ts-ignore
         localStorage.setItem('auth-token', user.accessToken);
         toast({
             title: "Sign In Successful",
@@ -96,6 +114,8 @@ export default function LoginPage() {
             title: "Apple Sign-In Failed",
             description: "There was an error signing in with Apple. Please try again.",
         });
+    } finally {
+        hideLoading();
     }
   }
 
@@ -105,6 +125,7 @@ export default function LoginPage() {
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
+        // @ts-ignore
         localStorage.setItem('auth-token', user.accessToken);
         toast({
             title: "Sign In Successful",
@@ -120,6 +141,8 @@ export default function LoginPage() {
             title: "Google Sign-In Failed",
             description: "There was an error signing in with Google. Please try again.",
         });
+    } finally {
+        hideLoading();
     }
   }
 
@@ -158,7 +181,7 @@ export default function LoginPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
               Sign In
             </Button>
           </form>
