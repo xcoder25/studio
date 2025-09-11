@@ -67,20 +67,11 @@ export default function LoginPage() {
 
   const handleAuthError = (error: any) => {
     console.error(error);
-    if (error.code === 'auth/unauthorized-domain') {
-        toast({
-            variant: 'destructive',
-            title: 'Configuration Error: Domain Not Authorized',
-            description: "This app's domain is not authorized. Please go to your Firebase Console -> Authentication -> Settings -> Authorized domains and add 'localhost'.",
-            duration: 10000,
-        });
-    } else {
-        toast({
-            variant: "destructive",
-            title: "Sign In Failed",
-            description: error.message || "An unexpected error occurred.",
-        });
-    }
+    toast({
+        variant: "destructive",
+        title: "Sign In Failed",
+        description: error.message || "An unexpected error occurred.",
+    });
   }
 
   const onSubmit = async (data: LoginFormValues) => {
@@ -146,13 +137,13 @@ export default function LoginPage() {
     } finally {
         hideLoading();
     }
-  }
+  };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Welcome Back!</CardTitle>
-        <CardDescription>Enter your credentials to access your account.</CardDescription>
+        <CardTitle>Welcome Back</CardTitle>
+        <CardDescription>Sign in to your Trendix account to continue.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -183,6 +174,11 @@ export default function LoginPage() {
                 </FormItem>
               )}
             />
+            <div className="flex items-center justify-end">
+              <Link href="#" className="text-sm underline">
+                Forgot password?
+              </Link>
+            </div>
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
               Sign In
             </Button>
@@ -194,10 +190,10 @@ export default function LoginPage() {
                 <Separator />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">OR CONTINUE WITH</span>
+                <span className="bg-background px-2 text-muted-foreground">OR SIGN IN WITH</span>
             </div>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-2">
             <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
                 <GoogleIcon />
@@ -207,12 +203,11 @@ export default function LoginPage() {
             </Button>
         </div>
 
-
         <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="underline">
-                Sign up
-            </Link>
+          Don't have an account?{' '}
+          <Link href="/signup" className="underline">
+            Sign up
+          </Link>
         </div>
       </CardContent>
     </Card>

@@ -68,20 +68,11 @@ export default function SignupPage() {
   
   const handleAuthError = (error: any) => {
     console.error(error);
-    if (error.code === 'auth/unauthorized-domain') {
-        toast({
-            variant: 'destructive',
-            title: 'Configuration Error: Domain Not Authorized',
-            description: "This app's domain is not authorized. Please go to your Firebase Console -> Authentication -> Settings -> Authorized domains and add 'localhost'.",
-            duration: 10000,
-        });
-    } else {
-        toast({
-            variant: "destructive",
-            title: "Sign Up Failed",
-            description: error.message || "An unexpected error occurred.",
-        });
-    }
+    toast({
+        variant: "destructive",
+        title: "Sign Up Failed",
+        description: error.message || "An unexpected error occurred.",
+    });
   }
 
   const onSubmit = async (data: SignupFormValues) => {
