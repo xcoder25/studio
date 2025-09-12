@@ -18,6 +18,8 @@ import { generateDashboardData, type GenerateDashboardDataOutput } from '@/ai/fl
 import { cn } from '@/lib/utils';
 import { useProStatus } from '@/context/pro-status-context';
 import { Skeleton } from '@/components/ui/skeleton';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, query } from 'firebase/firestore';
 
 const TikTokIcon = () => (
     <svg
@@ -47,31 +49,46 @@ export default function DashboardPage() {
   const [errorLoadingTrends, setErrorLoadingTrends] = useState(false);
 
   useEffect(() => {
-    async function loadData() {
-      setIsLoading(true);
-      setErrorLoadingTrends(false);
-      try {
-        const [trendsResult, dashboardDataResult] = await Promise.all([
-          findTrends({ industry: 'AI and Technology' }),
-          generateDashboardData({
-              userContext: 'The user is Jane Doe, a social media manager for the tech startup Trendix.',
-          }),
-        ]);
+    async function initialLoad() {
+        setIsLoading(true);
+        setErrorLoadingTrends(false);
+        try {
+            // Initial data fetch
+            const [trendsResult, dashboardDataResult] = await Promise.all([
+                findTrends({ industry: 'AI and Technology' }),
+                generateDashboardData({
+                    userContext: 'The user is Jane Doe, a social media manager for the tech startup Trendix.',
+                }),
+            ]);
 
-        if (trendsResult.trends.length === 0) {
+            if (trendsResult.trends.length === 0) setErrorLoadingTrends(true);
+            setTrends(trendsResult.trends);
+            setDashboardData(dashboardDataResult);
+
+        } catch (error) {
+            console.error('Failed to load initial dashboard data:', error);
             setErrorLoadingTrends(true);
+        } finally {
+            setIsLoading(false);
         }
-        setTrends(trendsResult.trends);
-        setDashboardData(dashboardDataResult);
-
-      } catch (error) {
-        console.error('Failed to load dashboard data:', error);
-        setErrorLoadingTrends(true); // Also indicate error for trend-dependent sections
-      } finally {
-        setIsLoading(false);
-      }
     }
-    loadData();
+
+    initialLoad();
+
+    // Set up a listener for realtime updates simulation
+    const q = query(collection(db, 'dashboard-updates'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        // In a real app, you'd process snapshot.docChanges()
+        // Here, we just re-trigger the AI data generation to simulate a realtime update
+        if (!isLoading) { // Don't run on initial load
+             generateDashboardData({
+                userContext: 'The user is Jane Doe, a social media manager for the tech startup Trendix.',
+            }).then(setDashboardData).catch(err => console.error("Failed to refresh dashboard data", err));
+        }
+    });
+
+    return () => unsubscribe(); // Cleanup listener on component unmount
+
   }, []);
 
   const videoQuickActions = [

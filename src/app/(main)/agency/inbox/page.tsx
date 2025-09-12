@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
-const accounts = {
+const initialAccountsData = {
     trendix: {
         name: 'Trendix',
         conversations: [
@@ -59,6 +59,9 @@ export default function UnifiedInboxPage() {
     const { toast } = useToast();
     const [selectedAccount, setSelectedAccount] = useState('trendix');
     const [platformFilters, setPlatformFilters] = useState<string[]>(allPlatforms);
+    
+    // Simulate realtime data with state
+    const [accounts, setAccounts] = useState(initialAccountsData);
 
     const currentAccountData = accounts[selectedAccount as keyof typeof accounts];
     
@@ -73,6 +76,35 @@ export default function UnifiedInboxPage() {
     const [isRefining, setIsRefining] = useState(false);
     const [replyText, setReplyText] = useState('');
     const [tone, setTone] = useState('Friendly');
+
+    // Simulate receiving a new message
+    useEffect(() => {
+        if (!selectedConversation) return;
+
+        const interval = setInterval(() => {
+            if (document.hidden) return; // Don't simulate if tab is not active
+            
+            const newMessages = [
+                "Just following up on my question!",
+                "This is so cool, thanks for the quick reply!",
+                "Can I get a discount? 😉",
+                "Another quick question about the new feature...",
+            ];
+            const randomMessage = newMessages[Math.floor(Math.random() * newMessages.length)];
+
+            setAccounts(prevAccounts => {
+                const newAccounts = JSON.parse(JSON.stringify(prevAccounts));
+                const thread = newAccounts[selectedAccount as keyof typeof newAccounts].messageThread[selectedConversation.id as keyof typeof currentAccountData.messageThread];
+                if (thread) {
+                    thread.push({ from: 'user', text: randomMessage });
+                }
+                return newAccounts;
+            });
+
+        }, 15000); // Simulate new message every 15 seconds
+
+        return () => clearInterval(interval);
+    }, [selectedAccount, selectedConversation]);
 
     const handleAccountChange = (accountId: string) => {
         setSelectedAccount(accountId);
