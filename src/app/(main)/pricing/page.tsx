@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { useLoading } from '@/context/loading-context';
 import { useProStatus } from '@/context/pro-status-context';
+import { useRouter } from 'next/navigation';
 
 const plans = [
   {
@@ -59,7 +60,7 @@ const plans = [
       'White-label Client Reporting',
       'Priority Support',
     ],
-    cta: 'Contact Sales',
+    cta: 'Upgrade to Agency',
     ctaLink: '#',
   },
 ];
@@ -67,19 +68,49 @@ const plans = [
 export default function PricingPage() {
   const { toast } = useToast();
   const { showLoading, hideLoading } = useLoading();
-  const { isProPlan, setIsProPlan } = useProStatus();
+  const { isProPlan, setIsProPlan, isAgencyPlan, setIsAgencyPlan, setCredits } = useProStatus();
+  const router = useRouter();
 
-  const handleUpgrade = () => {
+  const handleUpgrade = (plan: 'Pro' | 'Agency') => {
     showLoading();
     setTimeout(() => {
-        setIsProPlan(true);
+        if (plan === 'Pro') {
+            setIsProPlan(true);
+            setCredits(prev => Math.max(prev, 50)); // Set credits to 50 if they are lower
+        }
+        if (plan === 'Agency') {
+            setIsProPlan(true); // Agency includes Pro features
+            setIsAgencyPlan(true);
+            setCredits(prev => Math.max(prev, 200)); // Set credits to 200 if they are lower
+        }
         hideLoading();
         toast({
             title: "Plan Activated!",
-            description: "You've successfully upgraded to the Pro Plan. All features are now unlocked."
-        })
+            description: `You've successfully upgraded to the ${plan} Plan. All features are now unlocked.`
+        });
+        router.push('/dashboard');
     }, 1500)
   }
+
+  const getButtonState = (planName: string) => {
+    if (planName === 'Agency') {
+      return {
+        disabled: isAgencyPlan,
+        text: isAgencyPlan ? 'Current Plan' : 'Upgrade to Agency'
+      }
+    }
+    if (planName === 'Pro') {
+      return {
+        disabled: isProPlan && !isAgencyPlan,
+        text: isProPlan && !isAgencyPlan ? 'Current Plan' : 'Upgrade to Pro'
+      }
+    }
+    return {
+      disabled: false,
+      text: 'Start Trial'
+    }
+  }
+
 
   return (
     <div className="space-y-8">
@@ -91,38 +122,43 @@ export default function PricingPage() {
       </div>
 
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {plans.map((plan) => (
-          <Card key={plan.name} className={cn("flex flex-col", plan.popular && "border-primary ring-2 ring-primary")}>
-            <CardHeader className="flex-grow-0">
-              {plan.popular && <div className="text-center"><div className="inline-block px-3 py-1 text-xs font-semibold tracking-wider text-primary-foreground bg-primary rounded-full">Most Popular</div></div>}
-              <CardTitle className="text-center text-3xl font-bold pt-4">{plan.name}</CardTitle>
-              <CardDescription className="text-center">
-                <span className="text-4xl font-bold text-foreground">{plan.price}</span>
-                <span className="text-muted-foreground">{plan.period}</span>
-              </CardDescription>
-              <CardDescription className="text-center h-10">{plan.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow">
-              <ul className="space-y-3">
-                {plan.features.map(feature => (
-                  <li key={feature} className="flex items-start gap-3">
-                    <Check className="size-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-muted-foreground">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-            <CardFooter>
-              {plan.name === 'Pro' ? (
-                 <Button className="w-full" onClick={handleUpgrade} disabled={isProPlan}>{isProPlan ? 'Current Plan' : plan.cta}</Button>
-              ) : (
-                <Button asChild className="w-full" variant={plan.name === 'Agency' ? 'outline' : 'default'}>
-                    <Link href={plan.ctaLink}>{plan.cta}</Link>
-                </Button>
-              )}
-            </CardFooter>
-          </Card>
-        ))}
+        {plans.map((plan) => {
+          const { disabled, text } = getButtonState(plan.name);
+          return (
+            <Card key={plan.name} className={cn("flex flex-col", plan.popular && "border-primary ring-2 ring-primary")}>
+              <CardHeader className="flex-grow-0">
+                {plan.popular && <div className="text-center"><div className="inline-block px-3 py-1 text-xs font-semibold tracking-wider text-primary-foreground bg-primary rounded-full">Most Popular</div></div>}
+                <CardTitle className="text-center text-3xl font-bold pt-4">{plan.name}</CardTitle>
+                <CardDescription className="text-center">
+                  <span className="text-4xl font-bold text-foreground">{plan.price}</span>
+                  <span className="text-muted-foreground">{plan.period}</span>
+                </CardDescription>
+                <CardDescription className="text-center h-10">{plan.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <ul className="space-y-3">
+                  {plan.features.map(feature => (
+                    <li key={feature} className="flex items-start gap-3">
+                      <Check className="size-5 text-primary flex-shrink-0 mt-0.5" />
+                      <span className="text-muted-foreground">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+              <CardFooter>
+                {plan.name === 'Free Trial' ? (
+                  <Button asChild className="w-full" variant={'outline'}>
+                      <Link href={plan.ctaLink}>{text}</Link>
+                  </Button>
+                ) : (
+                  <Button className="w-full" onClick={() => handleUpgrade(plan.name as 'Pro' | 'Agency')} disabled={disabled}>
+                    {text}
+                  </Button>
+                )}
+              </CardFooter>
+            </Card>
+          )
+        })}
       </div>
     </div>
   );
