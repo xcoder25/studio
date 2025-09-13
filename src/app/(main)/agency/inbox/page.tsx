@@ -22,32 +22,16 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 
-const initialAccountsData = {
+const initialAccountsData: any = {
     trendix: {
         name: 'Trendix',
-        conversations: [
-            { id: 1, name: 'Alice Johnson', handle: '@alicej', platform: 'Twitter', message: 'Just wanted to say I love your new feature! It\'s a game-changer. 🚀', avatar: 'https://picsum.photos/seed/5/100/100', type: 'Mention', unread: 2 },
-            { id: 2, name: 'Bob Williams', handle: 'bobw', platform: 'Instagram', message: 'Can you tell me more about your pricing plans?', avatar: 'https://picsum.photos/seed/6/100/100', type: 'DM' },
-        ],
-        messageThread: {
-            1: [
-                { from: 'user', text: 'Just wanted to say I love your new feature! It\'s a game-changer. 🚀' },
-                { from: 'agent', text: 'That\'s amazing to hear, Alice! We\'re so glad you\'re enjoying it. Anything specific you like the most?' },
-                { from: 'user', text: 'The AI-powered suggestions are incredibly accurate. Saves me so much time!' },
-            ],
-            2: [ { from: 'user', text: 'Can you tell me more about your pricing plans?' } ],
-        }
+        conversations: [],
+        messageThread: {}
     },
     client_a: {
         name: 'Client A',
-        conversations: [
-            { id: 3, name: 'Charlie Brown', handle: '@charlieb', platform: 'Twitter', message: 'I\'m having some trouble with the setup process. Can you help?', avatar: 'https://picsum.photos/seed/7/100/100', type: 'Comment' },
-            { id: 4, name: 'Diana Miller', handle: 'dianam', platform: 'Facebook', message: 'Your last post was so insightful! Looking forward to more content like that.', avatar: 'https://picsum.photos/seed/8/100/100', type: 'Comment' },
-        ],
-        messageThread: {
-            3: [ { from: 'user', text: 'I\'m having some trouble with the setup process. Can you help?' } ],
-            4: [ { from: 'user', text: 'Your last post was so insightful! Looking forward to more content like that.' } ]
-        }
+        conversations: [],
+        messageThread: {}
     }
 }
 
@@ -70,16 +54,27 @@ export default function UnifiedInboxPage() {
     const currentAccountData = accounts[selectedAccount as keyof typeof accounts];
     
     const filteredConversations = useMemo(() => {
-        return currentAccountData.conversations.filter(convo => 
+        if (!currentAccountData) return [];
+        return currentAccountData.conversations.filter((convo: any) => 
             platformFilters.includes(convo.platform)
         );
-    }, [currentAccountData.conversations, platformFilters]);
+    }, [currentAccountData, platformFilters]);
 
-    const [selectedConversation, setSelectedConversation] = useState(filteredConversations[0]);
+    const [selectedConversation, setSelectedConversation] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isRefining, setIsRefining] = useState(false);
     const [replyText, setReplyText] = useState('');
     const [tone, setTone] = useState('Friendly');
+
+    // Set initial conversation
+    useEffect(() => {
+        if (filteredConversations.length > 0) {
+            setSelectedConversation(filteredConversations[0]);
+        } else {
+            setSelectedConversation(null);
+        }
+    }, [filteredConversations]);
+
 
     // Simulate receiving a new message
     useEffect(() => {
@@ -119,7 +114,11 @@ export default function UnifiedInboxPage() {
     const handleAccountChange = (accountId: string) => {
         setSelectedAccount(accountId);
         const newAccountData = accounts[accountId as keyof typeof accounts];
-        const newFilteredConvos = newAccountData.conversations.filter(convo => 
+        if (!newAccountData) {
+            setSelectedConversation(null);
+            return;
+        }
+        const newFilteredConvos = newAccountData.conversations.filter((convo: any) => 
             platformFilters.includes(convo.platform)
         );
         setSelectedConversation(newFilteredConvos[0] || null);
@@ -134,7 +133,7 @@ export default function UnifiedInboxPage() {
     }
 
     React.useEffect(() => {
-        if (filteredConversations.length > 0 && !filteredConversations.find(c => c.id === selectedConversation?.id)) {
+        if (filteredConversations.length > 0 && !filteredConversations.find((c: any) => c.id === selectedConversation?.id)) {
             setSelectedConversation(filteredConversations[0]);
         } else if (filteredConversations.length === 0) {
             setSelectedConversation(null!);
@@ -191,7 +190,7 @@ export default function UnifiedInboxPage() {
                         <div className="flex items-center gap-2">
                              <Avatar className="size-6">
                                 <AvatarImage src={`https://picsum.photos/seed/${selectedAccount === 'trendix' ? 1 : 99}/100/100`} data-ai-hint="logo company"/>
-                                <AvatarFallback>{currentAccountData.name.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>{currentAccountData?.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <SelectValue />
                         </div>
@@ -237,7 +236,7 @@ export default function UnifiedInboxPage() {
             </CardHeader>
             <ScrollArea>
                  <div className="space-y-1 p-2">
-                    {filteredConversations.map(convo => (
+                    {filteredConversations.length > 0 ? filteredConversations.map((convo: any) => (
                         <button key={convo.id} onClick={() => setSelectedConversation(convo)} className={cn(
                             "w-full text-left p-2 rounded-lg hover:bg-muted transition-colors",
                             selectedConversation?.id === convo.id && 'bg-muted'
@@ -257,7 +256,11 @@ export default function UnifiedInboxPage() {
                                 {convo.unread && <Badge className="h-5">{convo.unread}</Badge>}
                            </div>
                         </button>
-                    ))}
+                    )) : (
+                        <div className="text-center p-10 text-muted-foreground text-sm">
+                            No conversations found.
+                        </div>
+                    )}
                  </div>
             </ScrollArea>
         </Card>
@@ -272,7 +275,7 @@ export default function UnifiedInboxPage() {
                             <p className="text-sm text-muted-foreground">on {selectedConversation.platform}</p>
                         </CardHeader>
                         <CardContent className="flex-grow p-4 space-y-4">
-                            {currentAccountData.messageThread[selectedConversation.id as keyof typeof currentAccountData.messageThread].map((msg, index) => (
+                            {currentAccountData.messageThread[selectedConversation.id as keyof typeof currentAccountData.messageThread].map((msg: any, index: number) => (
                                 <div key={index} className={cn(
                                     "flex items-end gap-2",
                                     msg.from === 'agent' ? 'justify-end' : 'justify-start'

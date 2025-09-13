@@ -10,39 +10,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { addDays, startOfMonth } from 'date-fns';
 import { Twitter, Facebook, Instagram, Edit, Clock, Trash2 } from 'lucide-react';
 
-const scheduledPosts = [
-  {
-    date: addDays(new Date(), 2),
-    title: "Launch new feature",
-    content: "We're thrilled to announce our new AI-powered video editor! Create stunning videos from text or images in seconds. #AI #VideoEditing #SaaS",
-    platform: "Twitter",
-    image: 'https://picsum.photos/seed/cal1/600/400',
-    aiHint: 'abstract technology',
-  },
-  {
-    date: addDays(new Date(), 5),
-    title: "Weekly tech roundup",
-    content: "This week in tech: A look at the latest advancements in generative AI and what it means for content creators. Read our full analysis on the blog.",
-    platform: "Facebook",
-    image: 'https://picsum.photos/seed/cal2/600/400',
-    aiHint: 'futuristic city',
-  },
-  {
-    date: addDays(new Date(), 5),
-    title: "Behind the scenes",
-    content: "A sneak peek at the team that makes Trendix possible! #TeamCulture #StartupLife",
-    platform: "Instagram",
-    image: 'https://picsum.photos/seed/cal3/600/400',
-    aiHint: 'people office',
-  },
-  {
-    date: addDays(new Date(), 10),
-    title: "AI in 2024 discussion",
-    content: "What are your predictions for AI in 2024? We think it's going to be all about multimodal models. Join the conversation!",
-    platform: "Twitter",
-    image: 'https://picsum.photos/seed/cal4/600/400',
-    aiHint: 'robot human',
-  },
+const scheduledPosts: any[] = [
+  // This is now empty by default. Real data will be fetched or managed by a state management solution.
 ];
 
 const platformIcons = {
@@ -111,6 +80,7 @@ export default function ContentCalendar() {
                     </PopoverContent>
                   </Popover>
                 ))}
+                {postsForDay.length === 0 && <div className="text-xs text-muted-foreground/50 text-center pt-8">No posts</div>}
               </div>
             </>
           );

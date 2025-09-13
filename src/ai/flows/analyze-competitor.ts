@@ -61,7 +61,7 @@ const prompt = ai.definePrompt({
   3.  **Engagement Analysis**: Estimated average likes/comments and audience sentiment.
   4.  **SWOT Analysis**: Strengths, Weaknesses, Opportunities (for my brand), and Threats.
   
-  Assume you have access to public social media data for this analysis. Provide realistic but hypothetical data for the analysis.`,
+  Use your knowledge to provide a realistic analysis based on public social media data.`,
 });
 
 const analyzeCompetitorFlow = ai.defineFlow(

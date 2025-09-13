@@ -75,7 +75,7 @@ const prompt = ai.definePrompt({
       - Generate 1-2 'activeAlerts' if there are sudden negative spikes.
       - Generate 1-2 'proactiveIssues' by identifying subtle negative themes that could escalate.
 
-  Generate realistic but hypothetical data for this analysis. For this run, ensure that 'isCrisisDetected' is **true**, and create a few negative mentions related to a fictional "billing issue" to justify the crisis.`,
+  Provide a realistic analysis based on your access to public web data.`,
 });
 
 const socialListeningFlow = ai.defineFlow(
