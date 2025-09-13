@@ -18,8 +18,9 @@ import { generateDashboardData, type GenerateDashboardDataOutput } from '@/ai/fl
 import { cn } from '@/lib/utils';
 import { useProStatus } from '@/context/pro-status-context';
 import { Skeleton } from '@/components/ui/skeleton';
-import { db } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { collection, onSnapshot, query } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const TikTokIcon = () => (
     <svg
@@ -53,7 +54,6 @@ export default function DashboardPage() {
         setIsLoading(true);
         setErrorLoadingTrends(false);
         try {
-            // Initial data fetch
             const [trendsResult, dashboardDataResult] = await Promise.all([
                 findTrends({ industry: 'AI and Technology' }),
                 generateDashboardData({
@@ -74,20 +74,25 @@ export default function DashboardPage() {
     }
 
     initialLoad();
+    
+    const authUnsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const q = query(collection(db, 'dashboard-updates'));
+            const firestoreUnsubscribe = onSnapshot(q, (snapshot) => {
+                if (!isLoading) {
+                    generateDashboardData({
+                        userContext: 'The user is Jane Doe, a social media manager for the tech startup Trendix.',
+                    }).then(setDashboardData).catch(err => console.error("Failed to refresh dashboard data", err));
+                }
+            }, (error) => {
+                console.error("Firestore snapshot error:", error);
+            });
 
-    // Set up a listener for realtime updates simulation
-    const q = query(collection(db, 'dashboard-updates'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-        // In a real app, you'd process snapshot.docChanges()
-        // Here, we just re-trigger the AI data generation to simulate a realtime update
-        if (!isLoading) { // Don't run on initial load
-             generateDashboardData({
-                userContext: 'The user is Jane Doe, a social media manager for the tech startup Trendix.',
-            }).then(setDashboardData).catch(err => console.error("Failed to refresh dashboard data", err));
+            return () => firestoreUnsubscribe();
         }
     });
 
-    return () => unsubscribe(); // Cleanup listener on component unmount
+    return () => authUnsubscribe();
 
   }, []);
 

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -17,6 +18,9 @@ import { Loader2, Send, Twitter, MessageSquare, Instagram, Bot, Sparkles, Wand2,
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth, db } from '@/lib/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 const initialAccountsData = {
     trendix: {
@@ -81,30 +85,36 @@ export default function UnifiedInboxPage() {
     useEffect(() => {
         if (!selectedConversation) return;
 
-        const interval = setInterval(() => {
-            if (document.hidden) return; // Don't simulate if tab is not active
+        const authUnsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                 // In a real app, this would point to a real document
+                const unsub = onSnapshot(doc(db, "inbox-simulation", "messages"), (doc) => {
+                    if (document.hidden) return; // Don't simulate if tab is not active
             
-            const newMessages = [
-                "Just following up on my question!",
-                "This is so cool, thanks for the quick reply!",
-                "Can I get a discount? 😉",
-                "Another quick question about the new feature...",
-            ];
-            const randomMessage = newMessages[Math.floor(Math.random() * newMessages.length)];
+                    const newMessages = [
+                        "Just following up on my question!",
+                        "This is so cool, thanks for the quick reply!",
+                        "Can I get a discount? 😉",
+                        "Another quick question about the new feature...",
+                    ];
+                    const randomMessage = newMessages[Math.floor(Math.random() * newMessages.length)];
+        
+                    setAccounts(prevAccounts => {
+                        const newAccounts = JSON.parse(JSON.stringify(prevAccounts));
+                        const thread = newAccounts[selectedAccount as keyof typeof newAccounts].messageThread[selectedConversation.id as keyof typeof currentAccountData.messageThread];
+                        if (thread) {
+                            thread.push({ from: 'user', text: randomMessage });
+                        }
+                        return newAccounts;
+                    });
+                });
+                return () => unsub();
+            }
+        });
+        
+        return () => authUnsubscribe();
 
-            setAccounts(prevAccounts => {
-                const newAccounts = JSON.parse(JSON.stringify(prevAccounts));
-                const thread = newAccounts[selectedAccount as keyof typeof newAccounts].messageThread[selectedConversation.id as keyof typeof currentAccountData.messageThread];
-                if (thread) {
-                    thread.push({ from: 'user', text: randomMessage });
-                }
-                return newAccounts;
-            });
-
-        }, 15000); // Simulate new message every 15 seconds
-
-        return () => clearInterval(interval);
-    }, [selectedAccount, selectedConversation]);
+    }, [selectedAccount, selectedConversation, currentAccountData.messageThread]);
 
     const handleAccountChange = (accountId: string) => {
         setSelectedAccount(accountId);
