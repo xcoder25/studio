@@ -18,7 +18,7 @@ import { Loader2, Send, Twitter, MessageSquare, Instagram, Bot, Sparkles, Wand2,
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 
@@ -45,6 +45,7 @@ const platformConfig = {
 
 export default function UnifiedInboxPage() {
     const { toast } = useToast();
+    const [user, setUser] = useState<User | null>(null);
     const [selectedAccount, setSelectedAccount] = useState('trendix');
     const [platformFilters, setPlatformFilters] = useState<string[]>(allPlatforms);
     
@@ -76,40 +77,41 @@ export default function UnifiedInboxPage() {
     }, [filteredConversations]);
 
 
+    useEffect(() => {
+        const authUnsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+        });
+        return () => authUnsubscribe();
+    }, []);
+
     // Simulate receiving a new message
     useEffect(() => {
-        if (!selectedConversation) return;
+        if (!selectedConversation || !user) return;
 
-        const authUnsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                 // In a real app, this would point to a real document
-                const unsub = onSnapshot(doc(db, "inbox-simulation", "messages"), (doc) => {
-                    if (document.hidden) return; // Don't simulate if tab is not active
-            
-                    const newMessages = [
-                        "Just following up on my question!",
-                        "This is so cool, thanks for the quick reply!",
-                        "Can I get a discount? 😉",
-                        "Another quick question about the new feature...",
-                    ];
-                    const randomMessage = newMessages[Math.floor(Math.random() * newMessages.length)];
-        
-                    setAccounts(prevAccounts => {
-                        const newAccounts = JSON.parse(JSON.stringify(prevAccounts));
-                        const thread = newAccounts[selectedAccount as keyof typeof newAccounts].messageThread[selectedConversation.id as keyof typeof currentAccountData.messageThread];
-                        if (thread) {
-                            thread.push({ from: 'user', text: randomMessage });
-                        }
-                        return newAccounts;
-                    });
-                });
-                return () => unsub();
-            }
+        // In a real app, this would point to a real document
+        const unsub = onSnapshot(doc(db, "inbox-simulation", "messages"), (doc) => {
+            if (document.hidden) return; // Don't simulate if tab is not active
+    
+            const newMessages = [
+                "Just following up on my question!",
+                "This is so cool, thanks for the quick reply!",
+                "Can I get a discount? 😉",
+                "Another quick question about the new feature...",
+            ];
+            const randomMessage = newMessages[Math.floor(Math.random() * newMessages.length)];
+
+            setAccounts(prevAccounts => {
+                const newAccounts = JSON.parse(JSON.stringify(prevAccounts));
+                const thread = newAccounts[selectedAccount as keyof typeof newAccounts].messageThread[selectedConversation.id as keyof typeof currentAccountData.messageThread];
+                if (thread) {
+                    thread.push({ from: 'user', text: randomMessage });
+                }
+                return newAccounts;
+            });
         });
-        
-        return () => authUnsubscribe();
+        return () => unsub();
 
-    }, [selectedAccount, selectedConversation, currentAccountData.messageThread]);
+    }, [selectedAccount, selectedConversation, currentAccountData.messageThread, user]);
 
     const handleAccountChange = (accountId: string) => {
         setSelectedAccount(accountId);
@@ -363,3 +365,5 @@ export default function UnifiedInboxPage() {
     </div>
   );
 }
+
+    

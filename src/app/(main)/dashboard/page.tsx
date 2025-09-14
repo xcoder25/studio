@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 import { useProStatus } from '@/context/pro-status-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { auth, db } from '@/lib/firebase';
-import { collection, onSnapshot, query } from 'firebase/firestore';
+import { collection, onSnapshot, query, doc } from 'firebase/firestore';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 
 const TikTokIcon = () => (
@@ -50,20 +50,7 @@ export default function DashboardPage() {
   const [errorLoadingTrends, setErrorLoadingTrends] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    const authUnsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        setUser(currentUser);
-        if (currentUser) {
-            initialLoad(currentUser.displayName || 'User');
-        } else {
-            setIsLoading(false);
-        }
-    });
-
-    return () => authUnsubscribe();
-  }, []);
-
-  async function initialLoad(userName: string) {
+  const initialLoad = async (userName: string) => {
     setIsLoading(true);
     setErrorLoadingTrends(false);
     try {
@@ -83,20 +70,34 @@ export default function DashboardPage() {
     } finally {
         setIsLoading(false);
     }
+  };
 
-    const q = query(collection(db, 'dashboard-updates'));
-    const firestoreUnsubscribe = onSnapshot(q, (snapshot) => {
-        if (!isLoading) {
-            generateDashboardData({ userContext: `The user is ${userName}, a social media manager for the tech startup Trendix.` })
-                .then(setDashboardData)
-                .catch(err => console.error("Failed to refresh dashboard data", err));
+  useEffect(() => {
+    const authUnsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        if (currentUser) {
+            setUser(currentUser);
+            initialLoad(currentUser.displayName || 'User').then(() => {
+                const firestoreUnsubscribe = onSnapshot(doc(db, "dashboard-updates", "updates"), (snapshot) => {
+                    if (!isLoading) { // Check if initial load is complete
+                        generateDashboardData({ userContext: `The user is ${currentUser.displayName || 'User'}, a social media manager for the tech startup Trendix.` })
+                            .then(setDashboardData)
+                            .catch(err => console.error("Failed to refresh dashboard data", err));
+                    }
+                }, (error) => {
+                    console.error("Firestore snapshot error:", error);
+                });
+                 // Return the firestore unsubscribe function to be called on cleanup
+                return () => firestoreUnsubscribe();
+            });
+        } else {
+            setUser(null);
+            setIsLoading(false);
         }
-    }, (error) => {
-        console.error("Firestore snapshot error:", error);
     });
 
-    return firestoreUnsubscribe;
-  }
+    return () => authUnsubscribe();
+  }, [isLoading]);
+
 
   const videoQuickActions = [
     { label: "Text to Video", icon: Text, href: "/video-generator/editor" },
@@ -265,3 +266,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
