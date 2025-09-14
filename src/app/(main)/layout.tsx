@@ -68,6 +68,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useProStatus } from '@/context/pro-status-context';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 
 const navItems = [
@@ -83,31 +85,28 @@ const navItems = [
 export default function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [initialAuthCheck, setInitialAuthCheck] = useState(true);
   const { showLoading, hideLoading, isLoading } = useLoading();
   const { isProPlan, isAgencyPlan, credits } = useProStatus();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [isAgencyOpen, setIsAgencyOpen] = useState(pathname.startsWith('/agency'));
   const [selectedClient, setSelectedClient] = useState('trendix');
 
 
   useEffect(() => {
-    const token = localStorage.getItem('auth-token');
-    if (!token) {
-      router.replace('/login');
-    } else {
-      setIsAuthenticated(true);
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+            setUser(user);
+        } else {
+            router.replace('/login');
+        }
+        setInitialAuthCheck(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, [router]);
   
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setInitialLoading(false);
-    }, 2000); // Show splash screen for 2 seconds
-
-    return () => clearTimeout(timer);
-  }, []);
-
   const handleNavClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (pathname !== href) {
       showLoading();
@@ -116,10 +115,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   
   const handleLogout = () => {
     showLoading();
-    localStorage.removeItem('auth-token');
-    setTimeout(() => {
-      router.push('/');
-    }, 1500);
+    auth.signOut().then(() => {
+        localStorage.removeItem('auth-token');
+        router.push('/');
+    }).finally(() => {
+        hideLoading();
+    });
   };
   
   useEffect(() => {
@@ -129,14 +130,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
-    if(!initialLoading) {
+    if(!initialAuthCheck) {
         hideLoading();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
 
-  if (!isAuthenticated || initialLoading) {
+  if (initialAuthCheck) {
     return <SplashScreen />;
   }
 
@@ -338,12 +339,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="w-full justify-start h-12 gap-2 px-2 group-hover:w-full h-10 w-10 px-0 justify-center">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src="https://picsum.photos/100/100" data-ai-hint="avatar" alt="User Avatar" />
-                        <AvatarFallback>JD</AvatarFallback>
+                        <AvatarImage src={user?.photoURL || "https://picsum.photos/100/100"} data-ai-hint="avatar" alt="User Avatar" />
+                        <AvatarFallback>{user?.displayName?.charAt(0) || user?.email?.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div className="flex-col items-start group-hover:flex hidden">
-                          <span className="text-sm font-medium text-foreground">Jane Doe</span>
-                          <span className="text-xs text-muted-foreground">jane.doe@email.com</span>
+                          <span className="text-sm font-medium text-foreground">{user?.displayName || 'User'}</span>
+                          <span className="text-xs text-muted-foreground">{user?.email}</span>
                       </div>
                       <ChevronDown className="ml-auto h-4 w-4 group-hover:inline-flex hidden" />
                     </Button>

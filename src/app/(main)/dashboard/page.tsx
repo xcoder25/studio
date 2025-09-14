@@ -20,7 +20,7 @@ import { useProStatus } from '@/context/pro-status-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { auth, db } from '@/lib/firebase';
 import { collection, onSnapshot, query } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 
 const TikTokIcon = () => (
     <svg
@@ -48,53 +48,55 @@ export default function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<GenerateDashboardDataOutput | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorLoadingTrends, setErrorLoadingTrends] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    async function initialLoad() {
-        setIsLoading(true);
-        setErrorLoadingTrends(false);
-        try {
-            const [trendsResult, dashboardDataResult] = await Promise.all([
-                findTrends({ industry: 'AI and Technology' }),
-                generateDashboardData({
-                    userContext: 'The user is Jane Doe, a social media manager for the tech startup Trendix.',
-                }),
-            ]);
-
-            if (trendsResult.trends.length === 0) setErrorLoadingTrends(true);
-            setTrends(trendsResult.trends);
-            setDashboardData(dashboardDataResult);
-
-        } catch (error) {
-            console.error('Failed to load initial dashboard data:', error);
-            setErrorLoadingTrends(true);
-        } finally {
+    const authUnsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+        if (currentUser) {
+            initialLoad(currentUser.displayName || 'User');
+        } else {
             setIsLoading(false);
-        }
-    }
-
-    initialLoad();
-    
-    const authUnsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-            const q = query(collection(db, 'dashboard-updates'));
-            const firestoreUnsubscribe = onSnapshot(q, (snapshot) => {
-                if (!isLoading) {
-                    generateDashboardData({
-                        userContext: 'The user is Jane Doe, a social media manager for the tech startup Trendix.',
-                    }).then(setDashboardData).catch(err => console.error("Failed to refresh dashboard data", err));
-                }
-            }, (error) => {
-                console.error("Firestore snapshot error:", error);
-            });
-
-            return () => firestoreUnsubscribe();
         }
     });
 
     return () => authUnsubscribe();
-
   }, []);
+
+  async function initialLoad(userName: string) {
+    setIsLoading(true);
+    setErrorLoadingTrends(false);
+    try {
+        const userContext = `The user is ${userName}, a social media manager for the tech startup Trendix.`;
+        const [trendsResult, dashboardDataResult] = await Promise.all([
+            findTrends({ industry: 'AI and Technology' }),
+            generateDashboardData({ userContext }),
+        ]);
+
+        if (trendsResult.trends.length === 0) setErrorLoadingTrends(true);
+        setTrends(trendsResult.trends);
+        setDashboardData(dashboardDataResult);
+
+    } catch (error) {
+        console.error('Failed to load initial dashboard data:', error);
+        setErrorLoadingTrends(true);
+    } finally {
+        setIsLoading(false);
+    }
+
+    const q = query(collection(db, 'dashboard-updates'));
+    const firestoreUnsubscribe = onSnapshot(q, (snapshot) => {
+        if (!isLoading) {
+            generateDashboardData({ userContext: `The user is ${userName}, a social media manager for the tech startup Trendix.` })
+                .then(setDashboardData)
+                .catch(err => console.error("Failed to refresh dashboard data", err));
+        }
+    }, (error) => {
+        console.error("Firestore snapshot error:", error);
+    });
+
+    return firestoreUnsubscribe;
+  }
 
   const videoQuickActions = [
     { label: "Text to Video", icon: Text, href: "/video-generator/editor" },
@@ -122,7 +124,7 @@ export default function DashboardPage() {
     <div className="grid gap-6">
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
             <div>
-                <h1 className="text-2xl font-bold">Welcome back, Jane!</h1>
+                <h1 className="text-2xl font-bold">Welcome back, {user?.displayName || 'Explorer'}!</h1>
                 <p className="text-muted-foreground">Here's your all-in-one hub for social media and content creation.</p>
             </div>
             {isProPlan && (
