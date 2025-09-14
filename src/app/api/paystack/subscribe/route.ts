@@ -10,7 +10,7 @@ export async function POST(request: Request) {
 
   const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
-  if (!PAYSTACK_SECRET_KEY || PAYSTACK_SECRET_KEY === 'YOUR_PAYSTACK_SECRET_KEY' || PAYSTACK_SECRET_KEY === 'sk_live_df23d84cc1f7219197eacdb8058ddcc7018cf14a') {
+  if (!PAYSTACK_SECRET_KEY || PAYSTACK_SECRET_KEY === 'YOUR_PAYSTACK_SECRET_KEY') {
     console.error('Paystack secret key is not configured.');
     return NextResponse.json({ message: 'Server configuration error. Paystack secret key is missing.' }, { status: 500 });
   }
