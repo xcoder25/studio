@@ -81,7 +81,7 @@ export default function PricingPage() {
     try {
         // This is a placeholder for the actual customer email.
         // In a real app, you would get this from the logged-in user's session.
-        const customerEmail = 'customer@example.com'; 
+        const customerEmail = 'jane.doe@email.com'; 
 
         const response = await fetch('/api/paystack/subscribe', {
             method: 'POST',
@@ -97,7 +97,7 @@ export default function PricingPage() {
         const result = await response.json();
 
         if (!response.ok) {
-            throw new Error(result.error || 'Subscription failed. Please try again.');
+            throw new Error(result.message || 'Subscription failed. Please try again.');
         }
 
         // --- On successful subscription ---
