@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useLoading } from '@/context/loading-context';
 import { useProStatus } from '@/context/pro-status-context';
 import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 const plans = [
   {
@@ -73,15 +75,17 @@ export default function PricingPage() {
   const { showLoading, hideLoading } = useLoading();
   const { isProPlan, setIsProPlan, isAgencyPlan, setIsAgencyPlan, setCredits } = useProStatus();
   const router = useRouter();
+  const [user] = useAuthState(auth);
 
   const handleUpgrade = async (plan: typeof plans[number]) => {
     if (!plan.plan_code) return;
     
     showLoading();
     try {
-        // This is a placeholder for the actual customer email.
-        // In a real app, you would get this from the logged-in user's session.
-        const customerEmail = 'jane.doe@email.com'; 
+        const customerEmail = user?.email;
+        if (!customerEmail) {
+            throw new Error("You must be logged in to subscribe.");
+        }
 
         const response = await fetch('/api/paystack/subscribe', {
             method: 'POST',
