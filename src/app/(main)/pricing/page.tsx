@@ -27,6 +27,7 @@ const plans = [
     ],
     cta: 'Start Your Free Trial',
     ctaLink: '/signup',
+    plan_code: null
   },
   {
     name: 'Pro',
@@ -47,6 +48,7 @@ const plans = [
     cta: 'Upgrade to Pro',
     ctaLink: '#',
     popular: true,
+    plan_code: 'PLN_PRO_TRENDIX' // Example plan code
   },
   {
     name: 'Agency',
@@ -62,6 +64,7 @@ const plans = [
     ],
     cta: 'Upgrade to Agency',
     ctaLink: '#',
+    plan_code: 'PLN_AGENCY_TRENDIX' // Example plan code
   },
 ];
 
@@ -71,25 +74,59 @@ export default function PricingPage() {
   const { isProPlan, setIsProPlan, isAgencyPlan, setIsAgencyPlan, setCredits } = useProStatus();
   const router = useRouter();
 
-  const handleUpgrade = (plan: 'Pro' | 'Agency') => {
+  const handleUpgrade = async (plan: typeof plans[number]) => {
+    if (!plan.plan_code) return;
+    
     showLoading();
-    setTimeout(() => {
-        if (plan === 'Pro') {
-            setIsProPlan(true);
-            setCredits(prev => Math.max(prev, 50)); // Set credits to 50 if they are lower
+    try {
+        // This is a placeholder for the actual customer email.
+        // In a real app, you would get this from the logged-in user's session.
+        const customerEmail = 'customer@example.com'; 
+
+        const response = await fetch('/api/paystack/subscribe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                customer: customerEmail,
+                plan: plan.plan_code
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Subscription failed. Please try again.');
         }
-        if (plan === 'Agency') {
+
+        // --- On successful subscription ---
+        if (plan.name === 'Pro') {
+            setIsProPlan(true);
+            setCredits(prev => Math.max(prev, 50));
+        }
+        if (plan.name === 'Agency') {
             setIsProPlan(true); // Agency includes Pro features
             setIsAgencyPlan(true);
-            setCredits(prev => Math.max(prev, 200)); // Set credits to 200 if they are lower
+            setCredits(prev => Math.max(prev, 200));
         }
-        hideLoading();
+
         toast({
             title: "Plan Activated!",
-            description: `You've successfully upgraded to the ${plan} Plan. All features are now unlocked.`
+            description: `You've successfully upgraded to the ${plan.name} Plan. All features are now unlocked.`
         });
         router.push('/dashboard');
-    }, 1500)
+
+    } catch (error: any) {
+        console.error("Subscription error:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Upgrade Failed',
+            description: error.message
+        });
+    } finally {
+        hideLoading();
+    }
   }
 
   const getButtonState = (planName: string) => {
@@ -151,7 +188,7 @@ export default function PricingPage() {
                       <Link href={plan.ctaLink}>{text}</Link>
                   </Button>
                 ) : (
-                  <Button className="w-full" onClick={() => handleUpgrade(plan.name as 'Pro' | 'Agency')} disabled={disabled}>
+                  <Button className="w-full" onClick={() => handleUpgrade(plan)} disabled={disabled}>
                     {text}
                   </Button>
                 )}
