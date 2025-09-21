@@ -134,7 +134,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         hideLoading();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [pathname, initialAuthCheck]);
 
 
   if (initialAuthCheck) {
