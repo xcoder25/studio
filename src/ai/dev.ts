@@ -20,10 +20,12 @@ import '@/ai/flows/generate-dashboard-data.ts';
 import '@/ai/flows/suggest-best-time.ts';
 import '@/ai/flows/run-campaign.ts';
 import '@/ai/flows/generate-optimized-captions.ts';
+import '@/ai/flows/run-engagement-booster.ts';
 
     
 
     
+
 
 
 

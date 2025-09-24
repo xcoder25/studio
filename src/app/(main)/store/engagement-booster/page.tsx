@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLoading } from '@/context/loading-context';
+import { runEngagementBooster } from '@/ai/flows/run-engagement-booster';
 
 const boosterPlans = [
   {
@@ -57,15 +58,30 @@ export default function EngagementBoosterPage() {
   const { toast } = useToast();
   const { showLoading, hideLoading } = useLoading();
 
-  const handleChoosePlan = (planName: string) => {
+  const handleChoosePlan = async (planName: string) => {
     showLoading();
-    setTimeout(() => {
-        hideLoading();
+    try {
+        const result = await runEngagementBooster({
+            planName: planName,
+            brandName: 'Trendix',
+            targetAudience: 'Social media managers and digital creators interested in AI tools.'
+        });
+
         toast({
-            title: "Booster Activated!",
-            description: `You've successfully subscribed to the ${planName} plan.`
-        })
-    }, 1500)
+            title: "Booster Agent Activated!",
+            description: result.engagementSummary.summary,
+        });
+
+    } catch (error) {
+        console.error("Engagement booster failed:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Activation Failed',
+            description: 'The AI agent could not be started.'
+        });
+    } finally {
+        hideLoading();
+    }
   }
 
   return (
