@@ -59,7 +59,7 @@ const generateVideoFlow = ai.defineFlow(
       model: googleAI.model('veo-3.0-generate-preview'),
       prompt: promptParts,
       config: {
-        aspectRatio: aspectRatio || '16:9',
+        aspectRatio: (aspectRatio === '9:16' || aspectRatio === '16:9') ? aspectRatio : '16:9',
       },
     });
 

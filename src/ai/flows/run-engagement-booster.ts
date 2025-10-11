@@ -51,13 +51,13 @@ const findAccountsToEngageWithTool = ai.defineTool(
       }
     });
     
-    const output = response.output();
+    const output = response.output;
     if (!output) {
         return { accounts: [] };
     }
 
     return {
-      accounts: output.handles.map(handle => ({
+      accounts: output.handles.map((handle: string) => ({
         id: uuidv4(),
         handle: handle,
       })),
@@ -103,47 +103,43 @@ const runEngagementBoosterFlow = ai.defineFlow(
     outputSchema: RunEngagementBoosterOutputSchema,
   },
   async ({ planName, brandName, targetAudience }) => {
-    
-    const agent = await ai.configureAgent({
-        name: 'engagementBoosterAgent',
-        tools: [findAccountsToEngageWithTool, engageWithAccountTool],
-        prompt: `You are an autonomous social media growth expert for the brand "${brandName}".
-        Your goal is to increase brand visibility by engaging with a target audience of "${targetAudience}".
+    // Determine engagement count based on plan
+    let engagementCount = 10;
+    if (planName === 'Rapid Growth') engagementCount = 25;
+    if (planName === 'Hyper Growth') engagementCount = 50;
 
-        You have been activated on the "${planName}" plan.
-        - If the plan is 'Starter Growth', find and engage with 10 accounts.
-        - If the plan is 'Rapid Growth', find and engage with 25 accounts.
-        - If the plan is 'Hyper Growth', find and engage with 50 accounts.
-
-        1. First, use the 'findAccountsToEngageWith' tool to get a list of accounts.
-        2. Then, for each account in the list, use the 'engageWithAccount' tool to follow them and like their content.
-        3. Finally, respond with a summary of your actions, including the number of accounts found and engaged with.
-        
-        Execute the plan now.`,
+    // Find accounts to engage with
+    const accountsResult = await findAccountsToEngageWithTool({
+      targetAudience,
+      count: engagementCount,
     });
 
-    const { output } = await agent({
-        prompt: `Start the engagement booster process.`,
-    });
-
-    // We expect the agent's final output to be a text summary.
-    // We'll use another AI call to parse this text into the structured format we need.
-    const finalResponse = await ai.generate({
-        prompt: `Based on the following summary from an AI agent, extract the data to fit the required JSON format.
-        
-        Agent's Summary:
-        "${output}"`,
-        output: { schema: EngagementSummarySchema },
-    });
-
-    const parsedOutput = finalResponse.output();
-
-    if (!parsedOutput) {
-        throw new Error("The AI agent failed to provide a structured summary of its actions.");
+    // Simulate engagement with accounts
+    let accountsEngaged = 0;
+    for (const account of accountsResult.accounts) {
+      try {
+        await engageWithAccountTool({
+          accountId: account.id,
+          accountHandle: account.handle,
+        });
+        accountsEngaged++;
+      } catch (error) {
+        console.error(`Failed to engage with account ${account.handle}:`, error);
+      }
     }
 
+    // Generate summary
+    const summaryResponse = await ai.generate({
+      prompt: `Generate a brief summary of a social media engagement campaign for "${brandName}" targeting "${targetAudience}". 
+      Found ${accountsResult.accounts.length} accounts and engaged with ${accountsEngaged} accounts.`,
+    });
+
     return {
-      engagementSummary: parsedOutput,
+      engagementSummary: {
+        accountsFound: accountsResult.accounts.length,
+        accountsEngaged: accountsEngaged,
+        summary: summaryResponse.text,
+      },
     };
   }
 );

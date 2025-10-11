@@ -35,7 +35,7 @@ const TikTokIcon = () => (
     </svg>
   );
 
-  const platformIcons: { [key: string]: React.ElementType } = {
+  const platformIcons: { [key: string]: React.FC<React.SVGProps<SVGSVGElement>> } = {
     Twitter,
     Facebook,
     Instagram,

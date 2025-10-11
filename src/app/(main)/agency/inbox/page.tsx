@@ -100,7 +100,7 @@ export default function UnifiedInboxPage() {
             ];
             const randomMessage = newMessages[Math.floor(Math.random() * newMessages.length)];
 
-            setAccounts(prevAccounts => {
+            setAccounts((prevAccounts: any) => {
                 const newAccounts = JSON.parse(JSON.stringify(prevAccounts));
                 const thread = newAccounts[selectedAccount as keyof typeof newAccounts].messageThread[selectedConversation.id as keyof typeof currentAccountData.messageThread];
                 if (thread) {

@@ -68,7 +68,7 @@ export default function VideoEditorPage() {
         try {
           const result = await generateVideo({
             prompt,
-            imageDataUri: mode === 'image-to-video' ? imageDataUri : undefined,
+            imageDataUri: mode === 'image-to-video' ? (imageDataUri || undefined) : undefined,
             aspectRatio,
           });
           setVideoUrl(result.videoUrl);

@@ -102,22 +102,25 @@ const runCampaignFlow = ai.defineFlow(
     outputSchema: RunCampaignOutputSchema,
   },
   async ({ campaignGoal, budget }) => {
-    const agent = await ai.configureAgent({
-        name: "runCampaignAgent",
-        tools: [generatePostTool, generateImageTool, schedulePostTool],
-        prompt: `You are an autonomous social media campaign manager. Your goal is: "${campaignGoal}". Your budget is $${budget}.
-
-        1.  First, create a campaign brief. Define a name, target audience, key message, and duration.
-        2.  Then, for each day of the campaign, create and schedule at least one post.
-        3.  Generate content and an image for each post using your tools.
-        4.  You must use your tools. Decide on the platforms and schedule times.
-        5.  Return the final campaign brief and a list of all scheduled posts.`,
+    // Generate campaign brief
+    const briefResponse = await ai.generate({
+        prompt: `Create a campaign brief for a social media campaign with the goal: "${campaignGoal}" and budget: $${budget}. 
+        Return a JSON object with: campaignName, targetAudience, keyMessage, durationDays (number between 7-30).`,
     });
-
-    const { output } = await agent({
-        prompt: `Execute the campaign plan now.`,
+    
+    const campaignBrief = JSON.parse(briefResponse.text);
+    
+    // Generate scheduled posts
+    const postsResponse = await ai.generate({
+        prompt: `Create ${campaignBrief.durationDays} scheduled posts for the campaign: "${campaignBrief.campaignName}".
+        Return a JSON array of posts with: day, time, platform, content, imageUrl (optional), videoId (optional).`,
     });
+    
+    const scheduledPosts = JSON.parse(postsResponse.text);
 
-    return output!;
+    return {
+        campaignBrief,
+        scheduledPosts,
+    };
   }
 );

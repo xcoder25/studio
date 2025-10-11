@@ -55,7 +55,7 @@ export default function AdCampaignsPage() {
     setAdResults(null);
     showLoading();
     try {
-      const result = await generateAdCopy({...data, imageDataUri});
+      const result = await generateAdCopy({...data, imageDataUri: imageDataUri || undefined});
       setAdResults(result as FullAdOutput);
       toast({ title: 'Ad Strategy Generated!' });
     } catch (error) {
@@ -79,7 +79,7 @@ export default function AdCampaignsPage() {
 
     try {
         const ad = adResults.adCopy[index];
-        const result = await generateVideo({ prompt: ad.videoIdea, imageDataUri });
+        const result = await generateVideo({ prompt: ad.videoIdea, imageDataUri: imageDataUri || undefined });
         
         setAdResults(currentResults => {
             if (!currentResults) return null;
