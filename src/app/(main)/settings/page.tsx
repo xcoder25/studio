@@ -156,9 +156,12 @@ export default function SettingsPage() {
         
         // Load user settings from Firestore
         try {
+          console.log('Loading user settings for:', currentUser.uid);
           const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          console.log('User document exists:', userDoc.exists());
           if (userDoc.exists()) {
             const userData = userDoc.data();
+            console.log('User data loaded:', userData);
             setUserSettings(userData);
             
             // Update forms with user data
@@ -179,6 +182,7 @@ export default function SettingsPage() {
             setSocialAccounts(userData.socialAccounts || []);
           } else {
             // Create default user document
+            console.log('Creating default user document for:', currentUser.uid);
             const defaultSettings = {
               bio: '',
               website: '',
@@ -192,6 +196,7 @@ export default function SettingsPage() {
             };
             
             await setDoc(doc(db, 'users', currentUser.uid), defaultSettings);
+            console.log('Default user document created');
             setUserSettings(defaultSettings);
             setSocialAccounts([]);
           }
@@ -357,8 +362,12 @@ export default function SettingsPage() {
   // Facebook connection
   const connectFacebook = async () => {
     try {
+      console.log('Starting Facebook connection...');
+      console.log('Facebook App ID:', process.env.NEXT_PUBLIC_FACEBOOK_APP_ID);
+      
       // Load Facebook SDK
       if (!window.FB) {
+        console.log('Loading Facebook SDK...');
         await loadFacebookSDK();
       }
 
