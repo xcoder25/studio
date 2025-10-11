@@ -16,10 +16,17 @@ import { Twitter, Facebook, Instagram, CheckCircle, Link, Linkedin, Youtube, Upl
 import { useToast } from '@/hooks/use-toast';
 import { useLoading } from '@/context/loading-context';
 import { auth, db } from '@/lib/firebase';
-import { User, updateProfile, updateEmail, updatePassword, deleteUser, signOut } from 'firebase/auth';
+import { User, updateProfile, updateEmail, updatePassword, deleteUser, signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+
+// Facebook SDK types
+declare global {
+  interface Window {
+    FB: any;
+  }
+}
 
 const TikTokIcon = () => (
     <svg
@@ -93,7 +100,10 @@ interface SocialAccount {
   platform: string;
   connected: boolean;
   username?: string;
+  userId?: string;
+  accessToken?: string;
   connectedAt?: string;
+  profilePicture?: string;
 }
 
 export default function SettingsPage() {
@@ -291,13 +301,416 @@ export default function SettingsPage() {
     }
   };
 
-  // Handle social account connection
+  // Handle social account connection/disconnection
   const handleSocialConnect = async (platform: string) => {
-    // In a real app, this would integrate with actual social media APIs
-    toast({
-      title: 'Social Media Integration',
-      description: `${platform} integration will be available soon!`,
+    const existingAccount = socialAccounts.find(acc => acc.platform === platform);
+    
+    if (existingAccount?.connected) {
+      await disconnectSocialAccount(platform);
+    } else {
+      if (platform === 'Facebook') {
+        await connectFacebook();
+      } else if (platform === 'Twitter') {
+        await connectTwitter();
+      } else if (platform === 'Instagram') {
+        await connectInstagram();
+      } else if (platform === 'LinkedIn') {
+        await connectLinkedIn();
+      } else if (platform === 'YouTube') {
+        await connectYouTube();
+      } else {
+        toast({
+          title: 'Social Media Integration',
+          description: `${platform} integration will be available soon!`,
+        });
+      }
+    }
+  };
+
+  // Disconnect social account
+  const disconnectSocialAccount = async (platform: string) => {
+    if (!user) return;
+    
+    try {
+      await updateDoc(doc(db, 'users', user.uid), {
+        [`socialAccounts.${platform.toLowerCase()}`]: null,
+        updatedAt: new Date(),
+      });
+
+      // Update local state
+      setSocialAccounts(prev => prev.filter(acc => acc.platform !== platform));
+
+      toast({
+        title: `${platform} Disconnected`,
+        description: `Successfully disconnected from ${platform}`,
+      });
+    } catch (error) {
+      console.error(`Error disconnecting ${platform}:`, error);
+      toast({
+        variant: 'destructive',
+        title: 'Disconnection Failed',
+        description: `Failed to disconnect from ${platform}`,
+      });
+    }
+  };
+
+  // Facebook connection
+  const connectFacebook = async () => {
+    try {
+      // Load Facebook SDK
+      if (!window.FB) {
+        await loadFacebookSDK();
+      }
+
+      window.FB.login(async (response: any) => {
+        if (response.authResponse) {
+          const { accessToken, userID } = response.authResponse;
+          
+          // Get user info
+          window.FB.api('/me', { fields: 'name,email,picture' }, async (userInfo: any) => {
+            try {
+              // Save to Firestore
+              const newAccount = {
+                platform: 'Facebook',
+                connected: true,
+                username: userInfo.name,
+                userId: userID,
+                accessToken: accessToken,
+                connectedAt: new Date().toISOString(),
+                profilePicture: userInfo.picture?.data?.url,
+              };
+
+              await updateDoc(doc(db, 'users', user!.uid), {
+                [`socialAccounts.facebook`]: newAccount,
+                updatedAt: new Date(),
+              });
+
+              // Update local state
+              setSocialAccounts(prev => {
+                const filtered = prev.filter(acc => acc.platform !== 'Facebook');
+                return [...filtered, newAccount];
+              });
+
+              toast({
+                title: 'Facebook Connected!',
+                description: `Successfully connected ${userInfo.name}`,
+              });
+            } catch (error) {
+              console.error('Error saving Facebook connection:', error);
+              toast({
+                variant: 'destructive',
+                title: 'Connection Failed',
+                description: 'Failed to save Facebook connection',
+              });
+            }
+          });
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Connection Cancelled',
+            description: 'Facebook connection was cancelled',
+          });
+        }
+      }, { scope: 'email,public_profile,pages_manage_posts,pages_read_engagement' });
+    } catch (error) {
+      console.error('Facebook connection error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Connection Failed',
+        description: 'Failed to connect to Facebook',
+      });
+    }
+  };
+
+  // Load Facebook SDK
+  const loadFacebookSDK = () => {
+    return new Promise((resolve) => {
+      if (window.FB) {
+        resolve(true);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://connect.facebook.net/en_US/sdk.js';
+      script.async = true;
+      script.defer = true;
+      script.crossOrigin = 'anonymous';
+      
+      script.onload = () => {
+        window.FB.init({
+          appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || 'your-facebook-app-id',
+          cookie: true,
+          xfbml: true,
+          version: 'v18.0'
+        });
+        resolve(true);
+      };
+
+      document.head.appendChild(script);
     });
+  };
+
+  // Twitter connection
+  const connectTwitter = async () => {
+    try {
+      // Twitter OAuth 2.0 flow
+      const twitterAuthUrl = `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/twitter/callback')}&scope=tweet.read%20users.read%20follows.read&state=twitter_auth`;
+      
+      // Open popup and handle response
+      const popup = window.open(twitterAuthUrl, 'twitter_auth', 'width=600,height=600,scrollbars=yes,resizable=yes');
+      
+      // Listen for popup close
+      const checkClosed = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkClosed);
+          // Check if connection was successful by listening to URL changes
+          window.addEventListener('message', handleTwitterCallback);
+        }
+      }, 1000);
+      
+      toast({
+        title: 'Twitter Connection',
+        description: 'Please complete the authorization in the popup window',
+      });
+    } catch (error) {
+      console.error('Twitter connection error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Connection Failed',
+        description: 'Failed to connect to Twitter',
+      });
+    }
+  };
+
+  // Handle Twitter callback
+  const handleTwitterCallback = async (event: MessageEvent) => {
+    if (event.origin !== window.location.origin) return;
+    
+    if (event.data.type === 'TWITTER_AUTH_SUCCESS') {
+      const { username, userId, accessToken, profilePicture } = event.data;
+      
+      const newAccount = {
+        platform: 'Twitter',
+        connected: true,
+        username: username,
+        userId: userId,
+        accessToken: accessToken,
+        connectedAt: new Date().toISOString(),
+        profilePicture: profilePicture,
+      };
+
+      await updateDoc(doc(db, 'users', user!.uid), {
+        [`socialAccounts.twitter`]: newAccount,
+        updatedAt: new Date(),
+      });
+
+      setSocialAccounts(prev => {
+        const filtered = prev.filter(acc => acc.platform !== 'Twitter');
+        return [...filtered, newAccount];
+      });
+
+      toast({
+        title: 'Twitter Connected!',
+        description: `Successfully connected ${username}`,
+      });
+    }
+    
+    window.removeEventListener('message', handleTwitterCallback);
+  };
+
+  // Instagram connection
+  const connectInstagram = async () => {
+    try {
+      // Instagram Basic Display API
+      const instagramAuthUrl = `https://api.instagram.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_INSTAGRAM_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/instagram/callback')}&scope=user_profile,user_media&response_type=code&state=instagram_auth`;
+      
+      const popup = window.open(instagramAuthUrl, 'instagram_auth', 'width=600,height=600,scrollbars=yes,resizable=yes');
+      
+      const checkClosed = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkClosed);
+          window.addEventListener('message', handleInstagramCallback);
+        }
+      }, 1000);
+      
+      toast({
+        title: 'Instagram Connection',
+        description: 'Please complete the authorization in the popup window',
+      });
+    } catch (error) {
+      console.error('Instagram connection error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Connection Failed',
+        description: 'Failed to connect to Instagram',
+      });
+    }
+  };
+
+  // Handle Instagram callback
+  const handleInstagramCallback = async (event: MessageEvent) => {
+    if (event.origin !== window.location.origin) return;
+    
+    if (event.data.type === 'INSTAGRAM_AUTH_SUCCESS') {
+      const { username, userId, accessToken, profilePicture } = event.data;
+      
+      const newAccount = {
+        platform: 'Instagram',
+        connected: true,
+        username: username,
+        userId: userId,
+        accessToken: accessToken,
+        connectedAt: new Date().toISOString(),
+        profilePicture: profilePicture,
+      };
+
+      await updateDoc(doc(db, 'users', user!.uid), {
+        [`socialAccounts.instagram`]: newAccount,
+        updatedAt: new Date(),
+      });
+
+      setSocialAccounts(prev => {
+        const filtered = prev.filter(acc => acc.platform !== 'Instagram');
+        return [...filtered, newAccount];
+      });
+
+      toast({
+        title: 'Instagram Connected!',
+        description: `Successfully connected ${username}`,
+      });
+    }
+    
+    window.removeEventListener('message', handleInstagramCallback);
+  };
+
+  // LinkedIn connection
+  const connectLinkedIn = async () => {
+    try {
+      // LinkedIn OAuth 2.0 flow
+      const linkedinAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/linkedin/callback')}&scope=r_liteprofile%20r_emailaddress%20w_member_social&state=linkedin_auth`;
+      
+      const popup = window.open(linkedinAuthUrl, 'linkedin_auth', 'width=600,height=600,scrollbars=yes,resizable=yes');
+      
+      const checkClosed = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkClosed);
+          window.addEventListener('message', handleLinkedInCallback);
+        }
+      }, 1000);
+      
+      toast({
+        title: 'LinkedIn Connection',
+        description: 'Please complete the authorization in the popup window',
+      });
+    } catch (error) {
+      console.error('LinkedIn connection error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Connection Failed',
+        description: 'Failed to connect to LinkedIn',
+      });
+    }
+  };
+
+  // Handle LinkedIn callback
+  const handleLinkedInCallback = async (event: MessageEvent) => {
+    if (event.origin !== window.location.origin) return;
+    
+    if (event.data.type === 'LINKEDIN_AUTH_SUCCESS') {
+      const { username, userId, accessToken, profilePicture } = event.data;
+      
+      const newAccount = {
+        platform: 'LinkedIn',
+        connected: true,
+        username: username,
+        userId: userId,
+        accessToken: accessToken,
+        connectedAt: new Date().toISOString(),
+        profilePicture: profilePicture,
+      };
+
+      await updateDoc(doc(db, 'users', user!.uid), {
+        [`socialAccounts.linkedin`]: newAccount,
+        updatedAt: new Date(),
+      });
+
+      setSocialAccounts(prev => {
+        const filtered = prev.filter(acc => acc.platform !== 'LinkedIn');
+        return [...filtered, newAccount];
+      });
+
+      toast({
+        title: 'LinkedIn Connected!',
+        description: `Successfully connected ${username}`,
+      });
+    }
+    
+    window.removeEventListener('message', handleLinkedInCallback);
+  };
+
+  // YouTube connection
+  const connectYouTube = async () => {
+    try {
+      // YouTube Data API v3 OAuth 2.0
+      const youtubeAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/youtube/callback')}&scope=https://www.googleapis.com/auth/youtube%20https://www.googleapis.com/auth/youtube.upload&response_type=code&state=youtube_auth`;
+      
+      const popup = window.open(youtubeAuthUrl, 'youtube_auth', 'width=600,height=600,scrollbars=yes,resizable=yes');
+      
+      const checkClosed = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkClosed);
+          window.addEventListener('message', handleYouTubeCallback);
+        }
+      }, 1000);
+      
+      toast({
+        title: 'YouTube Connection',
+        description: 'Please complete the authorization in the popup window',
+      });
+    } catch (error) {
+      console.error('YouTube connection error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Connection Failed',
+        description: 'Failed to connect to YouTube',
+      });
+    }
+  };
+
+  // Handle YouTube callback
+  const handleYouTubeCallback = async (event: MessageEvent) => {
+    if (event.origin !== window.location.origin) return;
+    
+    if (event.data.type === 'YOUTUBE_AUTH_SUCCESS') {
+      const { username, userId, accessToken, profilePicture } = event.data;
+      
+      const newAccount = {
+        platform: 'YouTube',
+        connected: true,
+        username: username,
+        userId: userId,
+        accessToken: accessToken,
+        connectedAt: new Date().toISOString(),
+        profilePicture: profilePicture,
+      };
+
+      await updateDoc(doc(db, 'users', user!.uid), {
+        [`socialAccounts.youtube`]: newAccount,
+        updatedAt: new Date(),
+      });
+
+      setSocialAccounts(prev => {
+        const filtered = prev.filter(acc => acc.platform !== 'YouTube');
+        return [...filtered, newAccount];
+      });
+
+      toast({
+        title: 'YouTube Connected!',
+        description: `Successfully connected ${username}`,
+      });
+    }
+    
+    window.removeEventListener('message', handleYouTubeCallback);
   };
 
   // Handle account deletion
@@ -584,21 +997,34 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <platform.icon className={`h-6 w-6 ${platform.color}`} />
-                      <span className="font-medium">{platform.name}</span>
-                      {isConnected && account?.username && (
-                        <span className="text-sm text-muted-foreground">@{account.username}</span>
-                      )}
+                      <div className="flex flex-col">
+                        <span className="font-medium">{platform.name}</span>
+                        {isConnected && account?.username && (
+                          <span className="text-sm text-muted-foreground">{account.username}</span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       {isConnected ? (
-                        <div className="flex items-center gap-2 text-green-500">
-                          <CheckCircle className="h-5 w-5" />
-                          <span>Connected</span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 text-green-500">
+                            <CheckCircle className="h-5 w-5" />
+                            <span>Connected</span>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleSocialConnect(platform.name)}
+                            disabled={isSaving}
+                          >
+                            Disconnect
+                          </Button>
                         </div>
                       ) : (
                         <Button 
                           variant="outline" 
                           onClick={() => handleSocialConnect(platform.name)}
+                          disabled={isSaving}
                         >
                           <Link className="mr-2 h-4 w-4" />
                           Connect
