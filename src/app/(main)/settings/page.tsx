@@ -365,6 +365,16 @@ export default function SettingsPage() {
       console.log('Starting Facebook connection...');
       console.log('Facebook App ID:', process.env.NEXT_PUBLIC_FACEBOOK_APP_ID);
       
+      // Check if Facebook App ID is configured
+      if (!process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID === 'your_facebook_app_id_here') {
+        toast({
+          variant: 'destructive',
+          title: 'Facebook Not Configured',
+          description: 'Please set up Facebook App ID in environment variables',
+        });
+        return;
+      }
+      
       // Load Facebook SDK
       if (!window.FB) {
         console.log('Loading Facebook SDK...');
@@ -462,6 +472,16 @@ export default function SettingsPage() {
   // Twitter connection
   const connectTwitter = async () => {
     try {
+      // Check if Twitter Client ID is configured
+      if (!process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID || process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID === 'your_twitter_client_id_here') {
+        toast({
+          variant: 'destructive',
+          title: 'Twitter Not Configured',
+          description: 'Please set up Twitter Client ID in environment variables',
+        });
+        return;
+      }
+
       // Twitter OAuth 2.0 flow
       const twitterAuthUrl = `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/twitter/callback')}&scope=tweet.read%20users.read%20follows.read&state=twitter_auth`;
       
