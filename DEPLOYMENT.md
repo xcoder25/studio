@@ -32,18 +32,24 @@ PAYSTACK_SECRET_KEY=your_paystack_secret_key_here
 NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=your_paystack_public_key_here
 
 # Social Media API Keys (REQUIRED for social connections)
+
+# Facebook OAuth 2.0 (Graph API v21.0)
 NEXT_PUBLIC_FACEBOOK_APP_ID=your_facebook_app_id_here
 FACEBOOK_APP_SECRET=your_facebook_app_secret_here
 
+# Twitter OAuth 2.0 with PKCE (API v2)
 NEXT_PUBLIC_TWITTER_CLIENT_ID=your_twitter_client_id_here
 TWITTER_CLIENT_SECRET=your_twitter_client_secret_here
 
+# Instagram Basic Display API OAuth 2.0
 NEXT_PUBLIC_INSTAGRAM_CLIENT_ID=your_instagram_client_id_here
 INSTAGRAM_CLIENT_SECRET=your_instagram_client_secret_here
 
+# LinkedIn API v2 OAuth 2.0
 NEXT_PUBLIC_LINKEDIN_CLIENT_ID=your_linkedin_client_id_here
 LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret_here
 
+# YouTube Data API v3 OAuth 2.0 (Google Cloud)
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id_here
 GOOGLE_CLIENT_SECRET=your_google_client_secret_here
 

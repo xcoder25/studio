@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        client_id: process.env.INSTAGRAM_CLIENT_ID!,
+        client_id: process.env.NEXT_PUBLIC_INSTAGRAM_CLIENT_ID!,
         client_secret: process.env.INSTAGRAM_CLIENT_SECRET!,
         grant_type: 'authorization_code',
         redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/instagram/callback`,
@@ -41,15 +41,9 @@ export async function GET(request: NextRequest) {
 
     const userData = await userResponse.json();
 
-    // Save to Firestore (simplified version)
-    const instagramAccount = {
-      platform: 'Instagram',
-      connected: true,
-      username: userData.username,
-      userId: userData.id,
-      accessToken: tokenData.access_token,
-      connectedAt: new Date().toISOString(),
-    };
+    if (!userData.id) {
+      throw new Error('Failed to get user data');
+    }
 
     // Send message to parent window
     const html = `

@@ -359,11 +359,10 @@ export default function SettingsPage() {
     }
   };
 
-  // Facebook connection
+  // Facebook connection using OAuth 2.0
   const connectFacebook = async () => {
     try {
-      console.log('Starting Facebook connection...');
-      console.log('Facebook App ID:', process.env.NEXT_PUBLIC_FACEBOOK_APP_ID);
+      console.log('Starting Facebook OAuth 2.0 connection...');
       
       // Check if Facebook App ID is configured
       if (!process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID === 'your_facebook_app_id_here') {
@@ -374,63 +373,73 @@ export default function SettingsPage() {
         });
         return;
       }
+
+      // Facebook OAuth 2.0 URL with proper scopes
+      const facebookAuthUrl = `https://www.facebook.com/v21.0/dialog/oauth?` +
+        `client_id=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&` +
+        `redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/facebook/callback')}&` +
+        `scope=email,public_profile,pages_manage_posts,pages_read_engagement&` +
+        `response_type=code&` +
+        `state=facebook_auth`;
+
+      // Open popup for OAuth flow
+      const popup = window.open(facebookAuthUrl, 'facebook_auth', 'width=600,height=600,scrollbars=yes,resizable=yes');
       
-      // Load Facebook SDK
-      if (!window.FB) {
-        console.log('Loading Facebook SDK...');
-        await loadFacebookSDK();
-      }
+      // Listen for popup close
+      const checkClosed = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkClosed);
+          window.removeEventListener('message', handleFacebookCallback);
+        }
+      }, 1000);
 
-      window.FB.login(async (response: any) => {
-        if (response.authResponse) {
-          const { accessToken, userID } = response.authResponse;
+      // Handle callback from popup
+      const handleFacebookCallback = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+        
+        if (event.data.type === 'FACEBOOK_AUTH_SUCCESS') {
+          const { username, userId, accessToken, profilePicture } = event.data;
           
-          // Get user info
-          window.FB.api('/me', { fields: 'name,email,picture' }, async (userInfo: any) => {
-            try {
-              // Save to Firestore
-              const newAccount = {
-                platform: 'Facebook',
-                connected: true,
-                username: userInfo.name,
-                userId: userID,
-                accessToken: accessToken,
-                connectedAt: new Date().toISOString(),
-                profilePicture: userInfo.picture?.data?.url,
-              };
+          const newAccount = {
+            platform: 'Facebook',
+            connected: true,
+            username,
+            userId,
+            accessToken,
+            connectedAt: new Date().toISOString(),
+            profilePicture,
+          };
 
-              await updateDoc(doc(db, 'users', user!.uid), {
-                [`socialAccounts.facebook`]: newAccount,
-                updatedAt: new Date(),
-              });
+          updateDoc(doc(db, 'users', user!.uid), {
+            [`socialAccounts.facebook`]: newAccount,
+            updatedAt: new Date(),
+          }).then(() => {
+            setSocialAccounts(prev => {
+              const filtered = prev.filter(acc => acc.platform !== 'Facebook');
+              return [...filtered, newAccount];
+            });
 
-              // Update local state
-              setSocialAccounts(prev => {
-                const filtered = prev.filter(acc => acc.platform !== 'Facebook');
-                return [...filtered, newAccount];
-              });
-
-              toast({
-                title: 'Facebook Connected!',
-                description: `Successfully connected ${userInfo.name}`,
-              });
-            } catch (error) {
-              console.error('Error saving Facebook connection:', error);
-              toast({
-                variant: 'destructive',
-                title: 'Connection Failed',
-                description: 'Failed to save Facebook connection',
-              });
-            }
-          });
-        } else {
-          toast({
-            variant: 'destructive',
-            title: 'Connection Cancelled',
-            description: 'Facebook connection was cancelled',
+            toast({
+              title: 'Facebook Connected!',
+              description: `Successfully connected ${username}`,
+            });
+          }).catch(error => {
+            console.error('Error saving Facebook connection:', error);
+            toast({
+              variant: 'destructive',
+              title: 'Connection Failed',
+              description: 'Failed to save Facebook connection',
+            });
           });
         }
-      }, { scope: 'email,public_profile,pages_manage_posts,pages_read_engagement' });
+      };
+
+      window.addEventListener('message', handleFacebookCallback);
+      
+      toast({
+        title: 'Facebook Connection',
+        description: 'Please complete the authorization in the popup window',
+      });
     } catch (error) {
       console.error('Facebook connection error:', error);
       toast({
@@ -482,8 +491,19 @@ export default function SettingsPage() {
         return;
       }
 
-      // Twitter OAuth 2.0 flow
-      const twitterAuthUrl = `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/twitter/callback')}&scope=tweet.read%20users.read%20follows.read&state=twitter_auth`;
+      // Generate PKCE code challenge
+      const codeVerifier = crypto.randomUUID();
+      const codeChallenge = btoa(codeVerifier).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+      
+      // Twitter OAuth 2.0 flow with PKCE
+      const twitterAuthUrl = `https://twitter.com/i/oauth2/authorize?` +
+        `response_type=code&` +
+        `client_id=${process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID}&` +
+        `redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/twitter/callback')}&` +
+        `scope=tweet.read%20users.read%20follows.read&` +
+        `state=twitter_auth&` +
+        `code_challenge=${codeChallenge}&` +
+        `code_challenge_method=plain`;
       
       // Open popup and handle response
       const popup = window.open(twitterAuthUrl, 'twitter_auth', 'width=600,height=600,scrollbars=yes,resizable=yes');
