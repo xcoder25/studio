@@ -1,6 +1,7 @@
 import type { FC, SVGProps } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, TrendingUp, TrendingDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, TrendingUp, TrendingDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type StatsCardProps = {
@@ -9,9 +10,10 @@ type StatsCardProps = {
   followers: string;
   change: string;
   changeType?: 'positive' | 'negative';
+  isConnected?: boolean;
 };
 
-export default function StatsCard({ platform, icon: Icon, followers, change, changeType = 'positive' }: StatsCardProps) {
+export default function StatsCard({ platform, icon: Icon, followers, change, changeType = 'positive', isConnected = true }: StatsCardProps) {
     const platformColorMap: { [key: string]: string } = {
         Twitter: "bg-sky-500",
         Facebook: "bg-blue-600",
@@ -26,19 +28,29 @@ export default function StatsCard({ platform, icon: Icon, followers, change, cha
           <h3 className="text-lg font-semibold">{platform}</h3>
           <Icon className="size-6 text-muted-foreground" />
         </div>
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground flex items-center gap-1"><Users className="size-4" /> Followers</p>
-            <p className="text-3xl font-bold">{followers}</p>
+        {isConnected ? (
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground flex items-center gap-1"><Users className="size-4" /> Followers</p>
+              <p className="text-3xl font-bold">{followers}</p>
+            </div>
+            <div className={cn(
+              "flex items-center text-sm font-semibold",
+              changeType === 'positive' ? 'text-green-500' : 'text-red-500'
+            )}>
+              {changeType === 'positive' ? <TrendingUp className="size-4 mr-1" /> : <TrendingDown className="size-4 mr-1" />}
+              {change}
+            </div>
           </div>
-          <div className={cn(
-            "flex items-center text-sm font-semibold",
-            changeType === 'positive' ? 'text-green-500' : 'text-red-500'
-          )}>
-            {changeType === 'positive' ? <TrendingUp className="size-4 mr-1" /> : <TrendingDown className="size-4 mr-1" />}
-            {change}
+        ) : (
+          <div className="flex flex-col items-center justify-center py-6">
+            <p className="text-sm text-muted-foreground mb-4">Not connected</p>
+            <Button size="sm" className="w-full">
+              <Plus className="size-4 mr-2" />
+              Connect
+            </Button>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

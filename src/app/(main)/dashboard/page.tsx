@@ -154,6 +154,7 @@ export default function DashboardPage() {
                 followers={stat.followers}
                 change={stat.change}
                 changeType={stat.changeType as 'positive' | 'negative' | undefined}
+                isConnected={stat.platform === 'Twitter' || stat.platform === 'Instagram'} // Only show Twitter and Instagram as connected
               />
             ))}
           </div>
