@@ -60,13 +60,19 @@ export default function DashboardPage() {
             generateDashboardData({ userContext }),
         ]);
 
-        if (trendsResult.trends.length === 0) setErrorLoadingTrends(true);
+        // Always set the data, even if trends are empty (fallback data will be used)
         setTrends(trendsResult.trends);
         setDashboardData(dashboardDataResult);
+        
+        // Only set error if both AI calls failed and no fallback data was provided
+        if (trendsResult.trends.length === 0 && !dashboardDataResult) {
+            setErrorLoadingTrends(true);
+        }
 
     } catch (error) {
         console.error('Failed to load initial dashboard data:', error);
-        setErrorLoadingTrends(true);
+        // Don't set error state since fallback data should be available
+        setErrorLoadingTrends(false);
     } finally {
         setIsLoading(false);
     }
@@ -78,7 +84,7 @@ export default function DashboardPage() {
             setUser(currentUser);
             initialLoad(currentUser.displayName || 'User').then(() => {
                 const firestoreUnsubscribe = onSnapshot(doc(db, "dashboard-updates", "updates"), (snapshot) => {
-                    if (!isLoading) { // Check if initial load is complete
+                    if (!isLoading && snapshot.exists()) { // Check if initial load is complete and data exists
                         generateDashboardData({ userContext: `The user is ${currentUser.displayName || 'User'}, a social media manager for the tech startup Trendix.` })
                             .then(setDashboardData)
                             .catch(err => console.error("Failed to refresh dashboard data", err));

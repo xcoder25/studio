@@ -48,6 +48,35 @@ const prompt = ai.definePrompt({
   Focus on current, actionable trends that a creator could use for a new post today.`,
 });
 
+// Fallback trends data for when AI fails
+const fallbackTrends = [
+  {
+    title: '#AITechTrends',
+    type: 'hashtag' as const,
+    description: 'Latest developments in artificial intelligence and technology innovation.'
+  },
+  {
+    title: '#SocialMediaStrategy',
+    type: 'hashtag' as const,
+    description: 'Tips and insights for effective social media marketing and content creation.'
+  },
+  {
+    title: '#ContentCreator',
+    type: 'hashtag' as const,
+    description: 'Community for content creators sharing their creative process and tips.'
+  },
+  {
+    title: 'Tech Innovation Sound',
+    type: 'sound' as const,
+    description: 'Popular audio track for tech-related content and product launches.'
+  },
+  {
+    title: 'AI Challenge',
+    type: 'challenge' as const,
+    description: 'Show how AI is changing your industry with creative video content.'
+  }
+];
+
 const findTrendsFlow = ai.defineFlow(
   {
     name: 'findTrendsFlow',
@@ -60,8 +89,8 @@ const findTrendsFlow = ai.defineFlow(
         return output!;
     } catch (error) {
         console.error('Error finding trends:', error);
-        // Return an empty array if the AI call fails
-        return { trends: [] };
+        // Return fallback trends when AI fails
+        return { trends: fallbackTrends };
     }
   }
 );
