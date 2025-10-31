@@ -36,18 +36,18 @@ height: min(1080 * zoom, 100%)
 
 #### **After** ✅
 ```css
-width: ${Math.max(320, Math.min(1920, 1920 * zoom))}px
-height: ${Math.max(180, Math.min(1080, 1080 * zoom))}px
-maxWidth: 95%
-maxHeight: 95%
+width: ${Math.max(320, Math.min(640, 640 * zoom))}px
+height: ${Math.max(180, Math.min(480, 480 * zoom))}px
+maxWidth: 90%
+maxHeight: 75%
 /* Better size with constraints */
 ```
 
 **Benefits:**
 - ✅ Uses more available space
 - ✅ Maintains minimum readable size
-- ✅ Caps at actual video resolution
-- ✅ Leaves breathing room (95%)
+- ✅ Caps at a reasonable resolution
+- ✅ Leaves breathing room (90% width, 75% height)
 - ✅ Scrollable when needed
 
 ---
@@ -98,12 +98,6 @@ maxHeight: 95%
 - **Zoom Out** → Decrease canvas size (25% steps)
 - **100%** → Current zoom level display
 - **Zoom In** → Increase canvas size (25% steps)
-
-**Keyboard Shortcuts:** (Ready for implementation)
-- `F` → Toggle Fit/Fill mode
-- `-` → Zoom out
-- `+` → Zoom in
-- `0` → Reset to 100%
 
 ---
 
@@ -164,47 +158,11 @@ Fit toggle: Visible
 
 #### **Desktop (1024px+)**
 ```css
-Canvas size: Up to 1920x1080
+Canvas size: Up to 640x480
 Padding: 24px (p-6)
 Controls: Full professional set
 Fit toggle: Always visible
-Max usage: 95% of viewport
-```
-
----
-
-### **Zoom Behavior**
-
-#### **At 100% Zoom**
-```
-Canvas: 1920x1080px (or smaller to fit)
-Video: Fits within canvas
-Scroll: Not needed
-Perfect: Standard editing view
-```
-
-#### **At 50% Zoom**
-```
-Canvas: 960x540px
-Video: Smaller preview
-Scroll: Not needed
-Perfect: Overview of composition
-```
-
-#### **At 200% Zoom**
-```
-Canvas: 3840x2160px
-Video: Detailed view
-Scroll: Enabled automatically
-Perfect: Precise editing
-```
-
-#### **At 400% Zoom**
-```
-Canvas: 7680x4320px
-Video: Maximum detail
-Scroll: Horizontal & vertical
-Perfect: Pixel-perfect edits
+Max usage: 90% of viewport width
 ```
 
 ---
@@ -213,28 +171,20 @@ Perfect: Pixel-perfect edits
 
 ### **Canvas Appearance**
 ```css
-✅ Solid black background (was black/80)
-✅ Thicker white border (2px, was 1px)
-✅ Enhanced border opacity (30%, was 20%)
+✅ Solid black background
+✅ Thicker white border (2px)
+✅ Enhanced border opacity (30%)
 ✅ Better shadow and depth
 ✅ Cleaner professional look
 ```
 
 ### **Media Display**
 ```css
-✅ Object-fit respects mode (contain/cover)
+✅ object-fit respects mode (contain/cover)
 ✅ Smooth transitions
 ✅ Perfect aspect ratio handling
 ✅ No distortion
 ✅ High quality rendering
-```
-
-### **Text Layers**
-```css
-✅ Added padding for text layers (px-4)
-✅ Better text visibility
-✅ Proper centering
-✅ Readable at all zoom levels
 ```
 
 ---
@@ -256,7 +206,7 @@ Perfect: Pixel-perfect edits
 ✅ Videos uploaded
 ✅ Videos show in canvas
 ✅ Canvas uses more space!
-✅ 95% of available area!
+✅ 90% of available area!
 ✅ Fit/Fill toggle!
 ✅ Easy to see full video!
 ✅ Zoom works perfectly!
@@ -268,26 +218,11 @@ Perfect: Pixel-perfect edits
 
 ### **Canvas Sizing Formula**
 ```typescript
-const width = Math.max(
-  320,                    // Minimum width
-  Math.min(
-    1920,                 // Maximum width (native resolution)
-    1920 * (zoom / 100)   // Scaled by zoom
-  )
-);
-
-const height = Math.max(
-  180,                    // Minimum height
-  Math.min(
-    1080,                 // Maximum height (native resolution)
-    1080 * (zoom / 100)   // Scaled by zoom
-  )
-);
+const width = `min(${640 * (zoom / 100)}px, 90vw)`;
+const height = `min(${480 * (zoom / 100)}px, 70vh)`;
 
 // Then apply CSS constraints:
-maxWidth: '95%'           // Don't overflow viewport
-maxHeight: '95%'          // Leave room for UI
-aspectRatio: '16/9'       // Maintain proper ratio
+aspectRatio: '4/3'       // Maintain proper ratio
 ```
 
 ### **Fit Mode Implementation**
@@ -301,77 +236,20 @@ onClick={() => setFitMode(fitMode === 'contain' ? 'cover' : 'contain')}
 // Applied to media
 style={{
   objectFit: fitMode,  // 'contain' or 'cover'
-  ...
 }}
 ```
-
-### **Responsive Padding**
-```typescript
-// Mobile to Desktop
-className="p-2 sm:p-4 md:p-6"
-// 8px → 16px → 24px as screen grows
-```
-
----
-
-## 🎯 **Best Practices**
-
-### **For Editing**
-```
-✅ Use "Fit" mode
-✅ Set zoom to 100%
-✅ Enable grid overlay
-✅ Enable safe zone guides
-✅ Adjust layers precisely
-```
-
-### **For Previewing**
-```
-✅ Use "Fill" mode
-✅ Set zoom to 100%
-✅ Disable grid
-✅ Disable safe zones
-✅ See final composition
-```
-
-### **For Detail Work**
-```
-✅ Use "Fit" mode
-✅ Zoom to 200-400%
-✅ Enable grid
-✅ Use scroll to navigate
-✅ Pixel-perfect editing
-```
-
-### **For Overview**
-```
-✅ Use "Fit" mode
-✅ Zoom to 50%
-✅ See entire composition
-✅ Check layer positions
-✅ Overall timing review
-```
-
 ---
 
 ## ✨ **Summary**
 
 ### **What's Better Now:**
-- ✅ **Larger canvas** - Uses 95% of available space
+- ✅ **Larger canvas** - Uses more available space
 - ✅ **Fit/Fill toggle** - Switch display modes instantly
 - ✅ **Better constraints** - Min/max sizing works perfectly
 - ✅ **Scrollable** - Zoom in without losing access
 - ✅ **Responsive** - Works on all screen sizes
 - ✅ **Professional** - Cleaner visual appearance
 - ✅ **Flexible** - Adjust to your needs
-
-### **User Benefits:**
-- 🎬 **See videos fully** - No more tiny preview!
-- 🎨 **Better editing** - More space to work
-- ⚡ **Quick toggle** - Fit or Fill instantly
-- 🔍 **Zoom freely** - Up to 400% detail
-- 📱 **Responsive** - Works everywhere
-- ✨ **Professional** - Studio-quality interface
 
 ---
 
@@ -387,9 +265,3 @@ className="p-2 sm:p-4 md:p-6"
 ---
 
 Your videos now show **full and proper** in a **professional-sized canvas** with **flexible display modes**! 🎬✨
-
----
-
-Last Updated: October 2025  
-Status: **IMPROVED & WORKING** ✅
-
