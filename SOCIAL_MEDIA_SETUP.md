@@ -145,6 +145,32 @@ This guide provides step-by-step instructions for setting up OAuth 2.0 integrati
 
 ---
 
+### 6. TikTok Login Kit (OAuth 2.0)
+
+**Required for:** TikTok login, user info, video access
+
+**Setup Steps:**
+1. Go to [TikTok for Developers](https://developers.tiktok.com/)
+2. Create a new app for "Login Kit"
+3. Configure your app settings:
+   - **Platform:** Web
+   - **Site URL:** `https://your-domain.com`
+   - **Redirect URI:** `https://your-domain.com/api/auth/tiktok/callback`
+4. Get credentials:
+   - **Client Key** → `NEXT_PUBLIC_TIKTOK_CLIENT_KEY`
+   - **Client Secret** → `TIKTOK_CLIENT_SECRET`
+
+**Required Scopes:**
+- `user.info.basic`
+- `video.list`
+
+**API Endpoints Used:**
+- Authorization: `https://www.tiktok.com/v2/auth/authorize/`
+- Token Exchange: `https://open.tiktokapis.com/v2/oauth/token/`
+- User Info: `https://open.tiktokapis.com/v2/user/info/`
+
+---
+
 ## 🔐 Security Best Practices
 
 ### Environment Variables
@@ -234,6 +260,7 @@ Ensure your production domain has a valid SSL certificate for OAuth to work prop
 - [Instagram Basic Display API](https://developers.facebook.com/docs/instagram-basic-display-api)
 - [LinkedIn API Documentation](https://docs.microsoft.com/en-us/linkedin/)
 - [YouTube Data API Documentation](https://developers.google.com/youtube/v3)
+- [TikTok Login Kit Documentation](https://developers.tiktok.com/doc/login-kit-web)
 
 ---
 

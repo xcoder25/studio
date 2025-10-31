@@ -324,6 +324,8 @@ export default function SettingsPage() {
         await connectLinkedIn();
       } else if (platform === 'YouTube') {
         await connectYouTube();
+      } else if (platform === 'TikTok') {
+        await connectTikTok();
       } else {
         toast({
           title: 'Social Media Integration',
@@ -651,6 +653,72 @@ export default function SettingsPage() {
     }
     
     window.removeEventListener('message', handleInstagramCallback);
+  };
+
+  // TikTok connection
+  const connectTikTok = async () => {
+    try {
+      const tiktokAuthUrl = `/api/auth/tiktok`;
+      const popup = window.open(tiktokAuthUrl, 'tiktok_auth', 'width=600,height=700');
+      
+      window.addEventListener('message', handleTikTokCallback, { once: true });
+
+      toast({
+        title: 'TikTok Connection',
+        description: 'Please complete the authorization in the popup window.',
+      });
+    } catch (error) {
+      console.error('TikTok connection error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Connection Failed',
+        description: 'Failed to connect to TikTok',
+      });
+    }
+  };
+
+  // Handle TikTok callback
+  const handleTikTokCallback = async (event: MessageEvent) => {
+    if (event.origin !== window.location.origin) return;
+    
+    if (event.data.type === 'TIKTOK_AUTH_SUCCESS') {
+      const { username, userId, accessToken, profilePicture } = event.data;
+      
+      const newAccount = {
+        platform: 'TikTok',
+        connected: true,
+        username,
+        userId,
+        accessToken,
+        connectedAt: new Date().toISOString(),
+        profilePicture,
+      };
+
+      await updateDoc(doc(db, 'users', user!.uid), {
+        'socialAccounts.tiktok': newAccount,
+        updatedAt: new Date(),
+      });
+
+      setSocialAccounts(prev => {
+        const filtered = prev.filter(acc => acc.platform !== 'TikTok');
+        return [...filtered, newAccount];
+      });
+
+      toast({
+        title: 'TikTok Connected!',
+        description: `Successfully connected @${username}`,
+      });
+
+      updateDashboardCache(user!.uid, user!.displayName || 'User').catch(err => 
+        console.error('Failed to update dashboard cache:', err)
+      );
+    } else if (event.data.type === 'TIKTOK_AUTH_ERROR') {
+        toast({
+            variant: 'destructive',
+            title: 'TikTok Connection Failed',
+            description: event.data.error || 'An unknown error occurred.',
+        });
+    }
   };
 
   // LinkedIn connection
