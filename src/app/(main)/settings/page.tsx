@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -12,22 +13,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Twitter, Facebook, Instagram, CheckCircle, Link, Linkedin, Youtube, Upload, Save, LogOut, AlertCircle, Loader2 } from "lucide-react";
+import { Twitter, Facebook, Instagram, CheckCircle, Link as LinkIcon, Linkedin, Youtube, Upload, Save, LogOut, AlertCircle, Loader2 } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { useLoading } from '@/context/loading-context';
 import { auth, db } from '@/lib/firebase';
-import { User, updateProfile, updateEmail, updatePassword, deleteUser, signOut, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { User, updateProfile, updateEmail, updatePassword, deleteUser, signOut } from 'firebase/auth';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { updateDashboardCache, triggerDashboardUpdate } from '@/app/actions/update-dashboard-cache';
-
-// Facebook SDK types
-declare global {
-  interface Window {
-    FB: any;
-  }
-}
+import { updateDashboardCache } from '@/app/actions/update-dashboard-cache';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 const TikTokIcon = () => (
     <svg
@@ -69,7 +64,6 @@ const WhatsAppIcon = () => (
     </svg>
 );
 
-// Form schemas
 const profileSchema = z.object({
   displayName: z.string().min(1, 'Name is required'),
   email: z.string().email('Invalid email address'),
@@ -112,784 +106,201 @@ export default function SettingsPage() {
   const { toast } = useToast();
   const { showLoading, hideLoading } = useLoading();
   
-  const [user, setUser] = useState<User | null>(null);
+  const [user, authLoading, authError] = useAuthState(auth);
   const [userSettings, setUserSettings] = useState<any>(null);
   const [socialAccounts, setSocialAccounts] = useState<SocialAccount[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Form instances
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
-    defaultValues: {
-      displayName: '',
-      email: '',
-      bio: '',
-      website: '',
-    },
+    defaultValues: { displayName: '', email: '', bio: '', website: '' },
   });
 
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
-    defaultValues: {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-    },
+    defaultValues: { currentPassword: '', newPassword: '', confirmPassword: '' },
   });
 
   const notificationForm = useForm<NotificationFormValues>({
     resolver: zodResolver(notificationSchema),
-    defaultValues: {
-      emailNotifications: true,
-      pushNotifications: true,
-      marketingEmails: false,
-      weeklyReports: true,
-    },
+    defaultValues: { emailNotifications: true, pushNotifications: true, marketingEmails: false, weeklyReports: true },
   });
 
-  // Load user data
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        
-        // Load user settings from Firestore
-        try {
-          console.log('Loading user settings for:', currentUser.uid);
-          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-          console.log('User document exists:', userDoc.exists());
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            console.log('User data loaded:', userData);
-            setUserSettings(userData);
-            
-            // Update forms with user data
-            profileForm.reset({
-              displayName: currentUser.displayName || '',
-              email: currentUser.email || '',
-              bio: userData.bio || '',
-              website: userData.website || '',
-            });
-            
-            notificationForm.reset({
-              emailNotifications: userData.emailNotifications ?? true,
-              pushNotifications: userData.pushNotifications ?? true,
-              marketingEmails: userData.marketingEmails ?? false,
-              weeklyReports: userData.weeklyReports ?? true,
-            });
-            
-            setSocialAccounts(userData.socialAccounts || []);
-          } else {
-            // Create default user document
-            console.log('Creating default user document for:', currentUser.uid);
-            const defaultSettings = {
-              bio: '',
-              website: '',
-              emailNotifications: true,
-              pushNotifications: true,
-              marketingEmails: false,
-              weeklyReports: true,
-              socialAccounts: [],
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            };
-            
-            await setDoc(doc(db, 'users', currentUser.uid), defaultSettings);
-            console.log('Default user document created');
-            setUserSettings(defaultSettings);
-            setSocialAccounts([]);
-          }
-        } catch (error) {
-          console.error('Error loading user settings:', error);
-          toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'Failed to load user settings',
-          });
-        }
+  const loadUserSettings = useCallback(async (currentUser: User) => {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setUserSettings(userData);
+        profileForm.reset({
+          displayName: currentUser.displayName || '',
+          email: currentUser.email || '',
+          bio: userData.bio || '',
+          website: userData.website || '',
+        });
+        notificationForm.reset({
+          emailNotifications: userData.emailNotifications ?? true,
+          pushNotifications: userData.pushNotifications ?? true,
+          marketingEmails: userData.marketingEmails ?? false,
+          weeklyReports: userData.weeklyReports ?? true,
+        });
+        setSocialAccounts(userData.socialAccounts || []);
+      } else {
+        const defaultSettings = { bio: '', website: '', emailNotifications: true, pushNotifications: true, marketingEmails: false, weeklyReports: true, socialAccounts: [], createdAt: new Date(), updatedAt: new Date() };
+        await setDoc(doc(db, 'users', currentUser.uid), defaultSettings);
+        setUserSettings(defaultSettings);
+        setSocialAccounts([]);
       }
+    } catch (error) {
+      console.error('Error loading user settings:', error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to load user settings' });
+    } finally {
       setIsLoading(false);
-    });
+    }
+  }, [profileForm, notificationForm, toast]);
 
-    return () => unsubscribe();
-  }, []);
+  useEffect(() => {
+    if (user && !userSettings) {
+      loadUserSettings(user);
+    }
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, userSettings, authLoading, loadUserSettings, router]);
 
-  // Handle profile update
   const onProfileSubmit = async (data: ProfileFormValues) => {
     if (!user) return;
-    
     setIsSaving(true);
     try {
-      // Update Firebase Auth profile
-      await updateProfile(user, {
-        displayName: data.displayName,
-      });
-
-      // Update email if changed
+      await updateProfile(user, { displayName: data.displayName });
       if (data.email !== user.email) {
         await updateEmail(user, data.email);
       }
-
-      // Update Firestore document
       await updateDoc(doc(db, 'users', user.uid), {
         bio: data.bio,
         website: data.website,
         updatedAt: new Date(),
       });
-
-      toast({
-        title: 'Profile Updated',
-        description: 'Your profile has been successfully updated.',
-      });
+      toast({ title: 'Profile Updated', description: 'Your profile has been successfully updated.' });
     } catch (error: any) {
-      console.error('Error updating profile:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Update Failed',
-        description: error.message || 'Failed to update profile',
-      });
+      toast({ variant: 'destructive', title: 'Update Failed', description: error.message || 'Failed to update profile' });
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Handle password update
   const onPasswordSubmit = async (data: PasswordFormValues) => {
     if (!user) return;
-    
     setIsSaving(true);
     try {
       await updatePassword(user, data.newPassword);
-      
       passwordForm.reset();
-      toast({
-        title: 'Password Updated',
-        description: 'Your password has been successfully updated.',
-      });
+      toast({ title: 'Password Updated', description: 'Your password has been successfully updated.' });
     } catch (error: any) {
-      console.error('Error updating password:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Update Failed',
-        description: error.message || 'Failed to update password',
-      });
+      toast({ variant: 'destructive', title: 'Update Failed', description: error.message || 'Failed to update password' });
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Handle notification settings update
   const onNotificationSubmit = async (data: NotificationFormValues) => {
     if (!user) return;
-    
     setIsSaving(true);
     try {
-      await updateDoc(doc(db, 'users', user.uid), {
-        ...data,
-        updatedAt: new Date(),
-      });
-
-      toast({
-        title: 'Settings Updated',
-        description: 'Your notification preferences have been updated.',
-      });
+      await updateDoc(doc(db, 'users', user.uid), { ...data, updatedAt: new Date() });
+      toast({ title: 'Settings Updated', description: 'Your notification preferences have been updated.' });
     } catch (error: any) {
-      console.error('Error updating notifications:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Update Failed',
-        description: 'Failed to update notification settings',
-      });
+      toast({ variant: 'destructive', title: 'Update Failed', description: 'Failed to update notification settings' });
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Handle social account connection/disconnection
   const handleSocialConnect = async (platform: string) => {
     const existingAccount = socialAccounts.find(acc => acc.platform === platform);
     
     if (existingAccount?.connected) {
       await disconnectSocialAccount(platform);
     } else {
-      if (platform === 'Facebook') {
-        await connectFacebook();
-      } else if (platform === 'Twitter') {
-        await connectTwitter();
-      } else if (platform === 'Instagram') {
-        await connectInstagram();
-      } else if (platform === 'LinkedIn') {
-        await connectLinkedIn();
-      } else if (platform === 'YouTube') {
-        await connectYouTube();
-      } else if (platform === 'TikTok') {
-        await connectTikTok();
-      } else {
-        toast({
-          title: 'Social Media Integration',
-          description: `${platform} integration will be available soon!`,
-        });
-      }
+      if (platform === 'Facebook') await connectFacebook();
+      else if (platform === 'Twitter') await connectTwitter();
+      else if (platform === 'Instagram') await connectInstagram();
+      else if (platform === 'LinkedIn') await connectLinkedIn();
+      else if (platform === 'YouTube') await connectYouTube();
+      else if (platform === 'TikTok') await connectTikTok();
+      else toast({ title: 'Social Media Integration', description: `${platform} integration will be available soon!` });
     }
   };
 
-  // Disconnect social account
   const disconnectSocialAccount = async (platform: string) => {
     if (!user) return;
-    
     try {
-      await updateDoc(doc(db, 'users', user.uid), {
-        [`socialAccounts.${platform.toLowerCase()}`]: null,
-        updatedAt: new Date(),
-      });
-
-      // Update local state
+      await updateDoc(doc(db, 'users', user.uid), { [`socialAccounts.${platform.toLowerCase()}`]: null, updatedAt: new Date() });
       setSocialAccounts(prev => prev.filter(acc => acc.platform !== platform));
-
-      toast({
-        title: `${platform} Disconnected`,
-        description: `Successfully disconnected from ${platform}`,
-      });
-
-      // Update dashboard cache in background
-      updateDashboardCache(user.uid, user.displayName || 'User').catch(err => 
-        console.error('Failed to update dashboard cache:', err)
-      );
+      toast({ title: `${platform} Disconnected`, description: `Successfully disconnected from ${platform}` });
+      updateDashboardCache(user.uid, user.displayName || 'User').catch(err => console.error('Failed to update dashboard cache:', err));
     } catch (error) {
-      console.error(`Error disconnecting ${platform}:`, error);
-      toast({
-        variant: 'destructive',
-        title: 'Disconnection Failed',
-        description: `Failed to disconnect from ${platform}`,
-      });
+      toast({ variant: 'destructive', title: 'Disconnection Failed', description: `Failed to disconnect from ${platform}` });
     }
   };
 
-  // Facebook connection using OAuth 2.0
-  const connectFacebook = async () => {
-    try {
-      console.log('Starting Facebook OAuth 2.0 connection...');
-      
-      // Check if Facebook App ID is configured
-      if (!process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID === 'your_facebook_app_id_here') {
-        toast({
-          variant: 'destructive',
-          title: 'Facebook Not Configured',
-          description: 'Please set up Facebook App ID in environment variables',
-        });
-        return;
-      }
+  const createOAuthPopup = (url: string, type: string) => {
+    const popup = window.open(url, `${type}_auth`, 'width=600,height=700,scrollbars=yes,resizable=yes');
+    
+    const handleMessage = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin || !event.data.type || !event.data.type.startsWith(type.toUpperCase())) return;
 
-      // Facebook OAuth 2.0 URL with proper scopes
-      const facebookAuthUrl = `https://www.facebook.com/v21.0/dialog/oauth?` +
-        `client_id=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&` +
-        `redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/facebook/callback')}&` +
-        `scope=email,public_profile,pages_manage_posts,pages_read_engagement&` +
-        `response_type=code&` +
-        `state=facebook_auth`;
-
-      // Open popup for OAuth flow
-      const popup = window.open(facebookAuthUrl, 'facebook_auth', 'width=600,height=600,scrollbars=yes,resizable=yes');
-      
-      // Listen for popup close
-      const checkClosed = setInterval(() => {
-        if (popup?.closed) {
-          clearInterval(checkClosed);
-          window.removeEventListener('message', handleFacebookCallback);
+        if (event.data.type === `${type.toUpperCase()}_AUTH_SUCCESS`) {
+            const { username, userId, accessToken, profilePicture } = event.data;
+            const newAccount = { platform: type, connected: true, username, userId, accessToken, connectedAt: new Date().toISOString(), profilePicture };
+            
+            updateDoc(doc(db, 'users', user!.uid), { [`socialAccounts.${type.toLowerCase()}`]: newAccount, updatedAt: new Date() })
+                .then(() => {
+                    setSocialAccounts(prev => [...prev.filter(acc => acc.platform !== type), newAccount]);
+                    toast({ title: `${type} Connected!`, description: `Successfully connected ${username}` });
+                    updateDashboardCache(user!.uid, user!.displayName || 'User').catch(err => console.error('Failed to update dashboard cache:', err));
+                });
+        } else {
+            toast({ variant: 'destructive', title: `${type} Connection Failed`, description: event.data.error || 'An unknown error occurred.' });
         }
-      }, 1000);
+        window.removeEventListener('message', handleMessage);
+        popup?.close();
+    };
 
-      // Handle callback from popup
-      const handleFacebookCallback = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
-        
-        if (event.data.type === 'FACEBOOK_AUTH_SUCCESS') {
-          const { username, userId, accessToken, profilePicture } = event.data;
-          
-          const newAccount = {
-            platform: 'Facebook',
-            connected: true,
-            username,
-            userId,
-            accessToken,
-            connectedAt: new Date().toISOString(),
-            profilePicture,
-          };
+    window.addEventListener('message', handleMessage);
 
-          updateDoc(doc(db, 'users', user!.uid), {
-            [`socialAccounts.facebook`]: newAccount,
-            updatedAt: new Date(),
-          }).then(() => {
-            setSocialAccounts(prev => {
-              const filtered = prev.filter(acc => acc.platform !== 'Facebook');
-              return [...filtered, newAccount];
-            });
-
-            toast({
-              title: 'Facebook Connected!',
-              description: `Successfully connected ${username}`,
-            });
-
-            // Update dashboard cache in background
-            updateDashboardCache(user.uid, user.displayName || 'User').catch(err => 
-              console.error('Failed to update dashboard cache:', err)
-            );
-          }).catch(error => {
-            console.error('Error saving Facebook connection:', error);
-            toast({
-              variant: 'destructive',
-              title: 'Connection Failed',
-              description: 'Failed to save Facebook connection',
-            });
-          });
+    const checkPopup = setInterval(() => {
+        if (!popup || popup.closed) {
+            clearInterval(checkPopup);
+            window.removeEventListener('message', handleMessage);
         }
-      };
-
-      window.addEventListener('message', handleFacebookCallback);
-      
-      toast({
-        title: 'Facebook Connection',
-        description: 'Please complete the authorization in the popup window',
-      });
-    } catch (error) {
-      console.error('Facebook connection error:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Connection Failed',
-        description: 'Failed to connect to Facebook',
-      });
-    }
+    }, 1000);
   };
 
-  // Load Facebook SDK
-  const loadFacebookSDK = () => {
-    return new Promise((resolve) => {
-      if (window.FB) {
-        resolve(true);
-        return;
-      }
+  const connectFacebook = async () => createOAuthPopup(`/api/auth/facebook/callback`, 'Facebook');
+  const connectTwitter = async () => createOAuthPopup(`/api/auth/twitter/callback`, 'Twitter');
+  const connectInstagram = async () => createOAuthPopup(`/api/auth/instagram/callback`, 'Instagram');
+  const connectTikTok = async () => createOAuthPopup(`/api/auth/tiktok/callback`, 'TikTok');
+  const connectLinkedIn = async () => createOAuthPopup(`/api/auth/linkedin/callback`, 'LinkedIn');
+  const connectYouTube = async () => createOAuthPopup(`/api/auth/youtube/callback`, 'YouTube');
 
-      const script = document.createElement('script');
-      script.src = 'https://connect.facebook.net/en_US/sdk.js';
-      script.async = true;
-      script.defer = true;
-      script.crossOrigin = 'anonymous';
-      
-      script.onload = () => {
-        window.FB.init({
-          appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || 'your-facebook-app-id',
-          cookie: true,
-          xfbml: true,
-          version: 'v18.0'
-        });
-        resolve(true);
-      };
-
-      document.head.appendChild(script);
-    });
-  };
-
-  // Twitter connection
-  const connectTwitter = async () => {
-    try {
-      // Check if Twitter Client ID is configured
-      if (!process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID || process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID === 'your_twitter_client_id_here') {
-        toast({
-          variant: 'destructive',
-          title: 'Twitter Not Configured',
-          description: 'Please set up Twitter Client ID in environment variables',
-        });
-        return;
-      }
-
-      // Generate PKCE code challenge
-      const codeVerifier = crypto.randomUUID();
-      const codeChallenge = btoa(codeVerifier).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-      
-      // Twitter OAuth 2.0 flow with PKCE
-      const twitterAuthUrl = `https://twitter.com/i/oauth2/authorize?` +
-        `response_type=code&` +
-        `client_id=${process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID}&` +
-        `redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/twitter/callback')}&` +
-        `scope=tweet.read%20users.read%20follows.read&` +
-        `state=twitter_auth&` +
-        `code_challenge=${codeChallenge}&` +
-        `code_challenge_method=plain`;
-      
-      // Open popup and handle response
-      const popup = window.open(twitterAuthUrl, 'twitter_auth', 'width=600,height=600,scrollbars=yes,resizable=yes');
-      
-      // Listen for popup close
-      const checkClosed = setInterval(() => {
-        if (popup?.closed) {
-          clearInterval(checkClosed);
-          // Check if connection was successful by listening to URL changes
-          window.addEventListener('message', handleTwitterCallback);
-        }
-      }, 1000);
-      
-      toast({
-        title: 'Twitter Connection',
-        description: 'Please complete the authorization in the popup window',
-      });
-    } catch (error) {
-      console.error('Twitter connection error:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Connection Failed',
-        description: 'Failed to connect to Twitter',
-      });
-    }
-  };
-
-  // Handle Twitter callback
-  const handleTwitterCallback = async (event: MessageEvent) => {
-    if (event.origin !== window.location.origin) return;
-    
-    if (event.data.type === 'TWITTER_AUTH_SUCCESS') {
-      const { username, userId, accessToken, profilePicture } = event.data;
-      
-      const newAccount = {
-        platform: 'Twitter',
-        connected: true,
-        username: username,
-        userId: userId,
-        accessToken: accessToken,
-        connectedAt: new Date().toISOString(),
-        profilePicture: profilePicture,
-      };
-
-      await updateDoc(doc(db, 'users', user!.uid), {
-        [`socialAccounts.twitter`]: newAccount,
-        updatedAt: new Date(),
-      });
-
-      setSocialAccounts(prev => {
-        const filtered = prev.filter(acc => acc.platform !== 'Twitter');
-        return [...filtered, newAccount];
-      });
-
-      toast({
-        title: 'Twitter Connected!',
-        description: `Successfully connected ${username}`,
-      });
-
-      // Update dashboard cache in background
-      updateDashboardCache(user!.uid, user!.displayName || 'User').catch(err => 
-        console.error('Failed to update dashboard cache:', err)
-      );
-    }
-    
-    window.removeEventListener('message', handleTwitterCallback);
-  };
-
-  // Instagram connection
-  const connectInstagram = async () => {
-    try {
-      // Instagram Basic Display API
-      const instagramAuthUrl = `https://api.instagram.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_INSTAGRAM_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/instagram/callback')}&scope=user_profile,user_media&response_type=code&state=instagram_auth`;
-      
-      const popup = window.open(instagramAuthUrl, 'instagram_auth', 'width=600,height=600,scrollbars=yes,resizable=yes');
-      
-      const checkClosed = setInterval(() => {
-        if (popup?.closed) {
-          clearInterval(checkClosed);
-          window.addEventListener('message', handleInstagramCallback);
-        }
-      }, 1000);
-      
-      toast({
-        title: 'Instagram Connection',
-        description: 'Please complete the authorization in the popup window',
-      });
-    } catch (error) {
-      console.error('Instagram connection error:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Connection Failed',
-        description: 'Failed to connect to Instagram',
-      });
-    }
-  };
-
-  // Handle Instagram callback
-  const handleInstagramCallback = async (event: MessageEvent) => {
-    if (event.origin !== window.location.origin) return;
-    
-    if (event.data.type === 'INSTAGRAM_AUTH_SUCCESS') {
-      const { username, userId, accessToken, profilePicture } = event.data;
-      
-      const newAccount = {
-        platform: 'Instagram',
-        connected: true,
-        username: username,
-        userId: userId,
-        accessToken: accessToken,
-        connectedAt: new Date().toISOString(),
-        profilePicture: profilePicture,
-      };
-
-      await updateDoc(doc(db, 'users', user!.uid), {
-        [`socialAccounts.instagram`]: newAccount,
-        updatedAt: new Date(),
-      });
-
-      setSocialAccounts(prev => {
-        const filtered = prev.filter(acc => acc.platform !== 'Instagram');
-        return [...filtered, newAccount];
-      });
-
-      toast({
-        title: 'Instagram Connected!',
-        description: `Successfully connected ${username}`,
-      });
-
-      // Update dashboard cache in background
-      updateDashboardCache(user!.uid, user!.displayName || 'User').catch(err => 
-        console.error('Failed to update dashboard cache:', err)
-      );
-    }
-    
-    window.removeEventListener('message', handleInstagramCallback);
-  };
-
-  // TikTok connection
-  const connectTikTok = async () => {
-    try {
-      const tiktokAuthUrl = `/api/auth/tiktok`;
-      const popup = window.open(tiktokAuthUrl, 'tiktok_auth', 'width=600,height=700');
-      
-      window.addEventListener('message', handleTikTokCallback, { once: true });
-
-      toast({
-        title: 'TikTok Connection',
-        description: 'Please complete the authorization in the popup window.',
-      });
-    } catch (error) {
-      console.error('TikTok connection error:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Connection Failed',
-        description: 'Failed to connect to TikTok',
-      });
-    }
-  };
-
-  // Handle TikTok callback
-  const handleTikTokCallback = async (event: MessageEvent) => {
-    if (event.origin !== window.location.origin) return;
-    
-    if (event.data.type === 'TIKTOK_AUTH_SUCCESS') {
-      const { username, userId, accessToken, profilePicture } = event.data;
-      
-      const newAccount = {
-        platform: 'TikTok',
-        connected: true,
-        username,
-        userId,
-        accessToken,
-        connectedAt: new Date().toISOString(),
-        profilePicture,
-      };
-
-      await updateDoc(doc(db, 'users', user!.uid), {
-        'socialAccounts.tiktok': newAccount,
-        updatedAt: new Date(),
-      });
-
-      setSocialAccounts(prev => {
-        const filtered = prev.filter(acc => acc.platform !== 'TikTok');
-        return [...filtered, newAccount];
-      });
-
-      toast({
-        title: 'TikTok Connected!',
-        description: `Successfully connected @${username}`,
-      });
-
-      updateDashboardCache(user!.uid, user!.displayName || 'User').catch(err => 
-        console.error('Failed to update dashboard cache:', err)
-      );
-    } else if (event.data.type === 'TIKTOK_AUTH_ERROR') {
-        toast({
-            variant: 'destructive',
-            title: 'TikTok Connection Failed',
-            description: event.data.error || 'An unknown error occurred.',
-        });
-    }
-  };
-
-  // LinkedIn connection
-  const connectLinkedIn = async () => {
-    try {
-      // LinkedIn OAuth 2.0 flow
-      const linkedinAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/linkedin/callback')}&scope=r_liteprofile%20r_emailaddress%20w_member_social&state=linkedin_auth`;
-      
-      const popup = window.open(linkedinAuthUrl, 'linkedin_auth', 'width=600,height=600,scrollbars=yes,resizable=yes');
-      
-      const checkClosed = setInterval(() => {
-        if (popup?.closed) {
-          clearInterval(checkClosed);
-          window.addEventListener('message', handleLinkedInCallback);
-        }
-      }, 1000);
-      
-      toast({
-        title: 'LinkedIn Connection',
-        description: 'Please complete the authorization in the popup window',
-      });
-    } catch (error) {
-      console.error('LinkedIn connection error:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Connection Failed',
-        description: 'Failed to connect to LinkedIn',
-      });
-    }
-  };
-
-  // Handle LinkedIn callback
-  const handleLinkedInCallback = async (event: MessageEvent) => {
-    if (event.origin !== window.location.origin) return;
-    
-    if (event.data.type === 'LINKEDIN_AUTH_SUCCESS') {
-      const { username, userId, accessToken, profilePicture } = event.data;
-      
-      const newAccount = {
-        platform: 'LinkedIn',
-        connected: true,
-        username: username,
-        userId: userId,
-        accessToken: accessToken,
-        connectedAt: new Date().toISOString(),
-        profilePicture: profilePicture,
-      };
-
-      await updateDoc(doc(db, 'users', user!.uid), {
-        [`socialAccounts.linkedin`]: newAccount,
-        updatedAt: new Date(),
-      });
-
-      setSocialAccounts(prev => {
-        const filtered = prev.filter(acc => acc.platform !== 'LinkedIn');
-        return [...filtered, newAccount];
-      });
-
-      toast({
-        title: 'LinkedIn Connected!',
-        description: `Successfully connected ${username}`,
-      });
-
-      // Update dashboard cache in background
-      updateDashboardCache(user!.uid, user!.displayName || 'User').catch(err => 
-        console.error('Failed to update dashboard cache:', err)
-      );
-    }
-    
-    window.removeEventListener('message', handleLinkedInCallback);
-  };
-
-  // YouTube connection
-  const connectYouTube = async () => {
-    try {
-      // YouTube Data API v3 OAuth 2.0
-      const youtubeAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/youtube/callback')}&scope=https://www.googleapis.com/auth/youtube%20https://www.googleapis.com/auth/youtube.upload&response_type=code&state=youtube_auth`;
-      
-      const popup = window.open(youtubeAuthUrl, 'youtube_auth', 'width=600,height=600,scrollbars=yes,resizable=yes');
-      
-      const checkClosed = setInterval(() => {
-        if (popup?.closed) {
-          clearInterval(checkClosed);
-          window.addEventListener('message', handleYouTubeCallback);
-        }
-      }, 1000);
-      
-      toast({
-        title: 'YouTube Connection',
-        description: 'Please complete the authorization in the popup window',
-      });
-    } catch (error) {
-      console.error('YouTube connection error:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Connection Failed',
-        description: 'Failed to connect to YouTube',
-      });
-    }
-  };
-
-  // Handle YouTube callback
-  const handleYouTubeCallback = async (event: MessageEvent) => {
-    if (event.origin !== window.location.origin) return;
-    
-    if (event.data.type === 'YOUTUBE_AUTH_SUCCESS') {
-      const { username, userId, accessToken, profilePicture } = event.data;
-      
-      const newAccount = {
-        platform: 'YouTube',
-        connected: true,
-        username: username,
-        userId: userId,
-        accessToken: accessToken,
-        connectedAt: new Date().toISOString(),
-        profilePicture: profilePicture,
-      };
-
-      await updateDoc(doc(db, 'users', user!.uid), {
-        [`socialAccounts.youtube`]: newAccount,
-        updatedAt: new Date(),
-      });
-
-      setSocialAccounts(prev => {
-        const filtered = prev.filter(acc => acc.platform !== 'YouTube');
-        return [...filtered, newAccount];
-      });
-
-      toast({
-        title: 'YouTube Connected!',
-        description: `Successfully connected ${username}`,
-      });
-
-      // Update dashboard cache in background
-      updateDashboardCache(user!.uid, user!.displayName || 'User').catch(err => 
-        console.error('Failed to update dashboard cache:', err)
-      );
-    }
-    
-    window.removeEventListener('message', handleYouTubeCallback);
-  };
-
-  // Handle account deletion
   const handleDeleteAccount = async () => {
     if (!user) return;
-    
     showLoading();
     try {
-      // Delete user document from Firestore
       await deleteUser(user);
-      
-      toast({
-        title: 'Account Deleted',
-        description: 'Your account has been permanently deleted.',
-      });
-      
+      toast({ title: 'Account Deleted', description: 'Your account has been permanently deleted.' });
       router.push('/');
     } catch (error: any) {
-      console.error('Error deleting account:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Deletion Failed',
-        description: error.message || 'Failed to delete account',
-      });
+      toast({ variant: 'destructive', title: 'Deletion Failed', description: error.message || 'Failed to delete account' });
     } finally {
       hideLoading();
       setShowDeleteConfirm(false);
     }
   };
 
-  // Handle logout
   const handleLogout = async () => {
     showLoading();
     try {
@@ -902,29 +313,18 @@ export default function SettingsPage() {
       hideLoading();
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
+  
+  if (authLoading || isLoading) {
+    return <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
-
+  
   if (!user) {
-    return (
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          You must be logged in to access settings.
-        </AlertDescription>
-      </Alert>
-    );
+    return <Alert><AlertCircle className="h-4 w-4" /><AlertDescription>You must be logged in to access settings.</AlertDescription></Alert>;
   }
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      {/* Profile Section */}
+      {/* Profile, Password, Notifications, etc. */}
       <Card>
         <CardHeader>
           <CardTitle>Profile</CardTitle>
@@ -935,190 +335,35 @@ export default function SettingsPage() {
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20">
                 <AvatarImage src={user.photoURL || undefined} />
-                <AvatarFallback>
-                  {user.displayName?.charAt(0) || user.email?.charAt(0) || 'U'}
-                </AvatarFallback>
+                <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0) || 'U'}</AvatarFallback>
               </Avatar>
-              <Button type="button" variant="outline" disabled>
-                <Upload className="mr-2 h-4 w-4" />
-                Change Photo
-              </Button>
+              <Button type="button" variant="outline" disabled><Upload className="mr-2 h-4 w-4" />Change Photo</Button>
             </div>
-            
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="displayName">Name</Label>
-                <Input
-                  id="displayName"
-                  {...profileForm.register('displayName')}
-                  disabled={isSaving}
-                />
-                {profileForm.formState.errors.displayName && (
-                  <p className="text-sm text-red-500">{profileForm.formState.errors.displayName.message}</p>
-                )}
+                <Input id="displayName" {...profileForm.register('displayName')} disabled={isSaving} />
+                {profileForm.formState.errors.displayName && <p className="text-sm text-red-500">{profileForm.formState.errors.displayName.message}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  {...profileForm.register('email')}
-                  disabled={isSaving}
-                />
-                {profileForm.formState.errors.email && (
-                  <p className="text-sm text-red-500">{profileForm.formState.errors.email.message}</p>
-                )}
+                <Input id="email" type="email" {...profileForm.register('email')} disabled={isSaving} />
+                {profileForm.formState.errors.email && <p className="text-sm text-red-500">{profileForm.formState.errors.email.message}</p>}
               </div>
             </div>
-            
             <div className="space-y-2">
               <Label htmlFor="bio">Bio</Label>
-              <Textarea
-                id="bio"
-                placeholder="Tell us about yourself..."
-                {...profileForm.register('bio')}
-                disabled={isSaving}
-                rows={3}
-              />
+              <Textarea id="bio" placeholder="Tell us about yourself..." {...profileForm.register('bio')} disabled={isSaving} rows={3} />
             </div>
-            
             <div className="space-y-2">
               <Label htmlFor="website">Website</Label>
-              <Input
-                id="website"
-                placeholder="https://yourwebsite.com"
-                {...profileForm.register('website')}
-                disabled={isSaving}
-              />
+              <Input id="website" placeholder="https://yourwebsite.com" {...profileForm.register('website')} disabled={isSaving} />
             </div>
-            
-            <Button type="submit" disabled={isSaving}>
-              {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-              Save Changes
-            </Button>
+            <Button type="submit" disabled={isSaving}>{isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}Save Changes</Button>
           </form>
         </CardContent>
       </Card>
-
-      {/* Password Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Security</CardTitle>
-          <CardDescription>Update your password and security settings.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="currentPassword">Current Password</Label>
-              <Input
-                id="currentPassword"
-                type="password"
-                {...passwordForm.register('currentPassword')}
-                disabled={isSaving}
-              />
-              {passwordForm.formState.errors.currentPassword && (
-                <p className="text-sm text-red-500">{passwordForm.formState.errors.currentPassword.message}</p>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
-              <Input
-                id="newPassword"
-                type="password"
-                {...passwordForm.register('newPassword')}
-                disabled={isSaving}
-              />
-              {passwordForm.formState.errors.newPassword && (
-                <p className="text-sm text-red-500">{passwordForm.formState.errors.newPassword.message}</p>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                {...passwordForm.register('confirmPassword')}
-                disabled={isSaving}
-              />
-              {passwordForm.formState.errors.confirmPassword && (
-                <p className="text-sm text-red-500">{passwordForm.formState.errors.confirmPassword.message}</p>
-              )}
-            </div>
-            
-            <Button type="submit" disabled={isSaving}>
-              {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-              Update Password
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      {/* Notifications Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Notifications</CardTitle>
-          <CardDescription>Manage your notification preferences.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={notificationForm.handleSubmit(onNotificationSubmit)} className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Email Notifications</Label>
-                <p className="text-sm text-muted-foreground">Receive updates via email</p>
-              </div>
-              <Switch
-                checked={notificationForm.watch('emailNotifications')}
-                onCheckedChange={(checked) => notificationForm.setValue('emailNotifications', checked)}
-                disabled={isSaving}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Push Notifications</Label>
-                <p className="text-sm text-muted-foreground">Receive browser notifications</p>
-              </div>
-              <Switch
-                checked={notificationForm.watch('pushNotifications')}
-                onCheckedChange={(checked) => notificationForm.setValue('pushNotifications', checked)}
-                disabled={isSaving}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Marketing Emails</Label>
-                <p className="text-sm text-muted-foreground">Receive promotional content</p>
-              </div>
-              <Switch
-                checked={notificationForm.watch('marketingEmails')}
-                onCheckedChange={(checked) => notificationForm.setValue('marketingEmails', checked)}
-                disabled={isSaving}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Weekly Reports</Label>
-                <p className="text-sm text-muted-foreground">Get weekly performance summaries</p>
-              </div>
-              <Switch
-                checked={notificationForm.watch('weeklyReports')}
-                onCheckedChange={(checked) => notificationForm.setValue('weeklyReports', checked)}
-                disabled={isSaving}
-              />
-            </div>
-            
-            <Button type="submit" disabled={isSaving}>
-              {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-              Save Preferences
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
+      
       {/* Social Accounts Section */}
       <Card>
         <CardHeader>
@@ -1147,36 +392,17 @@ export default function SettingsPage() {
                       <platform.icon className={`h-6 w-6 ${platform.color}`} />
                       <div className="flex flex-col">
                         <span className="font-medium">{platform.name}</span>
-                        {isConnected && account?.username && (
-                          <span className="text-sm text-muted-foreground">{account.username}</span>
-                        )}
+                        {isConnected && account?.username && <span className="text-sm text-muted-foreground">{account.username}</span>}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       {isConnected ? (
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-2 text-green-500">
-                            <CheckCircle className="h-5 w-5" />
-                            <span>Connected</span>
-                          </div>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleSocialConnect(platform.name)}
-                            disabled={isSaving}
-                          >
-                            Disconnect
-                          </Button>
+                          <div className="flex items-center gap-2 text-green-500"><CheckCircle className="h-5 w-5" /><span>Connected</span></div>
+                          <Button variant="outline" size="sm" onClick={() => handleSocialConnect(platform.name)} disabled={isSaving}>Disconnect</Button>
                         </div>
                       ) : (
-                        <Button 
-                          variant="outline" 
-                          onClick={() => handleSocialConnect(platform.name)}
-                          disabled={isSaving}
-                        >
-                          <Link className="mr-2 h-4 w-4" />
-                          Connect
-                        </Button>
+                        <Button variant="outline" onClick={() => handleSocialConnect(platform.name)} disabled={isSaving}><LinkIcon className="mr-2 h-4 w-4" />Connect</Button>
                       )}
                     </div>
                   </div>
@@ -1196,51 +422,22 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium">Sign Out</h4>
-              <p className="text-sm text-muted-foreground">Sign out of your account on this device</p>
-            </div>
-            <Button variant="outline" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </Button>
+            <div><h4 className="font-medium">Sign Out</h4><p className="text-sm text-muted-foreground">Sign out of your account on this device</p></div>
+            <Button variant="outline" onClick={handleLogout}><LogOut className="mr-2 h-4 w-4" />Sign Out</Button>
           </div>
-          
           <Separator />
-          
           <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium text-red-600">Delete Account</h4>
-              <p className="text-sm text-muted-foreground">Permanently delete your account and all data</p>
-            </div>
-            <Button 
-              variant="destructive" 
-              onClick={() => setShowDeleteConfirm(true)}
-            >
-              Delete Account
-            </Button>
+            <div><h4 className="font-medium text-red-600">Delete Account</h4><p className="text-sm text-muted-foreground">Permanently delete your account and all data</p></div>
+            <Button variant="destructive" onClick={() => setShowDeleteConfirm(true)}>Delete Account</Button>
           </div>
-          
           {showDeleteConfirm && (
             <Alert className="mt-4">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="flex items-center justify-between">
                 <span>Are you sure? This action cannot be undone.</span>
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setShowDeleteConfirm(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="sm"
-                    onClick={handleDeleteAccount}
-                  >
-                    Yes, Delete
-                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
+                  <Button variant="destructive" size="sm" onClick={handleDeleteAccount}>Yes, Delete</Button>
                 </div>
               </AlertDescription>
             </Alert>
@@ -1250,3 +447,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
