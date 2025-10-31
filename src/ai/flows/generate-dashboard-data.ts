@@ -91,39 +91,40 @@ const prompt = ai.definePrompt({
 });
 
 // Fallback data for when AI fails
+// Fresh data for new users just getting started
 const fallbackDashboardData: GenerateDashboardDataOutput = {
   socialStats: [
-    { platform: 'Twitter', followers: '12.5K', change: '+8.2%', changeType: 'positive' },
-    { platform: 'Facebook', followers: '8.9K', change: '+3.1%', changeType: 'positive' },
-    { platform: 'Instagram', followers: '15.2K', change: '+12.4%', changeType: 'positive' },
-    { platform: 'TikTok', followers: '22.1K', change: '+18.7%', changeType: 'positive' },
+    { platform: 'Twitter', followers: '0', change: '+0%', changeType: 'positive' },
+    { platform: 'Facebook', followers: '0', change: '+0%', changeType: 'positive' },
+    { platform: 'Instagram', followers: '0', change: '+0%', changeType: 'positive' },
+    { platform: 'TikTok', followers: '0', change: '+0%', changeType: 'positive' },
   ],
   engagementStats: [
-    { metric: 'Likes', value: '42.8K', change: '+21%', changeType: 'positive' },
-    { metric: 'Comments', value: '3.2K', change: '+15%', changeType: 'positive' },
-    { metric: 'Shares', value: '1.8K', change: '+8%', changeType: 'positive' },
-    { metric: 'Reach', value: '156K', change: '+12%', changeType: 'positive' },
+    { metric: 'Likes', value: '0', change: '+0%', changeType: 'positive' },
+    { metric: 'Comments', value: '0', change: '+0%', changeType: 'positive' },
+    { metric: 'Shares', value: '0', change: '+0%', changeType: 'positive' },
+    { metric: 'Reach', value: '0', change: '+0%', changeType: 'positive' },
   ],
   engagementChartData: [
-    { month: 'Jul', engagement: 12000 },
-    { month: 'Aug', engagement: 15000 },
-    { month: 'Sep', engagement: 18000 },
-    { month: 'Oct', engagement: 22000 },
-    { month: 'Nov', engagement: 28000 },
-    { month: 'Dec', engagement: 32000 },
-    { month: 'Jan', engagement: 38000 },
+    { month: 'Jul', engagement: 0 },
+    { month: 'Aug', engagement: 0 },
+    { month: 'Sep', engagement: 0 },
+    { month: 'Oct', engagement: 0 },
+    { month: 'Nov', engagement: 0 },
+    { month: 'Dec', engagement: 0 },
+    { month: 'Jan', engagement: 0 },
   ],
   postsOverview: [
-    { content: 'Excited to announce our new AI-powered features! 🚀 #TechInnovation', platform: 'Twitter', status: 'Published', date: '2 hours ago', engagement: '1.2K Likes' },
-    { content: 'Behind the scenes: How we built our latest product update', platform: 'Instagram', status: 'Scheduled', date: 'in 2 days', engagement: '-' },
-    { content: 'Join us for our weekly tech talk on AI trends', platform: 'Facebook', status: 'Draft', date: 'Draft', engagement: '-' },
-    { content: 'New tutorial: Getting started with our platform', platform: 'Twitter', status: 'Published', date: '1 day ago', engagement: '856 Likes' },
+    { content: 'Welcome to Trendix! 🎉 Ready to create amazing content? Let\'s get started!', platform: 'Twitter', status: 'Draft', date: 'Draft', engagement: '-' },
+    { content: 'Your first post will appear here. Click "Create Post" to get started! 💫', platform: 'Instagram', status: 'Draft', date: 'Draft', engagement: '-' },
+    { content: 'Start building your social media presence with AI-powered tools 🚀', platform: 'Facebook', status: 'Draft', date: 'Draft', engagement: '-' },
+    { content: 'Connect your social accounts in Settings to see your real stats here 📊', platform: 'Twitter', status: 'Draft', date: 'Draft', engagement: '-' },
   ],
   recentVideos: [
-    { title: 'AI-Powered Social Media Management', duration: '2:45', image: 'https://picsum.photos/300/200?random=1', aiHint: 'technology dashboard' },
-    { title: 'How to Create Engaging Content', duration: '1:32', image: 'https://picsum.photos/300/200?random=2', aiHint: 'creative workspace' },
-    { title: 'Social Media Analytics Explained', duration: '3:12', image: 'https://picsum.photos/300/200?random=3', aiHint: 'data visualization' },
-    { title: 'Building Your Brand Online', duration: '2:18', image: 'https://picsum.photos/300/200?random=4', aiHint: 'brand identity' },
+    { title: 'Getting Started with Trendix', duration: '2:30', image: 'https://picsum.photos/300/200?random=101', aiHint: 'welcome tutorial' },
+    { title: 'Create Your First Video', duration: '1:45', image: 'https://picsum.photos/300/200?random=102', aiHint: 'video creation guide' },
+    { title: 'Connect Social Media Accounts', duration: '2:00', image: 'https://picsum.photos/300/200?random=103', aiHint: 'social media setup' },
+    { title: 'AI Content Generation Tutorial', duration: '3:15', image: 'https://picsum.photos/300/200?random=104', aiHint: 'ai tools guide' },
   ],
 };
 

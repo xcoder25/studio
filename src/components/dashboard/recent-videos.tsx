@@ -23,6 +23,7 @@ export default function RecentVideos({ videos }: { videos: RecentVideoData[] }) 
                                 height={400} 
                                 data-ai-hint={video.aiHint}
                                 className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-110" 
+                                loading="lazy"
                             />
                             <div className="absolute inset-0 bg-black/50 flex flex-col justify-between p-3">
                                 <div className="flex justify-end">

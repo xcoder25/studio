@@ -20,6 +20,7 @@ import { User, updateProfile, updateEmail, updatePassword, deleteUser, signOut, 
 import { doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { updateDashboardCache, triggerDashboardUpdate } from '@/app/actions/update-dashboard-cache';
 
 // Facebook SDK types
 declare global {
@@ -349,6 +350,11 @@ export default function SettingsPage() {
         title: `${platform} Disconnected`,
         description: `Successfully disconnected from ${platform}`,
       });
+
+      // Update dashboard cache in background
+      updateDashboardCache(user.uid, user.displayName || 'User').catch(err => 
+        console.error('Failed to update dashboard cache:', err)
+      );
     } catch (error) {
       console.error(`Error disconnecting ${platform}:`, error);
       toast({
@@ -423,6 +429,11 @@ export default function SettingsPage() {
               title: 'Facebook Connected!',
               description: `Successfully connected ${username}`,
             });
+
+            // Update dashboard cache in background
+            updateDashboardCache(user.uid, user.displayName || 'User').catch(err => 
+              console.error('Failed to update dashboard cache:', err)
+            );
           }).catch(error => {
             console.error('Error saving Facebook connection:', error);
             toast({
@@ -562,6 +573,11 @@ export default function SettingsPage() {
         title: 'Twitter Connected!',
         description: `Successfully connected ${username}`,
       });
+
+      // Update dashboard cache in background
+      updateDashboardCache(user!.uid, user!.displayName || 'User').catch(err => 
+        console.error('Failed to update dashboard cache:', err)
+      );
     }
     
     window.removeEventListener('message', handleTwitterCallback);
@@ -627,6 +643,11 @@ export default function SettingsPage() {
         title: 'Instagram Connected!',
         description: `Successfully connected ${username}`,
       });
+
+      // Update dashboard cache in background
+      updateDashboardCache(user!.uid, user!.displayName || 'User').catch(err => 
+        console.error('Failed to update dashboard cache:', err)
+      );
     }
     
     window.removeEventListener('message', handleInstagramCallback);
@@ -692,6 +713,11 @@ export default function SettingsPage() {
         title: 'LinkedIn Connected!',
         description: `Successfully connected ${username}`,
       });
+
+      // Update dashboard cache in background
+      updateDashboardCache(user!.uid, user!.displayName || 'User').catch(err => 
+        console.error('Failed to update dashboard cache:', err)
+      );
     }
     
     window.removeEventListener('message', handleLinkedInCallback);
@@ -757,6 +783,11 @@ export default function SettingsPage() {
         title: 'YouTube Connected!',
         description: `Successfully connected ${username}`,
       });
+
+      // Update dashboard cache in background
+      updateDashboardCache(user!.uid, user!.displayName || 'User').catch(err => 
+        console.error('Failed to update dashboard cache:', err)
+      );
     }
     
     window.removeEventListener('message', handleYouTubeCallback);

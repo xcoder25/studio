@@ -70,6 +70,7 @@ import { cn } from '@/lib/utils';
 import { useProStatus } from '@/context/pro-status-context';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import TrendixAssistant from '@/components/trendix-assistant';
 
 
 const navItems = [
@@ -449,6 +450,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           {children}
         </main>
       </SidebarInset>
+      {/* Trendix AI Assistant - Available throughout the app */}
+      <TrendixAssistant context={pathname.split('/')[1] || 'dashboard'} />
     </SidebarProvider>
   );
 }
