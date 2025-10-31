@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import Link from 'next/link';
@@ -52,6 +51,7 @@ import {
   Cpu,
   Bot,
   Coins,
+  Facebook,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -125,7 +125,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   };
   
   useEffect(() => {
-    if (pathname.startsWith('/agency')) {
+    if (pathname.startsWith('/agency') || pathname.startsWith('/meta-suite')) {
       setIsAgencyOpen(true);
     }
   }, [pathname]);
@@ -144,6 +144,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   const getPageTitle = () => {
     if (pathname.startsWith('/video-generator/editor')) return 'Video Editor';
+    if (pathname.startsWith('/meta-suite/inbox')) return 'Meta Suite - Inbox';
+    if (pathname.startsWith('/meta-suite/planner')) return 'Meta Suite - Planner';
+    if (pathname.startsWith('/meta-suite/insights')) return 'Meta Suite - Insights';
+    if (pathname.startsWith('/meta-suite')) return 'Meta Suite - Overview';
     if (pathname.startsWith('/agency/competitor-analysis')) return 'Competitor Analysis';
     if (pathname.startsWith('/agency/social-listening')) return 'Social Listening';
     if (pathname.startsWith('/agency/team')) return 'Team Management';
@@ -226,71 +230,19 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
-
-                <Collapsible open={isAgencyOpen && isAgencyPlan} onOpenChange={setIsAgencyOpen} disabled={!isAgencyPlan}>
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild disabled={!isAgencyPlan}>
-                       <SidebarMenuButton
-                            asChild={!isAgencyPlan}
-                            className={cn("w-full", !isAgencyPlan && "cursor-not-allowed opacity-50")}
-                            tooltip={{ children: 'Agency Tools - Upgrade Required' }}
-                        >
-                           {isAgencyPlan ? (
-                                <>
-                                    <Scale />
-                                    <span className="group-hover:inline hidden">Agency Tools</span>
-                                    <ChevronDown className="ml-auto size-4 transition-transform data-[state=open]:rotate-180 group-hover:inline hidden" />
-                                </>
-                           ) : (
-                             <Link href="/pricing" className="w-full">
-                                    <Lock />
-                                    <span className="group-hover:inline hidden">Agency Tools</span>
-                                     <Badge variant="secondary" className="ml-auto group-hover:inline hidden">Pro</Badge>
-                             </Link>
-                           )}
-                        </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                  </SidebarMenuItem>
-                  <CollapsibleContent asChild>
-                      <SidebarMenuSub>
-                            <SidebarMenuSubItem>
-                              <SidebarMenuSubButton asChild isActive={pathname === '/agency/inbox'}>
-                                  <Link href="/agency/inbox" onClick={(e) => handleNavClick(e, '/agency/inbox')}>
-                                      <span>Unified Inbox</span>
-                                  </Link>
-                              </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                          <SidebarMenuSubItem>
-                              <SidebarMenuSubButton asChild isActive={pathname === '/agency/competitor-analysis'}>
-                                  <Link href="/agency/competitor-analysis" onClick={(e) => handleNavClick(e, '/agency/competitor-analysis')}>
-                                      <span>Competitor Analysis</span>
-                                  </Link>
-                              </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                          <SidebarMenuSubItem>
-                              <SidebarMenuSubButton asChild isActive={pathname === '/agency/social-listening'}>
-                                  <Link href="/agency/social-listening" onClick={(e) => handleNavClick(e, '/agency/social-listening')}>
-                                      <span>Social Listening</span>
-                                  </Link>
-                              </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                            <SidebarMenuSubItem>
-                              <SidebarMenuSubButton asChild isActive={pathname === '/agency/ad-campaigns'}>
-                                  <Link href="/agency/ad-campaigns" onClick={(e) => handleNavClick(e, '/agency/ad-campaigns')}>
-                                      <span>Ad Assistant</span>
-                                  </Link>
-                              </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                            <SidebarMenuSubItem>
-                              <SidebarMenuSubButton asChild isActive={pathname === '/agency/team'}>
-                                  <Link href="/agency/team" onClick={(e) => handleNavClick(e, '/agency/team')}>
-                                      <span>Team Management</span>
-                                  </Link>
-                              </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                      </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
+                
+                <SidebarMenuItem>
+                    <SidebarMenuButton
+                        asChild
+                        isActive={pathname.startsWith('/meta-suite')}
+                        tooltip={{ children: 'Meta Suite' }}
+                    >
+                        <Link href="/meta-suite" onClick={(e) => handleNavClick(e, '/meta-suite')}>
+                            <Facebook />
+                            <span className="group-hover:inline hidden">Meta Suite</span>
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
 
                 <SidebarMenuItem>
                   <SidebarMenuButton

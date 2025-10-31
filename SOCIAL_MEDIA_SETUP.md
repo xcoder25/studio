@@ -1,3 +1,4 @@
+
 # Social Media API Setup Guide
 
 This guide provides step-by-step instructions for setting up OAuth 2.0 integrations with all supported social media platforms.

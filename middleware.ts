@@ -1,19 +1,14 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  if (pathname === '/meta-suite' || pathname.startsWith('/meta-suite/')) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
-  }
-
+  // This middleware is currently empty.
+  // You can add logic here to handle redirects, authentication, etc.
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/meta-suite', '/meta-suite/:path*'],
+  // Add paths you want the middleware to run on.
+  // By default it runs on all paths.
+  // matcher: ['/about/:path*'],
 };
-
-
